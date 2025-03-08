@@ -12,7 +12,14 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false
   },
- 
+  experimental: {
+    optimizeCss: true,
+    scrollRestoration: true,
+    // Improve hydration
+    optimizeServerReact: true,
+    // Suppress hydration warnings
+    suppressHydrationWarning: true
+  },
   webpack: (config) => {
     config.resolve.fallback = { fs: false }
     return config

@@ -48,7 +48,7 @@ export default function Results({ searchParams }: { searchParams: { q: string } 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Résultats pour ;
+              Résultats pour &quot;{searchParams.q}&quot;
             </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               {mockResults.length} lieux trouvés correspondant à votre recherche
