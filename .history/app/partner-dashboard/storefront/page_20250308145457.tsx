@@ -6,10 +6,10 @@ import dynamic from 'next/dynamic'
 import { UsersIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 
-const Editor = dynamic(() => import('@tinymce/tinymce-react').then(mod => mod.Editor as any), {
+const Editor = dynamic(() => import('@tinymce/tinymce-react').then(mod => mod.Editor), {
   ssr: false,
   loading: () => <div className="h-[300px] bg-gray-100 dark:bg-gray-700 rounded-md animate-pulse" />
-})
+}) as any
 
 type Service = {
   id: number
@@ -117,40 +117,40 @@ Situé à seulement 55 km de Paris, ce chef-d'œuvre de l'architecture classique
               Description
             </label>
             <Editor
-              // @ts-ignore
-              initialValue={companyInfo.description}
-              onEditorChange={(content: string) => setCompanyInfo({ ...companyInfo, description: content })}
+              apiKey="kt6ws4781ypwwybkvh88ueu3ywheumr483a8x5xfzgmuctr4"
+              id="company-description"
+              value={companyInfo.description}
+              onEditorChange={(content) => setCompanyInfo({ ...companyInfo, description: content })}
               init={{
-              apiKey: "kt6ws4781ypwwybkvh88ueu3ywheumr483a8x5xfzgmuctr4",
-              height: 300,
-              menubar: false,
-              branding: false,
-              plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'help', 'wordcount'
-              ],
-              toolbar: 'undo redo | blocks | ' +
-                'bold italic | alignleft aligncenter ' +
-                'alignright alignjustify | bullist numlist outdent indent | ' +
-                'removeformat | help',
-              skin: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'oxide-dark' : 'oxide',
-              content_css: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-              content_style: `
-                body { 
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                font-size: 14px;
-                line-height: 1.5;
-                color: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000'};
-                background: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff'};
+                height: 300,
+                menubar: false,
+                branding: false,
+                plugins: [
+                  'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                  'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                  'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                  'bold italic | alignleft aligncenter ' +
+                  'alignright alignjustify | bullist numlist outdent indent | ' +
+                  'removeformat | help',
+                skin: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'oxide-dark' : 'oxide',
+                content_css: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+                content_style: `
+                  body { 
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    font-size: 14px;
+                    line-height: 1.5;
+                    color: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000'};
+                    background: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff'};
+                  }
+                `,
+                setup: function(editor) {
+                  editor.on('init', function() {
+                    editor.getBody().style.backgroundColor = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff';
+                    editor.getBody().style.color = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000';
+                  });
                 }
-              `,
-              setup: function(editor: any) {
-                editor.on('init', function() {
-                editor.getBody().style.backgroundColor = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff';
-                editor.getBody().style.color = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000';
-                });
-              }
               }}
             />
           </div>

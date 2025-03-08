@@ -70,7 +70,7 @@ export default function Seating() {
   const [newTableName, setNewTableName] = useState('')
   const dialogRef = useRef<HTMLDivElement>(null)
   const [showTooltip, setShowTooltip] = useState(true)
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const [draggedGuest, setDraggedGuest] = useState<Guest | null>(null)
 
   const sensors = useSensors(
