@@ -5,7 +5,6 @@ const nextConfig = {
     unoptimized: true,
     domains: ['images.unsplash.com']
   },
-  swcMinify: true,
   compiler: {
     // Preserve warnings in development
     removeConsole: process.env.NODE_ENV === 'production' ? {
