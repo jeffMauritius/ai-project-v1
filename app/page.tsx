@@ -11,6 +11,42 @@ import {
   MusicalNoteIcon
 } from '@heroicons/react/24/outline'
 
+const features = [
+  {
+    name: 'Recherche IA',
+    icon: MagnifyingGlassIcon,
+    description: 'Notre assistant intelligent comprend vos besoins et vous propose les meilleures options adaptées à vos critères.',
+    examples: [
+      'Suggestions personnalisées basées sur vos préférences',
+      'Filtrage intelligent par budget et style',
+      'Recommandations contextuelles'
+    ],
+    exampleIcons: [HeartIcon, CakeIcon, MusicalNoteIcon]
+  },
+  {
+    name: 'Large Sélection',
+    icon: BuildingLibraryIcon,
+    description: 'Accédez à une vaste collection de lieux et prestataires soigneusement sélectionnés pour votre grand jour.',
+    examples: [
+      'Châteaux et domaines d\'exception',
+      'Photographes et vidéastes professionnels',
+      'Traiteurs gastronomiques'
+    ],
+    exampleIcons: [HeartIcon, CakeIcon, MusicalNoteIcon]
+  },
+  {
+    name: 'Organisation Facile',
+    icon: CalendarDaysIcon,
+    description: 'Gérez tous les aspects de votre mariage en un seul endroit, de la recherche initiale jusqu\'à la coordination finale.',
+    examples: [
+      'Planning interactif personnalisé',
+      'Liste de tâches intelligente',
+      'Coordination avec les prestataires'
+    ],
+    exampleIcons: [HeartIcon, CakeIcon, MusicalNoteIcon]
+  }
+]
+
 export default function Home() {
   return (
     <>
@@ -74,39 +110,3 @@ export default function Home() {
     </>
   )
 }
-
-const features = [
-  {
-    name: 'Recherche IA',
-    icon: MagnifyingGlassIcon,
-    description: 'Notre assistant intelligent comprend vos besoins et vous propose les meilleures options adaptées à vos critères.',
-    examples: [
-      'Suggestions personnalisées basées sur vos préférences',
-      'Filtrage intelligent par budget et style',
-      'Recommandations contextuelles'
-    ],
-    exampleIcons: [HeartIcon, CakeIcon, MusicalNoteIcon]
-  },
-  {
-    name: 'Large Sélection',
-    icon: BuildingLibraryIcon,
-    description: 'Accédez à une vaste collection de lieux et prestataires soigneusement sélectionnés pour votre grand jour.',
-    examples: [
-      'Châteaux et domaines d\'exception',
-      'Photographes et vidéastes professionnels',
-      'Traiteurs gastronomiques'
-    ],
-    exampleIcons: [HeartIcon, CakeIcon, MusicalNoteIcon]
-  },
-  {
-    name: 'Organisation Facile',
-    icon: CalendarDaysIcon,
-    description: 'Gérez tous les aspects de votre mariage en un seul endroit, de la recherche initiale jusqu\'à la coordination finale.',
-    examples: [
-      'Planning interactif personnalisé',
-      'Liste de tâches intelligente',
-      'Coordination avec les prestataires'
-    ],
-    exampleIcons: [HeartIcon, CakeIcon, MusicalNoteIcon]
-  }
-]
