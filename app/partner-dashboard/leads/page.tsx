@@ -282,7 +282,7 @@ export default function Leads() {
                 )}
                 {lead.eventDate && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{`Date de l'événement`}</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Date de l'événement</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {new Date(lead.eventDate).toLocaleDateString()}
                     </p>
@@ -351,7 +351,7 @@ export default function Leads() {
           <DialogHeader>
             <DialogTitle>Ajouter une note</DialogTitle>
             <DialogDescription>
-              Ajoutez {`une note pour suivre l'évolution de ce lead.`}
+              Ajoutez une note pour suivre l'évolution de ce lead.
             </DialogDescription>
           </DialogHeader>
           {selectedLead && (

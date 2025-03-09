@@ -94,7 +94,7 @@ export default function Pricing() {
                     ))}
                   </ul>
                   <Button className="w-full" variant={plan.popular ? 'default' : 'outline'}>
-                   {` Commencer l'essai gratuit`}
+                    Commencer l'essai gratuit
                   </Button>
                 </CardContent>
               </Card>

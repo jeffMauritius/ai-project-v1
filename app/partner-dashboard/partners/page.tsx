@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, Filter, Plus, X } from "lucide-react"
-import Image from 'next/image'
 import {
   Dialog,
   DialogContent,
@@ -116,12 +115,10 @@ export default function Partners() {
         {filteredPartners.map((partner) => (
           <Card key={partner.id} className={partner.featured ? 'border-pink-500' : ''}>
             <div className="relative h-48">
-              <Image
+              <img
                 src={partner.image}
                 alt={partner.name}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-t-lg"
+                className="w-full h-full object-cover rounded-t-lg"
               />
               {partner.featured && (
                 <div className="absolute top-2 right-2 bg-pink-500 text-white text-xs font-medium px-2 py-1 rounded-full">
