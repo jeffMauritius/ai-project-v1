@@ -3,7 +3,7 @@ import Footer from '../../components/Footer'
 import PageNavigation from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function Cookies() {
+export default function Terms() {
   return (
     <>
       <Navbar />
@@ -12,15 +12,15 @@ export default function Cookies() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Politique des cookies
+              {`Conditions d'utilisation`}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Comment nous utilisons les cookies pour améliorer votre expérience.
+              Veuillez lire attentivement ces conditions avant d'utiliser nos services.
             </p>
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>{`1. Qu'est-ce qu'un cookie ?`}</CardTitle>
+              <CardTitle>1. Acceptation des conditions</CardTitle>
             </CardHeader>
             <CardContent className="prose dark:prose-invert">
               <p>Page en construction</p>

@@ -351,7 +351,7 @@ export default function Leads() {
           <DialogHeader>
             <DialogTitle>Ajouter une note</DialogTitle>
             <DialogDescription>
-              {`Ajoutez une note pour suivre l'évolution de ce lead.`}
+              Ajoutez une note pour suivre l'évolution de ce lead.
             </DialogDescription>
           </DialogHeader>
           {selectedLead && (
