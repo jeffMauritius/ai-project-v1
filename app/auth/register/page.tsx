@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import { EnvelopeIcon, LockClosedIcon, UserIcon, BuildingStorefrontIcon, IdentificationIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const partnerTypes = [
   { id: 'venue', name: 'Lieu de réception' },
@@ -70,20 +74,20 @@ export default function Register() {
 
         <form className="space-y-6" action="#" method="POST">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
               Adresse email
-            </label>
+            </Label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <EnvelopeIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </div>
-              <input
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="pl-10"
                 placeholder="vous@exemple.fr"
               />
             </div>
@@ -92,38 +96,36 @@ export default function Register() {
           {accountType === 'partner' && (
             <>
               <div>
-                <label htmlFor="partner-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Label htmlFor="partner-type" className="text-gray-700 dark:text-gray-300">
                   Type de prestation
-                </label>
-                <select
-                  id="partner-type"
-                  name="partner-type"
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  defaultValue=""
-                  required
-                >
-                  <option value="" disabled>Sélectionnez votre activité</option>
-                  {partnerTypes.map(type => (
-                    <option key={type.id} value={type.id}>{type.name}</option>
-                  ))}
-                </select>
+                </Label>
+                <Select name="partner-type" required>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Sélectionnez votre activité" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {partnerTypes.map(type => (
+                      <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
-                <label htmlFor="siret" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Label htmlFor="siret" className="text-gray-700 dark:text-gray-300">
                   Numéro SIRET
-                </label>
+                </Label>
                 <div className="mt-1 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <IdentificationIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   </div>
-                  <input
+                  <Input
                     id="siret"
                     name="siret"
                     type="text"
                     required
                     pattern="[0-9]{14}"
-                    className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="pl-10"
                     placeholder="12345678901234"
                   />
                 </div>
@@ -133,52 +135,50 @@ export default function Register() {
           )}
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
               Mot de passe
-            </label>
+            </Label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <LockClosedIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </div>
-              <input
+              <Input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="pl-10"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="password-confirmation" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <Label htmlFor="password-confirmation" className="text-gray-700 dark:text-gray-300">
               Confirmer le mot de passe
-            </label>
+            </Label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <LockClosedIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </div>
-              <input
+              <Input
                 id="password-confirmation"
                 name="password-confirmation"
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="pl-10"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
           <div className="flex items-center">
-            <input
+            <Checkbox
               id="terms"
               name="terms"
-              type="checkbox"
               required
-              className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
               J&apos;accepte les{' '}

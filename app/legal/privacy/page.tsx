@@ -1,6 +1,7 @@
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import PageNavigation from '../../components/PageNavigation'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function Privacy() {
   return (
@@ -9,10 +10,22 @@ export default function Privacy() {
       <PageNavigation />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">Confidentialité</h1>
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <p>Page en construction</p>
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Politique de confidentialité
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Comment nous protégeons vos données personnelles.
+            </p>
           </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>1. Collecte des données</CardTitle>
+            </CardHeader>
+            <CardContent className="prose dark:prose-invert">
+              <p>Page en construction</p>
+            </CardContent>
+          </Card>
         </div>
       </main>
       <Footer />

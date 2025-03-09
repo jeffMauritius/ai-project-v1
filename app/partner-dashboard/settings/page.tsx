@@ -1,10 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { Switch } from '@headlessui/react'
-import { BellIcon, EnvelopeIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ImageIcon, FileIcon as GoogleIcon, Facebook, Apple } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function Settings() {
+  const [isEditing, setIsEditing] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState("https://github.com/shadcn.png")
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [notifications, setNotifications] = useState({
     email: {
       newMessage: true,
@@ -25,343 +44,424 @@ export default function Settings() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Paramètres</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Paramètres du compte</h1>
       
-      {/* Informations du compte */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-          Informations du compte
-        </h2>
-        <form className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {/* Informations de l'entreprise */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Informations de l&apos;entreprise</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6 mb-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback>CV</AvatarFallback>
+            </Avatar>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Prénom
-              </label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                defaultValue="Jean"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Nom
-              </label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                defaultValue="Dupont"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email
-              </label>
-              <input
-                type="email"
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                defaultValue="jean.dupont@example.com"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Téléphone
-              </label>
-              <input
-                type="tel"
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                defaultValue="+33 6 12 34 56 78"
-              />
+              <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="mb-2">
+                    Changer le logo
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Changer le logo de l&apos;entreprise</DialogTitle>
+                    <DialogDescription>
+                      Choisissez une nouvelle image. JPG, GIF ou PNG. 1MB max.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={selectedFile ? URL.createObjectURL(selectedFile) : avatarUrl} />
+                        <AvatarFallback>CV</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <label 
+                          htmlFor="picture" 
+                          className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:border-pink-500 dark:hover:border-pink-500"
+                        >
+                          <div className="space-y-1 text-center">
+                            <ImageIcon className="mx-auto h-8 w-8 text-gray-400" />
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-semibold text-pink-600 dark:text-pink-400">
+                                Cliquez pour choisir
+                              </span>{' '}
+                              ou glissez-déposez
+                            </div>
+                          </div>
+                          <input
+                            id="picture"
+                            name="picture"
+                            type="file"
+                            className="sr-only"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) setSelectedFile(file)
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedFile(null)
+                        setIsUploadDialogOpen(false)
+                      }}
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (selectedFile) {
+                          setAvatarUrl(URL.createObjectURL(selectedFile))
+                          setIsUploadDialogOpen(false)
+                          setSelectedFile(null)
+                        }
+                      }}
+                      disabled={!selectedFile}
+                    >
+                      Enregistrer
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                JPG, GIF ou PNG. 1MB max.
+              </p>
             </div>
           </div>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md"
-            >
-              Enregistrer
-            </button>
+          <form className="space-y-6">
+            <div>
+              <Label htmlFor="company-name">
+                Nom de l&apos;entreprise
+              </Label>
+              <Input
+                id="company-name"
+                type="text"
+                defaultValue="Château de Vaux-le-Vicomte"
+                disabled={!isEditing}
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                defaultValue="Le Château de Vaux-le-Vicomte, joyau architectural du XVIIe siècle, vous ouvre ses portes pour faire de votre mariage un événement véritablement royal."
+                disabled={!isEditing}
+                className="min-h-[100px]"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="address">
+                  Adresse
+                </Label>
+                <Input
+                  id="address"
+                  type="text"
+                  defaultValue="77950 Maincy, France"
+                  disabled={!isEditing}
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">
+                  Téléphone
+                </Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  defaultValue="+33 1 64 14 41 90"
+                  disabled={!isEditing}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  defaultValue="events@vaux-le-vicomte.com"
+                  disabled={!isEditing}
+                />
+              </div>
+              <div>
+                <Label htmlFor="website">
+                  Site web
+                </Label>
+                <Input
+                  id="website"
+                  type="url"
+                  defaultValue="www.vaux-le-vicomte.com"
+                  disabled={!isEditing}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="mr-3"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                  >
+                    Enregistrer
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                >
+                  Modifier
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Comptes connectés */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Comptes connectés</CardTitle>
+          <CardDescription>
+            Gérez les services connectés à votre compte
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+                  <GoogleIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Google</p>
+                  <p className="text-sm text-gray-500">events@vaux-le-vicomte.com</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm">Déconnecter</Button>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+                  <Facebook className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Facebook</p>
+                  <p className="text-sm text-gray-500">Non connecté</p>
+                </div>
+              </div>
+              <Button size="sm">Connecter</Button>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+                  <Apple className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Apple</p>
+                  <p className="text-sm text-gray-500">Non connecté</p>
+                </div>
+              </div>
+              <Button size="sm">Connecter</Button>
+            </div>
           </div>
-        </form>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Notifications */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-          Notifications
-        </h2>
-        <div className="space-y-6">
-          {/* Email */}
-          <div>
-            <div className="flex items-center mb-4">
-              <EnvelopeIcon className="h-6 w-6 text-gray-400 mr-2" />
-              <h3 className="text-base font-medium text-gray-900 dark:text-white">
-                Notifications par email
-              </h3>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouveaux messages
-                </label>
-                <Switch
-                  checked={notifications.email.newMessage}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    email: { ...notifications .email, newMessage: checked }
-                  })}
-                  className={`${
-                    notifications.email.newMessage ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.email.newMessage ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">Email</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="email-messages">
+                    Nouveaux messages
+                  </Label>
+                  <Switch
+                    id="email-messages"
+                    checked={notifications.email.newMessage}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      email: { ...notifications.email, newMessage: checked }
+                    })}
                   />
-                </Switch>
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouveaux avis
-                </label>
-                <Switch
-                  checked={notifications.email.newReview}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    email: { ...notifications.email, newReview: checked }
-                  })}
-                  className={`${
-                    notifications.email.newReview ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.email.newReview ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="email-reviews">
+                    Nouveaux avis
+                  </Label>
+                  <Switch
+                    id="email-reviews"
+                    checked={notifications.email.newReview}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      email: { ...notifications.email, newReview: checked }
+                    })}
                   />
-                </Switch>
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouvelles réservations
-                </label>
-                <Switch
-                  checked={notifications.email.newBooking}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    email: { ...notifications.email, newBooking: checked }
-                  })}
-                  className={`${
-                    notifications.email.newBooking ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.email.newBooking ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="email-bookings">
+                    Nouvelles réservations
+                  </Label>
+                  <Switch
+                    id="email-bookings"
+                    checked={notifications.email.newBooking}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      email: { ...notifications.email, newBooking: checked }
+                    })}
                   />
-                </Switch>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* SMS */}
-          <div>
-            <div className="flex items-center mb-4">
-              <DevicePhoneMobileIcon className="h-6 w-6 text-gray-400 mr-2" />
-              <h3 className="text-base font-medium text-gray-900 dark:text-white">
-                Notifications par SMS
-              </h3>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouveaux messages
-                </label>
-                <Switch
-                  checked={notifications.sms.newMessage}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    sms: { ...notifications.sms, newMessage: checked }
-                  })}
-                  className={`${
-                    notifications.sms.newMessage ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.sms.newMessage ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+            <div>
+              <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">SMS</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="sms-messages">
+                    Nouveaux messages
+                  </Label>
+                  <Switch
+                    id="sms-messages"
+                    checked={notifications.sms.newMessage}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      sms: { ...notifications.sms, newMessage: checked }
+                    })}
                   />
-                </Switch>
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouveaux avis
-                </label>
-                <Switch
-                  checked={notifications.sms.newReview}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    sms: { ...notifications.sms, newReview: checked }
-                  })}
-                  className={`${
-                    notifications.sms.newReview ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.sms.newReview ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="sms-reviews">
+                    Nouveaux avis
+                  </Label>
+                  <Switch
+                    id="sms-reviews"
+                    checked={notifications.sms.newReview}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      sms: { ...notifications.sms, newReview: checked }
+                    })}
                   />
-                </Switch>
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouvelles réservations
-                </label>
-                <Switch
-                  checked={notifications.sms.newBooking}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    sms: { ...notifications.sms, newBooking: checked }
-                  })}
-                  className={`${
-                    notifications.sms.newBooking ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.sms.newBooking ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="sms-bookings">
+                    Nouvelles réservations
+                  </Label>
+                  <Switch
+                    id="sms-bookings"
+                    checked={notifications.sms.newBooking}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      sms: { ...notifications.sms, newBooking: checked }
+                    })}
                   />
-                </Switch>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Push */}
-          <div>
-            <div className="flex items-center mb-4">
-              <BellIcon className="h-6 w-6 text-gray-400 mr-2" />
-              <h3 className="text-base font-medium text-gray-900 dark:text-white">
-                Notifications push
-              </h3>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouveaux messages
-                </label>
-                <Switch
-                  checked={notifications.push.newMessage}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    push: { ...notifications.push, newMessage: checked }
-                  })}
-                  className={`${
-                    notifications.push.newMessage ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.push.newMessage ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+            <div>
+              <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">Notifications push</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="push-messages">
+                    Nouveaux messages
+                  </Label>
+                  <Switch
+                    id="push-messages"
+                    checked={notifications.push.newMessage}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      push: { ...notifications.push, newMessage: checked }
+                    })}
                   />
-                </Switch>
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouveaux avis
-                </label>
-                <Switch
-                  checked={notifications.push.newReview}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    push: { ...notifications.push, newReview: checked }
-                  })}
-                  className={`${
-                    notifications.push.newReview ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.push.newReview ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="push-reviews">
+                    Nouveaux avis
+                  </Label>
+                  <Switch
+                    id="push-reviews"
+                    checked={notifications.push.newReview}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      push: { ...notifications.push, newReview: checked }
+                    })}
                   />
-                </Switch>
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  Nouvelles réservations
-                </label>
-                <Switch
-                  checked={notifications.push.newBooking}
-                  onChange={(checked) => setNotifications({
-                    ...notifications,
-                    push: { ...notifications.push, newBooking: checked }
-                  })}
-                  className={`${
-                    notifications.push.newBooking ? 'bg-pink-600' : 'bg-gray-200 dark:bg-gray-700'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                >
-                  <span
-                    className={`${
-                      notifications.push.newBooking ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="push-bookings">
+                    Nouvelles réservations
+                  </Label>
+                  <Switch
+                    id="push-bookings"
+                    checked={notifications.push.newBooking}
+                    onCheckedChange={(checked) => setNotifications({
+                      ...notifications,
+                      push: { ...notifications.push, newBooking: checked }
+                    })}
                   />
-                </Switch>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Sécurité */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-          Sécurité
-        </h2>
-        <form className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Mot de passe actuel
-            </label>
-            <input
-              type="password"
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-            />
+      {/* Suppression du compte */}
+      <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+        <CardHeader>
+          <CardTitle className="text-red-600 dark:text-red-400">Suppression du compte</CardTitle>
+          <CardDescription>
+            Attention : cette action est irréversible
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              La suppression de votre compte entraînera la perte définitive de :
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 space-y-1">
+              <li>Toutes vos informations d&apos;entreprise</li>
+              <li>Votre historique de messages et conversations</li>
+              <li>Vos statistiques et analyses</li>
+              <li>Vos avis clients</li>
+            </ul>
+            <div className="pt-4">
+              <Button 
+                variant="destructive"
+                className="w-full sm:w-auto"
+              >
+                Supprimer mon compte
+              </Button>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Nouveau mot de passe
-            </label>
-            <input
-              type="password"
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Confirmer le nouveau mot de passe
-            </label>
-            <input
-              type="password"
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-            />
-          </div>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md"
-            >
-              Mettre à jour le mot de passe
-            </button>
-          </div>
-        </form>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

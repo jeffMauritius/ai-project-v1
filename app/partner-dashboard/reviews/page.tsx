@@ -1,8 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { StarIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/solid'
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Star, Filter, CheckCircle, XCircle, MessageSquare } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 type Review = {
   id: number
@@ -20,8 +36,8 @@ const mockReviews: Review[] = [
     author: 'Sophie M.',
     rating: 5,
     date: '2024-01-15',
-    content: 'Service exceptionnel ! L&apos;équipe a été très professionnelle et à l&apos;écoute de nos besoins. Je recommande vivement.',
-    response: 'Merci beaucoup Sophie pour votre retour ! C&apos;était un plaisir de participer à votre mariage.',
+    content: 'Service exceptionnel ! L\'équipe a été très professionnelle et à l\'écoute de nos besoins. Je recommande vivement.',
+    response: 'Merci beaucoup Sophie pour votre retour ! C\'était un plaisir de participer à votre mariage.',
     status: 'approved'
   },
   {
@@ -37,8 +53,8 @@ const mockReviews: Review[] = [
     author: 'Marie L.',
     rating: 5,
     date: '2024-01-10',
-    content: 'Tout était parfait ! De la préparation jusqu&apos;au jour J, nous avons été enchantés par le professionnalisme.',
-    response: 'Merci Marie ! Nous sommes ravis d&apos;avoir contribué à rendre votre journée spéciale.',
+    content: 'Tout était parfait ! De la préparation jusqu\'au jour J, nous avons été enchantés par le professionnalisme.',
+    response: 'Merci Marie ! Nous sommes ravis d\'avoir contribué à rendre votre journée spéciale.',
     status: 'approved'
   }
 ]
@@ -47,6 +63,7 @@ export default function Reviews() {
   const [reviews, setReviews] = useState<Review[]>(mockReviews)
   const [selectedReview, setSelectedReview] = useState<Review | null>(null)
   const [response, setResponse] = useState('')
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
 
   const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
   const totalReviews = reviews.length
@@ -74,6 +91,10 @@ export default function Reviews() {
     setResponse('')
   }
 
+  const filteredReviews = filter === 'all' 
+    ? reviews 
+    : reviews.filter(review => review.status === filter)
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-start mb-8">
@@ -89,159 +110,226 @@ export default function Reviews() {
 
       {/* Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <StarIcon className="h-8 w-8 text-yellow-400" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Note moyenne</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                {averageRating.toFixed(1)}/5
-              </p>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <Star className="h-8 w-8 text-yellow-400" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Note moyenne</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {averageRating.toFixed(1)}/5
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <ChatBubbleLeftIcon className="h-8 w-8 text-blue-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total des avis</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                {totalReviews}
-              </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <MessageSquare className="h-8 w-8 text-blue-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total des avis</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {totalReviews}
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <CheckCircleIcon className="h-8 w-8 text-green-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Avis approuvés</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                {approvedReviews}
-              </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <CheckCircle className="h-8 w-8 text-green-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Avis approuvés</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {approvedReviews}
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <XCircleIcon className="h-8 w-8 text-orange-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">En attente</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                {pendingReviews}
-              </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <XCircle className="h-8 w-8 text-orange-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">En attente</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {pendingReviews}
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
+      {/* Filtres */}
+      <Card className="mb-6">
+        <CardContent className="py-6">
+          <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Filter className="h-4 w-4" />
+                  {filter === 'all' ? 'Tous les avis' :
+                   filter === 'pending' ? 'En attente' :
+                   filter === 'approved' ? 'Approuvés' :
+                   'Rejetés'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setFilter('all')}>
+                  Tous les avis
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter('pending')}>
+                  En attente
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter('approved')}>
+                  Approuvés
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter('rejected')}>
+                  Rejetés
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Liste des avis */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {reviews.map((review) => (
-            <li key={review.id} className="p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <p className="font-medium text-gray-900 dark:text-white">{review.author}</p>
-                      <span className="mx-2 text-gray-500 dark:text-gray-400">•</span>
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <StarIcon
-                            key={i}
-                            className={`h-5 w-5 ${
-                              i < review.rating
-                                ? 'text-yellow-400'
-                                : 'text-gray-300 dark:text-gray-600'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <time className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(review.date).toLocaleDateString()}
-                    </time>
+      <div className="space-y-6">
+        {filteredReviews.map((review) => (
+          <Card key={review.id}>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                      {review.author}
+                    </h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      review.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                      review.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                    }`}>
+                      {review.status === 'approved' ? 'Approuvé' :
+                       review.status === 'rejected' ? 'Rejeté' :
+                       'En attente'}
+                    </span>
                   </div>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">{review.content}</p>
-                  {review.response && (
-                    <div className="mt-4 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        Votre réponse :
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{review.response}</p>
-                    </div>
-                  )}
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(review.date).toLocaleDateString()}
+                  </p>
                 </div>
-                <div className="ml-6 flex items-center space-x-2">
-                  {review.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => handleApprove(review.id)}
-                        className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full"
-                      >
-                        <CheckCircleIcon className="h-6 w-6" />
-                      </button>
-                      <button
-                        onClick={() => handleReject(review.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
-                      >
-                        <XCircleIcon className="h-6 w-6" />
-                      </button>
-                    </>
-                  )}
-                  {!review.response && (
-                    <button
-                      onClick={() => setSelectedReview(review)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
-                    >
-                      <ChatBubbleLeftIcon className="h-6 w-6" />
-                    </button>
-                  )}
+                <div className="flex gap-0.5">
+                  {Array.from({ length: review.rating }).map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
               </div>
-            </li>
-          ))}
-        </ul>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                {review.content}
+              </p>
+              {review.response && (
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    Votre réponse :
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {review.response}
+                  </p>
+                </div>
+              )}
+              <div className="flex justify-end gap-2">
+                {review.status === 'pending' && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleReject(review.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Rejeter
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleApprove(review.id)}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Approuver
+                    </Button>
+                  </>
+                )}
+                {!review.response && (
+                  <Button
+                    variant="default"
+                    onClick={() => setSelectedReview(review)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Répondre
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Modal de réponse */}
-      {selectedReview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Répondre à l&apos;avis
-            </h3>
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 dark:text-gray-300">{selectedReview.content}</p>
-            </div>
-            <textarea
-              value={response}
-              onChange={(e) => setResponse(e.target.value)}
-              rows={4}
-              className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white mb-4"
-              placeholder="Votre réponse..."
-            />
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setSelectedReview(null)
-                  setResponse('')
-                }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleRespond}
-                className="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md"
-              >
-                Répondre
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Répondre à l&apos;avis</DialogTitle>
+            <DialogDescription>
+              Votre réponse sera visible publiquement sur votre profil.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedReview && (
+            <>
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {selectedReview.author}
+                  </p>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: selectedReview.rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {selectedReview.content}
+                </p>
+              </div>
+              <Textarea
+                value={response}
+                onChange={(e) => setResponse(e.target.value)}
+                placeholder="Votre réponse..."
+                className="min-h-[100px]"
+              />
+            </>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedReview(null)
+                setResponse('')
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleRespond}
+              disabled={!response.trim()}
+            >
+              Publier la réponse
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

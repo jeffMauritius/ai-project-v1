@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
-import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, MicrophoneIcon, DocumentPlusIcon } from '@heroicons/react/24/outline'
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Mic, Send, Upload } from "lucide-react"
 
 type Message = {
   id: number
@@ -29,9 +32,9 @@ const mockConversations: Conversation[] = [
   {
     id: 1,
     client: {
-      name: 'Sophie Martin',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80',
-      type: 'Mariage Juillet 2024'
+      name: "Sophie Martin",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80",
+      type: "Mariage Juillet 2024"
     },
     messages: [
       {
@@ -63,9 +66,9 @@ const mockConversations: Conversation[] = [
   {
     id: 2,
     client: {
-      name: 'Pierre Dubois',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80',
-      type: 'Mariage Septembre 2024'
+      name: "Pierre Dubois",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80",
+      type: "Mariage Septembre 2024"
     },
     messages: [
       {
@@ -129,17 +132,16 @@ export default function Messages() {
     <div className="max-w-7xl mx-auto h-[calc(100vh-9rem)]">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Messages</h1>
       
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow h-full flex overflow-hidden">
+      <Card className="h-full flex overflow-hidden">
         {/* Liste des conversations */}
         <div className="w-1/3 border-r border-gray-200 dark:border-gray-700">
           <div className="h-full flex flex-col">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-              <input
+              <Input
                 type="text"
                 placeholder="Rechercher une conversation..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               />
             </div>
             <div className="flex-1 overflow-y-auto">
@@ -151,13 +153,10 @@ export default function Messages() {
                     selectedConversation?.id === conversation.id ? 'bg-pink-50 dark:bg-pink-900/20' : ''
                   }`}
                 >
-                  <Image
-                    src={conversation.client.avatar}
-                    alt={conversation.client.name}
-                    width={40}
-                    height={40}
-                    className="rounded-full object-cover"
-                  />
+                  <Avatar>
+                    <AvatarImage src={conversation.client.avatar} />
+                    <AvatarFallback>{conversation.client.name[0]}</AvatarFallback>
+                  </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -188,13 +187,10 @@ export default function Messages() {
           <div className="flex-1 flex flex-col">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-3">
-                <Image
-                  src={selectedConversation.client.avatar}
-                  alt={selectedConversation.client.name}
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
-                />
+                <Avatar>
+                  <AvatarImage src={selectedConversation.client.avatar} />
+                  <AvatarFallback>{selectedConversation.client.name[0]}</AvatarFallback>
+                </Avatar>
                 <div>
                   <h2 className="text-lg font-medium text-gray-900 dark:text-white">
                     {selectedConversation.client.name}
@@ -240,32 +236,34 @@ export default function Messages() {
                   handleSendMessage()
                 }}
               >
-                <input
+                <Input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Écrivez votre message..."
-                  className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                  className="flex-1"
                 />
                 <div className="flex space-x-2">
-                  <button
+                  <Button
                     type="button"
-                    className="p-2 rounded-lg text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    variant="ghost"
+                    size="icon"
                   >
-                    <MicrophoneIcon className="h-5 w-5" />
-                  </button>
-                  <button
+                    <Mic className="h-5 w-5" />
+                  </Button>
+                  <Button
                     type="button"
-                    className="p-2 rounded-lg text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    variant="ghost"
+                    size="icon"
                   >
-                    <DocumentPlusIcon className="h-5 w-5" />
-                  </button>
-                  <button
+                    <Upload className="h-5 w-5" />
+                  </Button>
+                  <Button
                     type="submit"
-                    className="p-2 rounded-lg bg-pink-600 hover:bg-pink-500 text-white"
+                    size="icon"
                   >
-                    <PaperAirplaneIcon className="h-5 w-5" />
-                  </button>
+                    <Send className="h-5 w-5" />
+                  </Button>
                 </div>
               </form>
             </div>
@@ -273,14 +271,14 @@ export default function Messages() {
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <Send className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                 Sélectionnez une conversation
               </h3>
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

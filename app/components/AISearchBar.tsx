@@ -1,16 +1,27 @@
 'use client'
 
-import { PaperAirplaneIcon, MicrophoneIcon, DocumentPlusIcon } from '@heroicons/react/24/outline'
+import { Mic, Send, Upload } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, useAnimationControls } from 'framer-motion'
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 
 export default function AISearchBar() {
   const router = useRouter()
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [animatingTag, setAnimatingTag] = useState<{ text: string, rect: DOMRect } | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,9 +32,9 @@ export default function AISearchBar() {
 
   const handleTagClick = async (text: string, e: React.MouseEvent) => {
     const buttonRect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    const inputRect = inputRef.current?.getBoundingClientRect()
+    const textareaRect = textareaRef.current?.getBoundingClientRect()
     
-    if (!inputRect) return
+    if (!textareaRect) return
     
     setAnimatingTag({ 
       text,
@@ -48,43 +59,52 @@ export default function AISearchBar() {
     
     setTimeout(() => {
       setAnimatingTag(null)
-      inputRef.current?.focus()
+      textareaRef.current?.focus()
     }, 2500)
   }
 
   return (
     <div className="w-full max-w-4xl">
       <form className="relative flex items-center" onSubmit={handleSubmit}>
-        <input
-          ref={inputRef}
-          type="text"
+        <Textarea
+          ref={textareaRef}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-3xl border-none py-8 pl-8 pr-32 text-gray-900 dark:text-white bg-white dark:bg-gray-800 shadow-lg ring-1 ring-inset ring-gray-100 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-pink-500/50 hover:ring-pink-500/30 transition-all text-lg"
+          className="min-h-[80px] resize-none rounded-xl pl-6 pr-32 py-6 text-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] focus-visible:shadow-[0_4px_16px_rgba(0,0,0,0.1)] transition-shadow border-0 focus-visible:ring-1 focus-visible:ring-pink-500/30 dark:focus-visible:ring-pink-500/20 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] dark:focus-visible:shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
           placeholder="Décrivez ce que vous recherchez..."
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              handleSubmit(e)
+            }
+          }}
         />
         <div className="absolute right-16 flex gap-2">
-          <button 
+          <Button
+            variant="ghost"
+            size="icon"
             type="button"
-            className="p-2 rounded-xl text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Commande vocale"
           >
-            <MicrophoneIcon className="h-5 w-5" />
-          </button>
-          <button 
+            <Mic className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             type="button"
-            className="p-2 rounded-xl text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Ajouter un fichier"
           >
-            <DocumentPlusIcon className="h-5 w-5" />
-          </button>
+            <Upload className="h-5 w-5" />
+          </Button>
         </div>
-        <button 
+        <Button
+          variant="default"
+          size="icon"
           type="submit" 
-          className="absolute right-4 p-2 rounded-xl bg-pink-600 hover:bg-pink-500 transition-colors"
+          className="absolute right-4"
         >
-          <PaperAirplaneIcon className="h-5 w-5 text-white" />
-        </button>
+          <Send className="h-5 w-5" />
+        </Button>
       </form>
       {pathname === '/' && <div className="mt-6 flex items-center gap-2 text-sm text-gray-400">
         <div className="flex flex-wrap gap-2 pb-2">

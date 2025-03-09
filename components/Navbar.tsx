@@ -1,11 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline' 
-import ThemeToggle from './ThemeToggle' 
-import { BuildingStorefrontIcon } from '@heroicons/react/24/outline' 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" 
-import { useEffect, useState } from 'react'
+import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
+import ThemeToggle from './ThemeToggle'
+import { BuildingStorefrontIcon } from '@heroicons/react/24/outline'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,18 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export default function Navbar() {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
-
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-sm" suppressHydrationWarning>
+    <nav className="bg-white dark:bg-gray-900 shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
           <div className="flex">
@@ -46,14 +35,14 @@ export default function Navbar() {
             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button type="button" className="relative h-8 w-8 rounded-full">
+                <button className="relative h-8 w-8 rounded-full">
                   <Avatar>
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
