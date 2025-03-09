@@ -3,9 +3,9 @@ import Footer from '../../components/Footer'
 import PageNavigation from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Briefcase } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
-export default function Jobs() {
+export default function Blog() {
   return (
     <>
       <Navbar />
@@ -14,28 +14,28 @@ export default function Jobs() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              {`Rejoignez l'équipe`}
+              Blog
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Découvrez nos opportunités de carrière.
+              Conseils, tendances et inspirations pour votre mariage.
             </p>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-6 w-6" />
-                {`Offre d'emploi`}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Page en construction
-              </p>
-              <Button variant="outline">
-                Postuler
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Article en construction</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Page en construction
+                </p>
+                <Button variant="outline" className="w-full">
+                  Lire l'article
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
       <Footer />
