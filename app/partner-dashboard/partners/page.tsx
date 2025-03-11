@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -115,55 +114,53 @@ export default function Partners() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPartners.map((partner) => (
           <Card key={partner.id} className={partner.featured ? 'border-pink-500' : ''}>
-            <>
-              <Image
+            <div className="relative h-48">
+              <img
                 src={partner.image}
                 alt={partner.name}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-t-lg"
+                className="w-full h-full object-cover rounded-t-lg"
               />
               {partner.featured && (
                 <div className="absolute top-2 right-2 bg-pink-500 text-white text-xs font-medium px-2 py-1 rounded-full">
                   Mis en avant
                 </div>
               )}
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      {partner.name}
-                    </h3>
-                    <p className="text-sm text-pink-600 dark:text-pink-400">
-                      {partner.type}
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                    <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">
-                      {partner.rating}
-                    </span>
-                  </div>
+            </div>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    {partner.name}
+                  </h3>
+                  <p className="text-sm text-pink-600 dark:text-pink-400">
+                    {partner.type}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                  {partner.description}
-                </p>
-                <div className="flex justify-between items-center">
-                  <a
-                    href={`https://${partner.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-pink-600 hover:text-pink-500"
-                  >
-                    {partner.website}
-                  </a>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <X className="h-4 w-4" />
-                    Retirer
-                  </Button>
+                <div className="flex items-center">
+                  <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                  <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">
+                    {partner.rating}
+                  </span>
                 </div>
-              </CardContent>
-            </>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                {partner.description}
+              </p>
+              <div className="flex justify-between items-center">
+                <a
+                  href={`https://${partner.website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-pink-600 hover:text-pink-500"
+                >
+                  {partner.website}
+                </a>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <X className="h-4 w-4" />
+                  Retirer
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         ))}
       </div>

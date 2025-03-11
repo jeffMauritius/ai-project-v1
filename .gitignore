@@ -13,8 +13,6 @@
 .next/cache/
 /out/
 
-.history
-
 # production
 #/build
 

@@ -1,12 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { EnvelopeIcon, LockClosedIcon, UserIcon, BuildingStorefrontIcon, IdentificationIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from 'react'
 
 const partnerTypes = [
   { id: 'venue', name: 'Lieu de réception' },
@@ -25,6 +27,60 @@ const partnerTypes = [
 
 export default function Register() {
   const [accountType, setAccountType] = useState<'couple' | 'partner'>('couple')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
+  const router = useRouter()
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsLoading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    const name = formData.get('name') as string
+    
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          role: accountType === 'partner' ? 'PARTNER' : 'USER'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Une erreur est survenue')
+      }
+
+      if (profileError) {
+        throw profileError
+      }
+
+      router.push('/auth/login')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Une erreur est survenue')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -72,7 +128,30 @@ export default function Register() {
           </button>
         </div>
 
-        <form className="space-y-6" action="#" method="POST">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+          <div>
+            <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">
+              Nom complet
+            </Label>
+            <div className="mt-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <UserIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              </div>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                required
+                className="pl-10"
+                placeholder="John Doe"
+              />
+            </div>
+          </div>
           <div>
             <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
               Adresse email
@@ -191,9 +270,10 @@ export default function Register() {
           <div>
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
             >
-              Créer mon compte
+              {isLoading ? 'Création...' : 'Créer mon compte'}
             </button>
           </div>
         </form>
