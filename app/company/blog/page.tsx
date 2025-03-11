@@ -30,7 +30,7 @@ export default function Blog() {
                   Page en construction
                 </p>
                 <Button variant="outline" className="w-full">
-                  {`Lire l'article`}
+                  Lire l'article
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>

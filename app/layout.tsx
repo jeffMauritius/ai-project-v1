@@ -1,8 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { getSession } from '@/lib/auth';
-import { Providers } from './providers';
+import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -14,18 +13,16 @@ export const metadata: Metadata = {
   }
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body className={`${inter.className} bg-white dark:bg-gray-900`} suppressHydrationWarning>
-        <Providers session={session}>{children}</Providers>
+    <html lang="fr">
+      <body className={`${inter.className} antialiased`}>
+        <Providers>{children}</Providers>
       </body>
     </html>
-  );
+  )
 }

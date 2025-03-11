@@ -16,7 +16,7 @@ export default function About() {
               À propos de MonMariage.ai
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-             {` Notre mission est de rendre l'organisation de votre mariage plus simple et plus intelligente.`}
+              Notre mission est de rendre l'organisation de votre mariage plus simple et plus intelligente.
             </p>
           </div>
           <Card>

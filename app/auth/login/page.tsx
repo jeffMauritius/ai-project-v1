@@ -1,11 +1,57 @@
+'use client'
+
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useState, useEffect } from 'react'
+import { signIn } from 'next-auth/react'
 
 export default function Login() {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
+  
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsLoading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    
+    try {
+      const result = await signIn('credentials', {
+        email: email,
+        password: password,
+        redirect: false
+      });
+
+      if (result?.error) {
+        throw new Error(result.error)
+      }
+
+      router.push('/dashboard')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Une erreur est survenue')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-xl rounded-lg sm:px-10">
@@ -21,7 +67,12 @@ export default function Login() {
           </p>
         </div>
 
-        <form className="space-y-6" action="#" method="POST">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
           <div>
             <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
               Adresse email
@@ -83,9 +134,10 @@ export default function Login() {
           <div>
             <Button
               type="submit"
+              disabled={isLoading}
               className="w-full"
             >
-              Se connecter
+              {isLoading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </div>
         </form>
