@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { EnvelopeIcon, LockClosedIcon, UserIcon, BuildingStorefrontIcon, IdentificationIcon } from '@heroicons/react/24/outline'
-import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -30,7 +29,8 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
-
+  const router = useRouter()
+  
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -38,7 +38,6 @@ export default function Register() {
   if (!mounted) {
     return null
   }
-  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -70,9 +69,6 @@ export default function Register() {
         throw new Error(data.error || 'Une erreur est survenue')
       }
 
-      if (profileError) {
-        throw profileError
-      }
 
       router.push('/auth/login')
     } catch (error) {
