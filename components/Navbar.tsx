@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
-import ThemeToggle from './ThemeToggle'
+import ThemeToggle from '@/app/components/ThemeToggle'
 import { BuildingStorefrontIcon } from '@heroicons/react/24/outline'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {

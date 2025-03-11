@@ -86,7 +86,7 @@ export default function PartnerDashboard() {
             Tableau de bord
           </h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            L'activité de votre compte
+            {`L'activité de votre compte`}
           </p>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function PartnerDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <Card>
           <CardHeader>
-            <CardTitle>Chiffre d'affaires</CardTitle>
+            <CardTitle>{`Chiffre d'affaires`}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-gray-400">

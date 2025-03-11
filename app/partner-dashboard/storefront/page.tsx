@@ -273,7 +273,7 @@ Situé à seulement 55 km de Paris, ce chef-d'œuvre de l'architecture classique
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          <div>
+            <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description
             </label>
@@ -281,40 +281,40 @@ Situé à seulement 55 km de Paris, ce chef-d'œuvre de l'architecture classique
               // @ts-ignore
               initialValue={companyInfo.description}
               init={{
-                apiKey: "kt6ws4781ypwwybkvh88ueu3ywheumr483a8x5xfzgmuctr4",
-                height: 300,
-                menubar: false,
-                branding: false,
-                plugins: [
-                  'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
-                  'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                  'insertdatetime', 'media', 'table', 'help', 'wordcount'
-                ],
-                toolbar: 'undo redo | blocks | ' +
-                  'bold italic | alignleft aligncenter ' +
-                  'alignright alignjustify | bullist numlist outdent indent | ' +
-                  'removeformat | help',
-                skin: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'oxide-dark' : 'oxide',
-                content_css: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-                content_style: `
-                  body { 
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                    font-size: 14px;
-                    line-height: 1.5;
-                    color: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000'};
-                    background: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff'};
-                  }
-                `,
-                setup: function(editor) {
-                  editor.on('init', function() {
-                    editor.getBody().style.backgroundColor = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff';
-                    editor.getBody().style.color = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000';
-                  });
+              apiKey: "kt6ws4781ypwwybkvh88ueu3ywheumr483a8x5xfzgmuctr4",
+              height: 300,
+              menubar: false,
+              branding: false,
+              plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+              ],
+              toolbar: 'undo redo | blocks | ' +
+                'bold italic | alignleft aligncenter ' +
+                'alignright alignjustify | bullist numlist outdent indent | ' +
+                'removeformat | help',
+              skin: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'oxide-dark' : 'oxide',
+              content_css: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+              content_style: `
+                body { 
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                font-size: 14px;
+                line-height: 1.5;
+                color: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000'};
+                background: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff'};
                 }
+              `,
+              setup: function(editor: any) {
+                editor.on('init', function() {
+                editor.getBody().style.backgroundColor = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff';
+                editor.getBody().style.color = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000';
+                });
+              }
               }}
               onEditorChange={(content: string) => setCompanyInfo({ ...companyInfo, description: content })}
             />
-          </div>
+            </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
