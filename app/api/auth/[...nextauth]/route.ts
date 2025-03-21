@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth/next";
 import { Role } from "@prisma/client";
+import { getToken } from "next-auth/jwt";
+import { NextRequest } from "next/server";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,7 +17,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials");
+          throw new Error("Email et mot de passe requis");
         }
 
         const user = await prisma.user.findUnique({
@@ -24,17 +26,17 @@ export const authOptions: NextAuthOptions = {
           }
         });
 
-        if (!user || !user?.password) {
-          throw new Error("Invalid credentials");
+        if (!user) {
+          throw new Error("Email ou mot de passe incorrect");
         }
 
-        const isCorrectPassword = await bcrypt.compare(
+        const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
 
-        if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
+        if (!isPasswordValid) {
+          throw new Error("Email ou mot de passe incorrect");
         }
 
         return {
@@ -48,35 +50,68 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: '/auth/login',
-    signOut: '/auth/logout',
     error: '/auth/error',
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60 // 30 days
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         return {
           ...token,
+          id: user.id,
           role: user.role,
         };
       }
       return token;
     },
-    async session({ session, token }): Promise<Session> {
+    async session({ session, token }) {
       return {
         ...session,
         user: {
           ...session.user,
-          role: token.role as Role
+          id: token.id,
+          role: token.role,
         },
       };
     },
-  },
-  secret: process.env.NEXTAUTH_SECRET
-}
+    async redirect({ url, baseUrl }) {
+      if (url.includes('/auth/login')) {
+        return url;
+      }
+
+      if (url.startsWith("/")) {
+        const token = await getToken({ 
+          req: new NextRequest(url, { 
+            headers: new Headers(),
+            method: 'GET',
+            body: null,
+            cache: 'no-store',
+            credentials: 'include',
+            integrity: '',
+            keepalive: false,
+            mode: 'cors',
+            redirect: 'follow',
+            referrer: '',
+            referrerPolicy: '',
+            signal: null,
+            url: url
+          })
+        });
+        
+        if (token?.role === "PARTNER") {
+          return `${baseUrl}/partner-dashboard`;
+        } else if (token?.role === "ADMIN") {
+          return `${baseUrl}/admin/dashboard`;
+        } else {
+          return `${baseUrl}/dashboard/planning`;
+        }
+      }
+      return url;
+    }
+  }
+};
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

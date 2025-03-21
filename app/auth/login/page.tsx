@@ -8,10 +8,11 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useState, useEffect } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 
 export default function Login() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -19,6 +20,18 @@ export default function Login() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (session?.user?.role) {
+      if (session.user.role === "PARTNER") {
+        router.push('/partner-dashboard')
+      } else if (session.user.role === "ADMIN") {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/dashboard/planning')
+      }
+    }
+  }, [session, router])
 
   if (!mounted) {
     return null
@@ -37,14 +50,12 @@ export default function Login() {
       const result = await signIn('credentials', {
         email: email,
         password: password,
-        redirect: false
+        redirect: true
       });
 
       if (result?.error) {
         throw new Error(result.error)
       }
-
-      router.push('/dashboard')
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Une erreur est survenue')
     } finally {
