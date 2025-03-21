@@ -6,6 +6,7 @@ import ThemeToggle from './ThemeToggle'
 import { BuildingStorefrontIcon } from '@heroicons/react/24/outline' 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" 
 import { useEffect, useState } from 'react'
+import { signOut } from "next-auth/react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,13 +15,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const [mounted, setMounted] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await signOut({ 
+        callbackUrl: '/auth/login'
+      });
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+      router.push('/auth/login');
+    }
+  };
 
   if (!mounted) {
     return null
@@ -36,13 +50,6 @@ export default function Navbar() {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link
-              href="/partner-dashboard"
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Tableau de bord partenaire"
-            >
-              <BuildingStorefrontIcon className="h-5 w-5" />
-            </Link>
             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -62,11 +69,9 @@ export default function Navbar() {
                     <span>Paramètres</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/auth/login" className="flex items-center">
-                    <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
-                    <span>Déconnexion</span>
-                  </Link>
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center cursor-pointer">
+                  <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
+                  <span>Déconnexion</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
