@@ -1,488 +1,746 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { PhotoIcon, PlusIcon, TrashIcon, PencilIcon, CheckIcon } from '@heroicons/react/24/outline'
-import dynamic from 'next/dynamic'
-import { UsersIcon } from '@heroicons/react/24/outline'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { useState, useEffect, useRef } from "react"
+import { useSession } from "next-auth/react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
-import { Eye } from "lucide-react"
-import Link from 'next/link'
-import Image from 'next/image'
+import { useToast } from "@/components/ui/use-toast"
+import { Editor } from "@tinymce/tinymce-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import L from "leaflet"
+import "leaflet/dist/leaflet.css"
 
-const Editor = dynamic(() => import('@tinymce/tinymce-react').then(mod => mod.Editor as any), {
-  ssr: false,
-  loading: () => <div className="h-[300px] bg-gray-100 dark:bg-gray-700 rounded-md animate-pulse" />
+// Correction des icônes Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 })
 
-type Service = {
-  id: number
-  name: string
-  description: string
-  price: string
-  included: string[]
-}
+export default function PartnerStorefrontPage() {
+  const { data: session } = useSession()
+  const { toast } = useToast()
+  const mapRef = useRef<HTMLDivElement>(null)
+  const [map, setMap] = useState<L.Map | null>(null)
+  const [marker, setMarker] = useState<L.Marker | null>(null)
+  const [circle, setCircle] = useState<L.Circle | null>(null)
+  const [storefrontData, setStorefrontData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const logoInputRef = useRef<HTMLInputElement>(null)
 
-type Option = {
-  id: number
-  name: string
-  price: string
-  description: string
-}
+  useEffect(() => {
+    if (session?.user?.role === "PARTNER" && mapRef.current) {
+      // Initialiser la carte
+      const mapInstance = L.map(mapRef.current).setView([48.8566, 2.3522], 12) // Paris par défaut
+      
+      // Ajouter le fond de carte OpenStreetMap
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(mapInstance)
 
-export default function Storefront() {
-  const [showPreview, setShowPreview] = useState(false)
-  const [companyInfo, setCompanyInfo] = useState({
-    name: 'Château de Vaux-le-Vicomte',
-    description: `Le Château de Vaux-le-Vicomte, joyau architectural du XVIIe siècle, vous ouvre ses portes pour faire de votre mariage un événement véritablement royal.
+      setMap(mapInstance)
 
-Situé à seulement 55 km de Paris, ce chef-d'œuvre de l'architecture classique française allie magnificence historique et confort moderne.`,
-    address: '77950 Maincy, France',
-    phone: '+33 1 64 14 41 90',
-    email: 'events@vaux-le-vicomte.com',
-    website: 'www.vaux-le-vicomte.com'
-  })
-
-  const [services, setServices] = useState<Service[]>([
-    {
-      id: 1,
-      name: 'Formule Prestige',
-      description: 'Location exclusive du château et des jardins',
-      price: 'À partir de 15000€',
-      included: [
-        'Accès privatif au château',
-        'Jardins illuminés',
-        'Coordinateur dédié',
-        'Vestiaires et salon privé',
-        'Parking sécurisé'
-      ]
+      // Nettoyer la carte lors du démontage du composant
+      return () => {
+        mapInstance.remove()
+      }
     }
-  ])
+  }, [session])
 
-  const [options, setOptions] = useState<Option[]>([
-    {
-      id: 1,
-      name: 'Feu d&apos;artifice',
-      price: '3000€',
-      description: 'Spectacle pyrotechnique personnalisé'
-    },
-    {
-      id: 2,
-      name: 'Voiture ancienne',
-      price: '800€',
-      description: 'Location d&apos;une voiture de collection avec chauffeur'
+  // Charger les données de la vitrine
+  useEffect(() => {
+    const fetchStorefrontData = async () => {
+      try {
+        const response = await fetch("/api/partner-storefront")
+        if (response.ok) {
+          const data = await response.json()
+          if (data) {
+            setStorefrontData(data)
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les données de la vitrine.",
+          variant: "destructive",
+        })
+      }
     }
-  ])
 
-  const [photos, setPhotos] = useState([
-    'https://images.unsplash.com/photo-1464808322410-1a934aab61e5',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
-    'https://images.unsplash.com/photo-1600566752355-35792bedcfea'
-  ])
+    if (session?.user?.role === "PARTNER") {
+      fetchStorefrontData()
+    }
+  }, [session, toast])
 
-  const [editingService, setEditingService] = useState<Service | null>(null)
-  const [editingOption, setEditingOption] = useState<Option | null>(null)
+  const handleInterventionTypeChange = (value: string) => {
+    setStorefrontData(prev => ({
+      ...prev,
+      interventionType: value,
+    }))
+    
+    // Supprimer le cercle si on passe à "Toute la France"
+    if (value === "all_france" && circle && map) {
+      circle.remove()
+      setCircle(null)
+    }
+  }
+
+  const handleRadiusChange = (value: string) => {
+    setStorefrontData(prev => ({
+      ...prev,
+      interventionRadius: value,
+    }))
+
+    // Mettre à jour le cercle sur la carte
+    if (storefrontData.interventionType === "radius" && 
+        storefrontData.venueLatitude && 
+        storefrontData.venueLongitude && 
+        map) {
+      if (circle) {
+        circle.remove()
+      }
+      const newCircle = L.circle(
+        [parseFloat(storefrontData.venueLatitude), parseFloat(storefrontData.venueLongitude)],
+        {
+          radius: parseInt(value) * 1000, // Conversion en mètres
+          color: "#3b82f6",
+          fillColor: "#3b82f6",
+          fillOpacity: 0.2,
+          weight: 2,
+        }
+      ).addTo(map)
+      setCircle(newCircle)
+    }
+  }
+
+  const handleAddressSearch = async (address: string) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+      )
+      const data = await response.json()
+
+      if (data && data[0]) {
+        const { lat, lon } = data[0]
+        
+        // Mettre à jour les coordonnées
+        setStorefrontData(prev => ({
+          ...prev,
+          venueLatitude: lat,
+          venueLongitude: lon,
+        }))
+
+        // Mettre à jour le marqueur sur la carte
+        if (map) {
+          if (marker) {
+            marker.remove()
+          }
+          const newMarker = L.marker([lat, lon]).addTo(map)
+          setMarker(newMarker)
+          map.setView([lat, lon], 15)
+
+          // Mettre à jour le cercle si le type d'intervention est "radius"
+          if (storefrontData.interventionType === "radius") {
+            if (circle) {
+              circle.remove()
+            }
+            const newCircle = L.circle(
+              [lat, lon],
+              {
+                radius: parseInt(storefrontData.interventionRadius) * 1000,
+                color: "#3b82f6",
+                fillColor: "#3b82f6",
+                fillOpacity: 0.2,
+                weight: 2,
+              }
+            ).addTo(map)
+            setCircle(newCircle)
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Erreur lors de la recherche d'adresse:", error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de trouver l'adresse.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Vérifier le type de fichier
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Erreur",
+          description: "Le fichier doit être une image.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Vérifier la taille du fichier (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Erreur",
+          description: "L'image ne doit pas dépasser 5MB.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Créer l'URL de prévisualisation
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string)
+        setStorefrontData(prev => ({
+          ...prev,
+          logo: file.name
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveLogo = () => {
+    setLogoPreview(null)
+    setStorefrontData(prev => ({
+      ...prev,
+      logo: ""
+    }))
+    if (logoInputRef.current) {
+      logoInputRef.current.value = ""
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch("/api/partner-storefront", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          ...storefrontData,
+          venueLatitude: storefrontData.venueLatitude ? parseFloat(storefrontData.venueLatitude) : null,
+          venueLongitude: storefrontData.venueLongitude ? parseFloat(storefrontData.venueLongitude) : null,
+          interventionRadius: storefrontData.interventionType === "radius" ? parseInt(storefrontData.interventionRadius) : null,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Erreur de réponse:", errorText)
+        throw new Error(`Erreur lors de la mise à jour: ${response.status} ${errorText}`)
+      }
+
+      const data = await response.json()
+      toast({
+        title: "Succès",
+        description: "Les informations ont été mises à jour avec succès.",
+      })
+      console.log("Vitrine mise à jour:", data)
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour:", error)
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la mise à jour.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Fonction de test pour créer une vitrine
+  const testCreateStorefront = async () => {
+    try {
+      const testData = {
+        companyName: "Test Company",
+        description: "Test Description",
+        logo: "test-logo.png",
+        isActive: true,
+        billingStreet: "123 Test St",
+        billingCity: "Test City",
+        billingPostalCode: "75000",
+        billingCountry: "France",
+        siret: "12345678901234",
+        vatNumber: "FR12345678900",
+        venueAddress: "123 Test St, Test City",
+        venueLatitude: 48.8566,
+        venueLongitude: 2.3522,
+        interventionType: "radius",
+        interventionRadius: 50,
+      }
+
+      const response = await fetch("/api/partner-storefront", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(testData),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Erreur de réponse:", errorText)
+        throw new Error(`Erreur lors de la création: ${response.status} ${errorText}`)
+      }
+
+      const data = await response.json()
+      toast({
+        title: "Succès",
+        description: "Vitrine créée avec succès",
+      })
+      console.log("Vitrine créée:", data)
+    } catch (error) {
+      console.error("Erreur lors de la création:", error)
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Erreur lors de la création de la vitrine",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Fonction de test pour lire une vitrine
+  const testReadStorefront = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch("/api/partner-storefront", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la lecture")
+      }
+
+      const data = await response.json()
+      setStorefrontData(data)
+      toast({
+        title: "Succès",
+        description: "Données de la vitrine récupérées avec succès",
+      })
+    } catch (error) {
+      console.error("Erreur:", error)
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la lecture des données",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Fonction de test pour mettre à jour une vitrine
+  const testUpdateStorefront = async () => {
+    try {
+      const testData = {
+        companyName: "Updated Company",
+        description: "Updated Description",
+        logo: "updated-logo.png",
+        isActive: true,
+        billingStreet: "456 Updated St",
+        billingCity: "Updated City",
+        billingPostalCode: "75001",
+        billingCountry: "France",
+        siret: "98765432109876",
+        vatNumber: "FR98765432100",
+        venueAddress: "456 Updated St, Updated City",
+        venueLatitude: 48.8566,
+        venueLongitude: 2.3522,
+        interventionType: "radius",
+        interventionRadius: 100,
+      }
+
+      const response = await fetch("/api/partner-storefront", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(testData),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour")
+      }
+
+      const data = await response.json()
+      toast({
+        title: "Succès",
+        description: "Vitrine mise à jour avec succès",
+      })
+      console.log("Vitrine mise à jour:", data)
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour:", error)
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la mise à jour de la vitrine",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Fonction de test pour créer un utilisateur partenaire
+  const testCreatePartner = async () => {
+    try {
+      const response = await fetch("/api/test/create-partner", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Erreur de réponse:", errorText)
+        throw new Error(`Erreur lors de la création du partenaire: ${response.status} ${errorText}`)
+      }
+
+      const data = await response.json()
+      toast({
+        title: "Succès",
+        description: "Partenaire créé avec succès",
+      })
+      console.log("Partenaire créé:", data)
+    } catch (error) {
+      console.error("Erreur lors de la création du partenaire:", error)
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Erreur lors de la création du partenaire",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const testResetDb = async () => {
+    try {
+      const response = await fetch("/api/test/reset-db", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la réinitialisation")
+      }
+
+      toast({
+        title: "Succès",
+        description: "Base de données réinitialisée avec succès",
+      })
+    } catch (error) {
+      console.error("Erreur:", error)
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la réinitialisation",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="fixed right-8 bottom-8 z-50">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                className="h-14 w-14 rounded-full shadow-lg hover:scale-105 transition-transform"
-                onClick={() => setShowPreview(true)}
-              >
-                <Eye className="h-6 w-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Prévisualiser votre vitrine</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Configuration de la Vitrine</h1>
+        <div className="space-x-2">
+          <Button onClick={testResetDb} variant="destructive" size="sm">
+            Réinitialiser DB
+          </Button>
+          <Button onClick={testCreatePartner} size="sm">
+            Test Création Partenaire
+          </Button>
+          <Button onClick={testCreateStorefront} size="sm">
+            Test Création Vitrine
+          </Button>
+          <Button onClick={testReadStorefront} size="sm">
+            Test Lecture Vitrine
+          </Button>
+          <Button onClick={testUpdateStorefront} size="sm">
+            Test Mise à jour Vitrine
+          </Button>
+        </div>
       </div>
 
-      {/* Modal de prévisualisation */}
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-6xl h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Prévisualisation de votre vitrine</DialogTitle>
-            <DialogDescription>
-              Voici comment votre vitrine apparaît aux visiteurs
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto">
-            <div className="space-y-8">
-              {/* En-tête */}
-              <div className="relative h-64 rounded-lg overflow-hidden">
-                {photos[0] && (
-                  <Image
-                    src={photos[0]}
-                    alt={companyInfo.name}
-                    fill
-                    className="object-cover"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-                  <div className="p-8 text-white">
-                    <h1 className="text-3xl font-bold mb-2">{companyInfo.name}</h1>
-                    <p className="text-lg opacity-90">{companyInfo.address}</p>
-                  </div>
-                </div>
-              </div>
+      {isLoading && (
+        <div className="flex justify-center items-center py-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      )}
 
-              {/* Informations */}
-              <div className="grid grid-cols-3 gap-8">
-                <div className="col-span-2 space-y-8">
-                  <div className="prose dark:prose-invert">
-                    <div dangerouslySetInnerHTML={{ __html: companyInfo.description }} />
-                  </div>
-
-                  {/* Services */}
-                  <div>
-                    <h2 className="text-xl font-semibold mb-4">Nos services</h2>
-                    <div className="space-y-4">
-                      {services.map(service => (
-                        <div key={service.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="text-lg font-medium">{service.name}</h3>
-                              <p className="text-sm text-gray-500">{service.price}</p>
-                            </div>
-                          </div>
-                          <p className="text-gray-600 dark:text-gray-300 mb-4">{service.description}</p>
-                          <ul className="space-y-2">
-                            {service.included.map((item, index) => (
-                              <li key={index} className="flex items-center text-sm">
-                                <CheckIcon className="h-4 w-4 text-green-500 mr-2" />
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Options */}
-                  <div>
-                    <h2 className="text-xl font-semibold mb-4">Options disponibles</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      {options.map(option => (
-                        <div key={option.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                          <h3 className="font-medium mb-1">{option.name}</h3>
-                          <p className="text-sm text-gray-500 mb-2">{option.price}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {option.description}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contact */}
-                <div>
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 sticky top-4">
-                    <h2 className="text-xl font-semibold mb-4">Contact</h2>
-                    <div className="space-y-4">
-                      <p className="flex items-center">
-                        <span className="font-medium mr-2">Téléphone:</span>
-                        {companyInfo.phone}
-                      </p>
-                      <p className="flex items-center">
-                        <span className="font-medium mr-2">Email:</span>
-                        {companyInfo.email}
-                      </p>
-                      <p className="flex items-center">
-                        <span className="font-medium mr-2">Site web:</span>
-                        {companyInfo.website}
-                      </p>
-                    </div>
-                    <Button className="w-full mt-6">
-                      Contacter l&apos;établissement
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Photos */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Informations de l'entreprise */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations de l&apos;entreprise</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
               <div>
-                <h2 className="text-xl font-semibold mb-4">Photos</h2>
-                <div className="grid grid-cols-3 gap-4">
-                  {photos.map((photo, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-                      <Image
-                        src={photo}
-                        alt={`Photo ${index + 1}`}
-                        fill
-                        className="object-cover"
+                <Label htmlFor="companyName">Nom de l&apos;entreprise</Label>
+                <Input
+                  id="companyName"
+                  value={storefrontData?.companyName || ""}
+                  onChange={(e) =>
+                    setStorefrontData({ ...storefrontData, companyName: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Editor
+                  apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+                  value={storefrontData?.description || ""}
+                  onEditorChange={(content: string) =>
+                    setStorefrontData({ ...storefrontData, description: content })
+                  }
+                  init={{
+                    height: 300,
+                    menubar: false,
+                    plugins: [
+                      "advlist", "autolink", "lists", "link", "image", "charmap", "preview",
+                      "anchor", "searchreplace", "visualblocks", "code", "fullscreen",
+                      "insertdatetime", "media", "table", "code", "help", "wordcount"
+                    ],
+                    toolbar: "undo redo | blocks | " +
+                      "bold italic forecolor | alignleft aligncenter " +
+                      "alignright alignjustify | bullist numlist outdent indent | " +
+                      "removeformat | help",
+                    content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }"
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="logo">Logo</Label>
+                <div className="flex items-center gap-4">
+                  <Input
+                    ref={logoInputRef}
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                    className="flex-1"
+                  />
+                  {logoPreview && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleRemoveLogo}
+                    >
+                      Supprimer
+                    </Button>
+                  )}
+                </div>
+                {logoPreview && (
+                  <div className="mt-2">
+                    <div className="relative w-32 h-32 border rounded-md overflow-hidden">
+                      <img
+                        src={logoPreview}
+                        alt="Logo preview"
+                        className="w-full h-full object-contain"
                       />
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {storefrontData?.logo || ""}
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ma vitrine</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Gérez votre profil et vos prestations
-          </p>
-        </div>
-        <button
-          type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md"
-        >
-          Publier les modifications
-        </button>
-      </div>
-
-      {/* Informations de l'entreprise */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-          Informations de l&apos;entreprise
-        </h2>
-        <form className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Nom de l&apos;entreprise
-            </label>
-            <input
-              type="text"
-              value={companyInfo.name}
-              onChange={(e) => setCompanyInfo({ ...companyInfo, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description
-            </label>
-            <Editor
-              // @ts-ignore
-              initialValue={companyInfo.description}
-              init={{
-                apiKey: "kt6ws4781ypwwybkvh88ueu3ywheumr483a8x5xfzgmuctr4",
-                height: 300,
-                menubar: false,
-                branding: false,
-                plugins: [
-                  'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
-                  'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                  'insertdatetime', 'media', 'table', 'help', 'wordcount'
-                ],
-                toolbar: 'undo redo | blocks | ' +
-                  'bold italic | alignleft aligncenter ' +
-                  'alignright alignjustify | bullist numlist outdent indent | ' +
-                  'removeformat | help',
-                skin: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'oxide-dark' : 'oxide',
-                content_css: typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-                content_style: `
-                  body { 
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                    font-size: 14px;
-                    line-height: 1.5;
-                    color: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000'};
-                    background: ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff'};
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isActive"
+                  checked={storefrontData?.isActive || false}
+                  onCheckedChange={(checked) =>
+                    setStorefrontData({ ...storefrontData, isActive: checked })
                   }
-                `,
-                setup: function(editor) {
-                  editor.on('init', function() {
-                    editor.getBody().style.backgroundColor = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#fff';
-                    editor.getBody().style.color = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fff' : '#000';
-                  });
-                }
-              }}
-              onEditorChange={(content: string) => setCompanyInfo({ ...companyInfo, description: content })}
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Adresse
-              </label>
-              <input
-                type="text"
-                value={companyInfo.address}
-                onChange={(e) => setCompanyInfo({ ...companyInfo, address: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white"
-              />
+                />
+                <Label htmlFor="isActive">Vitrine active</Label>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Téléphone
-              </label>
-              <input
-                type="tel"
-                value={companyInfo.phone}
-                onChange={(e) => setCompanyInfo({ ...companyInfo, phone: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email
-              </label>
-              <input
-                type="email"
-                value={companyInfo.email}
-                onChange={(e) => setCompanyInfo({ ...companyInfo, email: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Site web
-              </label>
-              <input
-                type="url"
-                value={companyInfo.website}
-                onChange={(e) => setCompanyInfo({ ...companyInfo, website: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-          </div>
-        </form>
-      </div>
+          </CardContent>
+        </Card>
 
-      {/* Photos */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Photos</h2>
-          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-500">
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Ajouter des photos
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {photos.map((photo, index) => (
-            <div key={index} className="relative group">
-              <Image
-                src={photo}
-                alt={`Photo ${index + 1}`}
-                fill
-                className="object-cover rounded-lg"
-              />
-              <button className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Services */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Services</h2>
-          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-500">
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Ajouter un service
-          </button>
-        </div>
-        <div className="space-y-4">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-            >
-              <div className="flex justify-between items-start mb-4">
+        {/* Informations de facturation */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations de facturation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              <div>
+                <Label htmlFor="billingStreet">Adresse de facturation</Label>
+                <Input
+                  id="billingStreet"
+                  value={storefrontData?.billingStreet || ""}
+                  onChange={(e) =>
+                    setStorefrontData({ ...storefrontData, billingStreet: e.target.value })
+                  }
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    {service.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {service.price}
-                  </p>
+                  <Label htmlFor="billingCity">Ville</Label>
+                  <Input
+                    id="billingCity"
+                    value={storefrontData?.billingCity || ""}
+                    onChange={(e) =>
+                      setStorefrontData({ ...storefrontData, billingCity: e.target.value })
+                    }
+                  />
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setEditingService(service)}
-                    className="text-gray-400 hover:text-pink-600 dark:hover:text-pink-400"
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                  <button className="text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                <div>
+                  <Label htmlFor="billingPostalCode">Code postal</Label>
+                  <Input
+                    id="billingPostalCode"
+                    value={storefrontData?.billingPostalCode || ""}
+                    onChange={(e) =>
+                      setStorefrontData({ ...storefrontData, billingPostalCode: e.target.value })
+                    }
+                  />
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">{service.description}</p>
-              <ul className="space-y-2">
-                {service.included.map((item, index) => (
-                  <li key={index} className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                    <CheckIcon className="h-4 w-4 text-green-500 mr-2" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Options */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Options</h2>
-          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-500">
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Ajouter une option
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {options.map((option) => (
-            <div
-              key={option.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-            >
-              <div className="flex justify-between items-start mb-2">
+              <div>
+                <Label htmlFor="billingCountry">Pays</Label>
+                <Input
+                  id="billingCountry"
+                  value={storefrontData?.billingCountry || ""}
+                  onChange={(e) =>
+                    setStorefrontData({ ...storefrontData, billingCountry: e.target.value })
+                  }
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    {option.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {option.price}
-                  </p>
+                  <Label htmlFor="siret">Numéro SIRET</Label>
+                  <Input
+                    id="siret"
+                    value={storefrontData?.siret || ""}
+                    onChange={(e) =>
+                      setStorefrontData({ ...storefrontData, siret: e.target.value })
+                    }
+                  />
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setEditingOption(option)}
-                    className="text-gray-400 hover:text-pink-600 dark:hover:text-pink-400"
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                  <button className="text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                <div>
+                  <Label htmlFor="vatNumber">Numéro de TVA</Label>
+                  <Input
+                    id="vatNumber"
+                    value={storefrontData?.vatNumber || ""}
+                    onChange={(e) =>
+                      setStorefrontData({ ...storefrontData, vatNumber: e.target.value })
+                    }
+                  />
                 </div>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                {option.description}
-              </p>
             </div>
-          ))}
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+
+        {/* Adresse du lieu et zone d'intervention (uniquement pour les partenaires) */}
+        {session?.user?.role === "PARTNER" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Adresse du lieu et zone d&apos;intervention</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="venueAddress">Adresse du lieu</Label>
+                  <Input
+                    id="venueAddress"
+                    value={storefrontData?.venueAddress || ""}
+                    onChange={(e) =>
+                      setStorefrontData({ ...storefrontData, venueAddress: e.target.value })
+                    }
+                    onBlur={(e) => handleAddressSearch(e.target.value)}
+                    placeholder="Entrez l'adresse complète..."
+                  />
+                </div>
+                <div className="h-[300px] w-full rounded-md overflow-hidden">
+                  <div ref={mapRef} className="w-full h-full" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="venueLatitude">Latitude</Label>
+                    <Input
+                      id="venueLatitude"
+                      type="number"
+                      step="any"
+                      value={storefrontData?.venueLatitude?.toString() || ""}
+                      onChange={(e) =>
+                        setStorefrontData({ ...storefrontData, venueLatitude: parseFloat(e.target.value) })
+                      }
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="venueLongitude">Longitude</Label>
+                    <Input
+                      id="venueLongitude"
+                      type="number"
+                      step="any"
+                      value={storefrontData?.venueLongitude?.toString() || ""}
+                      onChange={(e) =>
+                        setStorefrontData({ ...storefrontData, venueLongitude: parseFloat(e.target.value) })
+                      }
+                      readOnly
+                    />
+                  </div>
+                </div>
+
+                {/* Zone d'intervention */}
+                <div className="space-y-4">
+                  <Label>Zone d&apos;intervention</Label>
+                  <RadioGroup
+                    value={storefrontData?.interventionType || "all_france"}
+                    onValueChange={handleInterventionTypeChange}
+                    className="flex flex-col space-y-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="all_france" id="all_france" />
+                      <Label htmlFor="all_france">Toute la France</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="radius" id="radius" />
+                      <Label htmlFor="radius">Rayon autour de l&apos;adresse</Label>
+                    </div>
+                  </RadioGroup>
+
+                  {storefrontData?.interventionType === "radius" && (
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="500"
+                        value={storefrontData?.interventionRadius?.toString() || "50"}
+                        onChange={(e) => handleRadiusChange(e.target.value)}
+                        className="w-24"
+                      />
+                      <Label>km</Label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Button type="submit">Enregistrer les modifications</Button>
+      </form>
     </div>
   )
 }
