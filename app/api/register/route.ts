@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { Role } from "@prisma/client";
 
 const registerSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  role: z.enum(["USER", "PARTNER", "ADMIN"] as const),
 });
 
 export async function POST(req: Request) {
@@ -35,6 +37,7 @@ export async function POST(req: Request) {
         email: validatedData.email,
         name: validatedData.name,
         password: hashedPassword,
+        role: validatedData.role,
       },
     });
 
