@@ -70,22 +70,22 @@ export default function PartnerStorefrontPage() {
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Ma Vitrine</h2>
         <p className="text-muted-foreground">
-          Personnalisez l'apparence de votre vitrine et gérez vos informations
+          {`Personnalisez l'apparence de votre vitrine et gérez vos informations`}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Informations de l'entreprise</CardTitle>
+            <CardTitle>{`Informations de l'entreprise`}</CardTitle>
             <CardDescription>
-              Les informations principales de votre entreprise
+              {`Les informations principales de votre entreprise`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Nom de l'entreprise</Label>
+                <Label htmlFor="name">{`Nom de l'entreprise`}</Label>
                 <Input
                   id="name"
                   value={storefrontData.name}
@@ -94,7 +94,7 @@ export default function PartnerStorefrontPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{`Description`}</Label>
                 <Textarea
                   id="description"
                   value={storefrontData.description}
@@ -230,7 +230,7 @@ export default function PartnerStorefrontPage() {
             <CardHeader>
               <CardTitle>Adresse du lieu</CardTitle>
               <CardDescription>
-                L'adresse où se trouve votre établissement
+                {`L'adresse où se trouve votre établissement`}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
