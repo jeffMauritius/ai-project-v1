@@ -12,6 +12,7 @@ import { Editor } from "@tinymce/tinymce-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Correction des icônes Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -32,6 +33,25 @@ export default function PartnerStorefrontPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
+  const [formData, setFormData] = useState({
+    companyName: "",
+    description: "",
+    logo: "",
+    isActive: false,
+    serviceType: "LIEU" as const,
+    venueType: "UNKNOWN" as const,
+    billingStreet: "",
+    billingCity: "",
+    billingPostalCode: "",
+    billingCountry: "",
+    siret: "",
+    vatNumber: "",
+    venueAddress: "",
+    venueLatitude: 0,
+    venueLongitude: 0,
+    interventionType: "all_france",
+    interventionRadius: 50,
+  })
 
   useEffect(() => {
     if (session?.user?.role === "PARTNER" && mapRef.current) {
@@ -61,6 +81,26 @@ export default function PartnerStorefrontPage() {
           const data = await response.json()
           if (data) {
             setStorefrontData(data)
+            // Initialiser le formulaire avec les données
+            setFormData({
+              companyName: data.companyName || "",
+              description: data.description || "",
+              logo: data.logo || "",
+              isActive: data.isActive || false,
+              serviceType: data.serviceType || "LIEU",
+              venueType: data.venueType || "UNKNOWN",
+              billingStreet: data.billingStreet || "",
+              billingCity: data.billingCity || "",
+              billingPostalCode: data.billingPostalCode || "",
+              billingCountry: data.billingCountry || "",
+              siret: data.siret || "",
+              vatNumber: data.vatNumber || "",
+              venueAddress: data.venueAddress || "",
+              venueLatitude: data.venueLatitude || 0,
+              venueLongitude: data.venueLongitude || 0,
+              interventionType: data.interventionType || "all_france",
+              interventionRadius: data.interventionRadius || 50,
+            })
           }
         }
       } catch (error) {
@@ -231,10 +271,10 @@ export default function PartnerStorefrontPage() {
         },
         credentials: "include",
         body: JSON.stringify({
-          ...storefrontData,
-          venueLatitude: storefrontData.venueLatitude ? parseFloat(storefrontData.venueLatitude) : null,
-          venueLongitude: storefrontData.venueLongitude ? parseFloat(storefrontData.venueLongitude) : null,
-          interventionRadius: storefrontData.interventionType === "radius" ? parseInt(storefrontData.interventionRadius) : null,
+          ...formData,
+          venueLatitude: formData.venueLatitude ? parseFloat(formData.venueLatitude.toString()) : null,
+          venueLongitude: formData.venueLongitude ? parseFloat(formData.venueLongitude.toString()) : null,
+          interventionRadius: formData.interventionType === "radius" ? parseInt(formData.interventionRadius.toString()) : null,
         }),
       })
 
@@ -245,6 +285,7 @@ export default function PartnerStorefrontPage() {
       }
 
       const data = await response.json()
+      setStorefrontData(data) // Mettre à jour storefrontData avec les nouvelles données
       toast({
         title: "Succès",
         description: "Les informations ont été mises à jour avec succès.",
@@ -494,19 +535,80 @@ export default function PartnerStorefrontPage() {
                 <Label htmlFor="companyName">Nom de l&apos;entreprise</Label>
                 <Input
                   id="companyName"
-                  value={storefrontData?.companyName || ""}
+                  value={formData.companyName}
                   onChange={(e) =>
-                    setStorefrontData({ ...storefrontData, companyName: e.target.value })
+                    setFormData((prev) => ({ ...prev, companyName: e.target.value }))
                   }
                 />
               </div>
               <div>
+                <Label htmlFor="serviceType">Type de service</Label>
+                <Select
+                  value={formData.serviceType}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, serviceType: value as any }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un type de service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LIEU">Lieu de réception</SelectItem>
+                    <SelectItem value="TRAITEUR">Traiteur</SelectItem>
+                    <SelectItem value="FAIRE_PART">Faire-part</SelectItem>
+                    <SelectItem value="CADEAUX_INVITES">Cadeaux invités</SelectItem>
+                    <SelectItem value="PHOTOGRAPHE">Photographe</SelectItem>
+                    <SelectItem value="MUSIQUE">Musique</SelectItem>
+                    <SelectItem value="VOITURE">Voiture</SelectItem>
+                    <SelectItem value="BUS">Bus</SelectItem>
+                    <SelectItem value="DECORATION">Décoration</SelectItem>
+                    <SelectItem value="CHAPITEAU">Chapiteau</SelectItem>
+                    <SelectItem value="ANIMATION">Animation</SelectItem>
+                    <SelectItem value="FLORISTE">Floriste</SelectItem>
+                    <SelectItem value="LISTE">Liste</SelectItem>
+                    <SelectItem value="ORGANISATION">Organisation</SelectItem>
+                    <SelectItem value="VIDEO">Vidéo</SelectItem>
+                    <SelectItem value="LUNE_DE_MIEL">Lune de miel</SelectItem>
+                    <SelectItem value="WEDDING_CAKE">Wedding cake</SelectItem>
+                    <SelectItem value="OFFICIANT">Officiant</SelectItem>
+                    <SelectItem value="FOOD_TRUCK">Food truck</SelectItem>
+                    <SelectItem value="VIN">Vin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {formData.serviceType === "LIEU" && (
+                <div>
+                  <Label htmlFor="venueType">Type de lieu</Label>
+                  <Select
+                    value={formData.venueType}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, venueType: value as any }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez un type de lieu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="DOMAINE">Domaine</SelectItem>
+                      <SelectItem value="AUBERGE">Auberge</SelectItem>
+                      <SelectItem value="HOTEL">Hôtel</SelectItem>
+                      <SelectItem value="RESTAURANT">Restaurant</SelectItem>
+                      <SelectItem value="SALLE_DE_RECEPTION">Salle de réception</SelectItem>
+                      <SelectItem value="CHATEAU">Château</SelectItem>
+                      <SelectItem value="BATEAU">Bateau</SelectItem>
+                      <SelectItem value="PLAGE">Plage</SelectItem>
+                      <SelectItem value="UNKNOWN">Inconnu</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div>
                 <Label htmlFor="description">Description</Label>
                 <Editor
                   apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
-                  value={storefrontData?.description || ""}
+                  value={formData.description}
                   onEditorChange={(content: string) =>
-                    setStorefrontData({ ...storefrontData, description: content })
+                    setFormData({ ...formData, description: content })
                   }
                   init={{
                     height: 300,
@@ -556,7 +658,7 @@ export default function PartnerStorefrontPage() {
                       />
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {storefrontData?.logo || ""}
+                      {formData.logo}
                     </p>
                   </div>
                 )}
@@ -564,9 +666,9 @@ export default function PartnerStorefrontPage() {
               <div className="flex items-center space-x-2">
                 <Switch
                   id="isActive"
-                  checked={storefrontData?.isActive || false}
+                  checked={formData.isActive}
                   onCheckedChange={(checked) =>
-                    setStorefrontData({ ...storefrontData, isActive: checked })
+                    setFormData({ ...formData, isActive: checked })
                   }
                 />
                 <Label htmlFor="isActive">Vitrine active</Label>
@@ -586,9 +688,9 @@ export default function PartnerStorefrontPage() {
                 <Label htmlFor="billingStreet">Adresse de facturation</Label>
                 <Input
                   id="billingStreet"
-                  value={storefrontData?.billingStreet || ""}
+                  value={formData.billingStreet}
                   onChange={(e) =>
-                    setStorefrontData({ ...storefrontData, billingStreet: e.target.value })
+                    setFormData({ ...formData, billingStreet: e.target.value })
                   }
                 />
               </div>
@@ -597,9 +699,9 @@ export default function PartnerStorefrontPage() {
                   <Label htmlFor="billingCity">Ville</Label>
                   <Input
                     id="billingCity"
-                    value={storefrontData?.billingCity || ""}
+                    value={formData.billingCity}
                     onChange={(e) =>
-                      setStorefrontData({ ...storefrontData, billingCity: e.target.value })
+                      setFormData({ ...formData, billingCity: e.target.value })
                     }
                   />
                 </div>
@@ -607,9 +709,9 @@ export default function PartnerStorefrontPage() {
                   <Label htmlFor="billingPostalCode">Code postal</Label>
                   <Input
                     id="billingPostalCode"
-                    value={storefrontData?.billingPostalCode || ""}
+                    value={formData.billingPostalCode}
                     onChange={(e) =>
-                      setStorefrontData({ ...storefrontData, billingPostalCode: e.target.value })
+                      setFormData({ ...formData, billingPostalCode: e.target.value })
                     }
                   />
                 </div>
@@ -618,9 +720,9 @@ export default function PartnerStorefrontPage() {
                 <Label htmlFor="billingCountry">Pays</Label>
                 <Input
                   id="billingCountry"
-                  value={storefrontData?.billingCountry || ""}
+                  value={formData.billingCountry}
                   onChange={(e) =>
-                    setStorefrontData({ ...storefrontData, billingCountry: e.target.value })
+                    setFormData({ ...formData, billingCountry: e.target.value })
                   }
                 />
               </div>
@@ -629,9 +731,9 @@ export default function PartnerStorefrontPage() {
                   <Label htmlFor="siret">Numéro SIRET</Label>
                   <Input
                     id="siret"
-                    value={storefrontData?.siret || ""}
+                    value={formData.siret}
                     onChange={(e) =>
-                      setStorefrontData({ ...storefrontData, siret: e.target.value })
+                      setFormData({ ...formData, siret: e.target.value })
                     }
                   />
                 </div>
@@ -639,9 +741,9 @@ export default function PartnerStorefrontPage() {
                   <Label htmlFor="vatNumber">Numéro de TVA</Label>
                   <Input
                     id="vatNumber"
-                    value={storefrontData?.vatNumber || ""}
+                    value={formData.vatNumber}
                     onChange={(e) =>
-                      setStorefrontData({ ...storefrontData, vatNumber: e.target.value })
+                      setFormData({ ...formData, vatNumber: e.target.value })
                     }
                   />
                 </div>
@@ -662,9 +764,9 @@ export default function PartnerStorefrontPage() {
                   <Label htmlFor="venueAddress">Adresse du lieu</Label>
                   <Input
                     id="venueAddress"
-                    value={storefrontData?.venueAddress || ""}
+                    value={formData.venueAddress}
                     onChange={(e) =>
-                      setStorefrontData({ ...storefrontData, venueAddress: e.target.value })
+                      setFormData({ ...formData, venueAddress: e.target.value })
                     }
                     onBlur={(e) => handleAddressSearch(e.target.value)}
                     placeholder="Entrez l'adresse complète..."
@@ -680,9 +782,9 @@ export default function PartnerStorefrontPage() {
                       id="venueLatitude"
                       type="number"
                       step="any"
-                      value={storefrontData?.venueLatitude?.toString() || ""}
+                      value={formData.venueLatitude.toString()}
                       onChange={(e) =>
-                        setStorefrontData({ ...storefrontData, venueLatitude: parseFloat(e.target.value) })
+                        setFormData({ ...formData, venueLatitude: parseFloat(e.target.value) })
                       }
                       readOnly
                     />
@@ -693,9 +795,9 @@ export default function PartnerStorefrontPage() {
                       id="venueLongitude"
                       type="number"
                       step="any"
-                      value={storefrontData?.venueLongitude?.toString() || ""}
+                      value={formData.venueLongitude.toString()}
                       onChange={(e) =>
-                        setStorefrontData({ ...storefrontData, venueLongitude: parseFloat(e.target.value) })
+                        setFormData({ ...formData, venueLongitude: parseFloat(e.target.value) })
                       }
                       readOnly
                     />
@@ -706,7 +808,7 @@ export default function PartnerStorefrontPage() {
                 <div className="space-y-4">
                   <Label>Zone d&apos;intervention</Label>
                   <RadioGroup
-                    value={storefrontData?.interventionType || "all_france"}
+                    value={formData.interventionType}
                     onValueChange={handleInterventionTypeChange}
                     className="flex flex-col space-y-2"
                   >
@@ -720,13 +822,13 @@ export default function PartnerStorefrontPage() {
                     </div>
                   </RadioGroup>
 
-                  {storefrontData?.interventionType === "radius" && (
+                  {formData.interventionType === "radius" && (
                     <div className="flex items-center space-x-2">
                       <Input
                         type="number"
                         min="1"
                         max="500"
-                        value={storefrontData?.interventionRadius?.toString() || "50"}
+                        value={formData.interventionRadius.toString()}
                         onChange={(e) => handleRadiusChange(e.target.value)}
                         className="w-24"
                       />
