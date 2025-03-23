@@ -20,7 +20,7 @@ export default function Cookies() {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>1. Qu'est-ce qu'un cookie ?</CardTitle>
+              <CardTitle>{`1. Qu'est-ce qu'un cookie ?`}</CardTitle>
             </CardHeader>
             <CardContent className="prose dark:prose-invert">
               <p>Page en construction</p>

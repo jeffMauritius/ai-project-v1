@@ -14,7 +14,7 @@ export default function Jobs() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Rejoignez l'équipe
+              {`Rejoignez l'équipe`}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Découvrez nos opportunités de carrière.
@@ -24,7 +24,7 @@ export default function Jobs() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-6 w-6" />
-                Offre d'emploi
+                {`Offre d'emploi`}
               </CardTitle>
             </CardHeader>
             <CardContent>
