@@ -1,30 +1,85 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { z } from "zod"
+import { ServiceType, VenueType } from "@prisma/client"
 
-export async function GET() {
+const storefrontSchema = z.object({
+  companyName: z.string().min(1, "Le nom de l'entreprise est requis"),
+  description: z.string().min(1, "La description est requise"),
+  serviceType: z.nativeEnum(ServiceType),
+  venueType: z.nativeEnum(VenueType).optional(),
+  billingStreet: z.string().min(1, "L'adresse de facturation est requise"),
+  billingCity: z.string().min(1, "La ville de facturation est requise"),
+  billingPostalCode: z.string().min(1, "Le code postal de facturation est requis"),
+  billingCountry: z.string().min(1, "Le pays de facturation est requis"),
+  siret: z.string().min(1, "Le numéro SIRET est requis"),
+  vatNumber: z.string().min(1, "Le numéro de TVA est requis"),
+  venueAddress: z.string().optional(),
+  venueLatitude: z.number().optional(),
+  venueLongitude: z.number().optional(),
+  interventionType: z.string().default("all_france"),
+  interventionRadius: z.number().optional().default(50),
+})
+
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
+    console.log("[PARTNER_STOREFRONT_GET] Session:", session)
     
     if (!session?.user?.id) {
+      console.log("[PARTNER_STOREFRONT_GET] Pas de session ou pas d'ID utilisateur")
       return new NextResponse("Non autorisé", { status: 401 })
     }
 
+    // Vérifier si l'utilisateur existe et a le bon rôle
+    const user = await prisma.user.findUnique({
+      where: {
+        id: session.user.id,
+      },
+    })
+    console.log("[PARTNER_STOREFRONT_GET] Utilisateur trouvé:", user)
+
+    if (!user) {
+      console.log("[PARTNER_STOREFRONT_GET] Utilisateur non trouvé dans la base de données")
+      return new NextResponse("Utilisateur non trouvé", { status: 404 })
+    }
+
+    if (user.role !== "PARTNER") {
+      console.log("[PARTNER_STOREFRONT_GET] L'utilisateur n'a pas le rôle PARTNER")
+      return new NextResponse("Accès non autorisé", { status: 403 })
+    }
+
+    console.log("[PARTNER_STOREFRONT_GET] Recherche du storefront pour l'utilisateur:", session.user.id)
+    
     const storefront = await prisma.partnerStorefront.findUnique({
       where: {
         userId: session.user.id,
       },
+      include: {
+        media: true,
+        receptionSpaces: true,
+        receptionOptions: true,
+        user: true,
+      },
     })
+
+    console.log("[PARTNER_STOREFRONT_GET] Résultat de la recherche:", storefront)
+
+    if (!storefront) {
+      console.log("[PARTNER_STOREFRONT_GET] Aucun storefront trouvé pour l'utilisateur")
+      return new NextResponse("Storefront non trouvé", { status: 404 })
+    }
 
     return NextResponse.json(storefront)
   } catch (error) {
-    console.error("[PARTNER_STOREFRONT_GET]", error)
+    console.error("[PARTNER_STOREFRONT_GET] Erreur:", error)
     return new NextResponse("Erreur interne", { status: 500 })
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     console.log("[PARTNER_STOREFRONT_POST] Session:", session)
@@ -34,29 +89,8 @@ export async function POST(req: Request) {
       return new NextResponse("Non autorisé", { status: 401 })
     }
 
-    const body = await req.json()
-    console.log("[PARTNER_STOREFRONT_POST] Body:", body)
-    
-    // Vérifier que tous les champs requis sont présents
-    const requiredFields = [
-      "companyName",
-      "description",
-      "billingStreet",
-      "billingCity",
-      "billingPostalCode",
-      "billingCountry",
-      "siret",
-      "vatNumber"
-    ]
-
-    const missingFields = requiredFields.filter(field => !body[field])
-    if (missingFields.length > 0) {
-      console.log("[PARTNER_STOREFRONT_POST] Champs manquants:", missingFields)
-      return new NextResponse(
-        `Champs requis manquants: ${missingFields.join(", ")}`,
-        { status: 400 }
-      )
-    }
+    const body = await request.json()
+    const validatedData = storefrontSchema.parse(body)
     
     // Vérifier si une vitrine existe déjà pour cet utilisateur
     const existingStorefront = await prisma.partnerStorefront.findUnique({
@@ -85,8 +119,14 @@ export async function POST(req: Request) {
     // Créer la vitrine
     const storefront = await prisma.partnerStorefront.create({
       data: {
-        ...body,
+        ...validatedData,
         userId: session.user.id,
+      },
+      include: {
+        media: true,
+        receptionSpaces: true,
+        receptionOptions: true,
+        user: true,
       },
     })
 
@@ -94,9 +134,11 @@ export async function POST(req: Request) {
     return NextResponse.json(storefront)
   } catch (error) {
     console.error("[PARTNER_STOREFRONT_POST] Erreur:", error)
-    if (error instanceof Error) {
-      return new NextResponse(error.message, { status: 500 })
+    
+    if (error instanceof z.ZodError) {
+      return new NextResponse(JSON.stringify(error.errors), { status: 400 })
     }
+    
     return new NextResponse("Erreur interne", { status: 500 })
   }
 }
@@ -157,6 +199,12 @@ export async function PUT(request: Request) {
         venueLongitude: body.venueLongitude,
         interventionType: body.interventionType,
         interventionRadius: body.interventionRadius,
+      },
+      include: {
+        media: true,
+        receptionSpaces: true,
+        receptionOptions: true,
+        user: true,
       },
     })
     console.log("[PARTNER_STOREFRONT_PUT] Vitrine mise à jour:", updatedStorefront)
