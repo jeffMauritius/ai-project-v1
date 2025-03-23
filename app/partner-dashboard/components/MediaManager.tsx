@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { ImagePlus, Trash2, Upload } from "lucide-react"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
 
 interface Media {
   id: string
@@ -20,6 +21,7 @@ interface Media {
 }
 
 export default function MediaManager() {
+  const { data: session } = useSession()
   const { toast } = useToast()
   const [media, setMedia] = useState<Media[]>([])
   const [isUploading, setIsUploading] = useState(false)
@@ -29,13 +31,19 @@ export default function MediaManager() {
 
   // Charger les médias existants
   useEffect(() => {
-    fetchMedia()
-  }, [])
+    if (session?.user) {
+      fetchMedia()
+    }
+  }, [session])
 
   const fetchMedia = async () => {
     try {
       console.log("[MediaManager] Chargement des médias")
-      const response = await fetch("/api/partner-storefront/media")
+      const response = await fetch("/api/partner-storefront/media", {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`)
       }
@@ -163,6 +171,14 @@ export default function MediaManager() {
         variant: "destructive",
       })
     }
+  }
+
+  if (!session?.user) {
+    return (
+      <div className="text-center py-8">
+        <p>Veuillez vous connecter pour gérer vos médias.</p>
+      </div>
+    )
   }
 
   return (
