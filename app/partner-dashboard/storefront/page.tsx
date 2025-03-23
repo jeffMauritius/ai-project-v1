@@ -10,17 +10,42 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { Editor } from "@tinymce/tinymce-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import L from "leaflet"
+import dynamic from "next/dynamic"
 import "leaflet/dist/leaflet.css"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// Correction des icônes Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+// Chargement dynamique de Leaflet uniquement côté client
+const L = dynamic(() => import("leaflet"), {
+  ssr: false,
+  loading: () => <div>Chargement de la carte...</div>,
+}) as any
+
+// Chargement dynamique du composant Map
+const Map = dynamic(() => import("../../components/Map"), {
+  ssr: false,
+  loading: () => <div>Chargement de la carte...</div>,
 })
+
+interface StorefrontData {
+  companyName: string
+  description: string
+  logo: string
+  isActive: boolean
+  serviceType: string
+  venueType: string
+  billingStreet: string
+  billingCity: string
+  billingPostalCode: string
+  billingCountry: string
+  siret: string
+  vatNumber: string
+  venueAddress: string
+  venueLatitude: number
+  venueLongitude: number
+  interventionType: string
+  interventionRadius: number
+}
 
 export default function PartnerStorefrontPage() {
   const { data: session } = useSession()
@@ -29,7 +54,7 @@ export default function PartnerStorefrontPage() {
   const [map, setMap] = useState<L.Map | null>(null)
   const [marker, setMarker] = useState<L.Marker | null>(null)
   const [circle, setCircle] = useState<L.Circle | null>(null)
-  const [storefrontData, setStorefrontData] = useState<any>(null)
+  const [storefrontData, setStorefrontData] = useState<StorefrontData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
@@ -118,11 +143,56 @@ export default function PartnerStorefrontPage() {
     }
   }, [session, toast])
 
+  // Effet séparé pour mettre à jour la carte
+  useEffect(() => {
+    if (storefrontData?.venueLatitude && storefrontData?.venueLongitude && map) {
+      // Mettre à jour le marqueur
+      if (marker) {
+        marker.remove()
+      }
+      const newMarker = L.marker([storefrontData.venueLatitude, storefrontData.venueLongitude]).addTo(map)
+      setMarker(newMarker)
+      map.setView([storefrontData.venueLatitude, storefrontData.venueLongitude], 15)
+
+      // Mettre à jour le cercle si le type d'intervention est "radius"
+      if (storefrontData.interventionType === "radius") {
+        if (circle) {
+          circle.remove()
+        }
+        const newCircle = L.circle(
+          [storefrontData.venueLatitude, storefrontData.venueLongitude],
+          {
+            radius: storefrontData.interventionRadius * 1000,
+            color: "#3b82f6",
+            fillColor: "#3b82f6",
+            fillOpacity: 0.2,
+            weight: 2,
+          }
+        ).addTo(map)
+        setCircle(newCircle)
+      }
+    }
+  }, [storefrontData, map])
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setStorefrontData((prev) => {
+      if (!prev) return null
+      return {
+        ...prev,
+        venueLatitude: lat,
+        venueLongitude: lng,
+      }
+    })
+  }
+
   const handleInterventionTypeChange = (value: string) => {
-    setStorefrontData(prev => ({
-      ...prev,
-      interventionType: value,
-    }))
+    setStorefrontData((prev) => {
+      if (!prev) return null
+      return {
+        ...prev,
+        interventionType: value,
+      }
+    })
     
     // Supprimer le cercle si on passe à "Toute la France"
     if (value === "all_france" && circle && map) {
@@ -132,21 +202,24 @@ export default function PartnerStorefrontPage() {
   }
 
   const handleRadiusChange = (value: string) => {
-    setStorefrontData(prev => ({
-      ...prev,
-      interventionRadius: value,
-    }))
+    setStorefrontData((prev) => {
+      if (!prev) return null
+      return {
+        ...prev,
+        interventionRadius: parseInt(value),
+      }
+    })
 
     // Mettre à jour le cercle sur la carte
-    if (storefrontData.interventionType === "radius" && 
-        storefrontData.venueLatitude && 
-        storefrontData.venueLongitude && 
+    if (storefrontData?.interventionType === "radius" && 
+        storefrontData?.venueLatitude && 
+        storefrontData?.venueLongitude && 
         map) {
       if (circle) {
         circle.remove()
       }
       const newCircle = L.circle(
-        [parseFloat(storefrontData.venueLatitude), parseFloat(storefrontData.venueLongitude)],
+        [storefrontData.venueLatitude, storefrontData.venueLongitude],
         {
           radius: parseInt(value) * 1000, // Conversion en mètres
           color: "#3b82f6",
@@ -170,7 +243,7 @@ export default function PartnerStorefrontPage() {
         const { lat, lon } = data[0]
         
         // Mettre à jour les coordonnées
-        setStorefrontData(prev => ({
+        setStorefrontData((prev: StorefrontData) => ({
           ...prev,
           venueLatitude: lat,
           venueLongitude: lon,
@@ -241,7 +314,7 @@ export default function PartnerStorefrontPage() {
       const reader = new FileReader()
       reader.onloadend = () => {
         setLogoPreview(reader.result as string)
-        setStorefrontData(prev => ({
+        setStorefrontData((prev: StorefrontData) => ({
           ...prev,
           logo: file.name
         }))
@@ -252,7 +325,7 @@ export default function PartnerStorefrontPage() {
 
   const handleRemoveLogo = () => {
     setLogoPreview(null)
-    setStorefrontData(prev => ({
+    setStorefrontData((prev: StorefrontData) => ({
       ...prev,
       logo: ""
     }))
@@ -309,6 +382,8 @@ export default function PartnerStorefrontPage() {
         description: "Test Description",
         logo: "test-logo.png",
         isActive: true,
+        serviceType: "LIEU",
+        venueType: "UNKNOWN",
         billingStreet: "123 Test St",
         billingCity: "Test City",
         billingPostalCode: "75000",
@@ -394,6 +469,8 @@ export default function PartnerStorefrontPage() {
         description: "Updated Description",
         logo: "updated-logo.png",
         isActive: true,
+        serviceType: "LIEU",
+        venueType: "UNKNOWN",
         billingStreet: "456 Updated St",
         billingCity: "Updated City",
         billingPostalCode: "75001",
@@ -412,11 +489,14 @@ export default function PartnerStorefrontPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(testData),
       })
 
       if (!response.ok) {
-        throw new Error("Erreur lors de la mise à jour")
+        const errorText = await response.text()
+        console.error("Erreur de réponse:", errorText)
+        throw new Error(`Erreur lors de la mise à jour: ${response.status} ${errorText}`)
       }
 
       const data = await response.json()
@@ -429,7 +509,7 @@ export default function PartnerStorefrontPage() {
       console.error("Erreur lors de la mise à jour:", error)
       toast({
         title: "Erreur",
-        description: "Erreur lors de la mise à jour de la vitrine",
+        description: error instanceof Error ? error.message : "Erreur lors de la mise à jour de la vitrine",
         variant: "destructive",
       })
     }
@@ -523,326 +603,382 @@ export default function PartnerStorefrontPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Informations de l'entreprise */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations de l&apos;entreprise</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="companyName">Nom de l&apos;entreprise</Label>
-                <Input
-                  id="companyName"
-                  value={formData.companyName}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, companyName: e.target.value }))
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="serviceType">Type de service</Label>
-                <Select
-                  value={formData.serviceType}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, serviceType: value as any }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un type de service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="LIEU">Lieu de réception</SelectItem>
-                    <SelectItem value="TRAITEUR">Traiteur</SelectItem>
-                    <SelectItem value="FAIRE_PART">Faire-part</SelectItem>
-                    <SelectItem value="CADEAUX_INVITES">Cadeaux invités</SelectItem>
-                    <SelectItem value="PHOTOGRAPHE">Photographe</SelectItem>
-                    <SelectItem value="MUSIQUE">Musique</SelectItem>
-                    <SelectItem value="VOITURE">Voiture</SelectItem>
-                    <SelectItem value="BUS">Bus</SelectItem>
-                    <SelectItem value="DECORATION">Décoration</SelectItem>
-                    <SelectItem value="CHAPITEAU">Chapiteau</SelectItem>
-                    <SelectItem value="ANIMATION">Animation</SelectItem>
-                    <SelectItem value="FLORISTE">Floriste</SelectItem>
-                    <SelectItem value="LISTE">Liste</SelectItem>
-                    <SelectItem value="ORGANISATION">Organisation</SelectItem>
-                    <SelectItem value="VIDEO">Vidéo</SelectItem>
-                    <SelectItem value="LUNE_DE_MIEL">Lune de miel</SelectItem>
-                    <SelectItem value="WEDDING_CAKE">Wedding cake</SelectItem>
-                    <SelectItem value="OFFICIANT">Officiant</SelectItem>
-                    <SelectItem value="FOOD_TRUCK">Food truck</SelectItem>
-                    <SelectItem value="VIN">Vin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {formData.serviceType === "LIEU" && (
-                <div>
-                  <Label htmlFor="venueType">Type de lieu</Label>
-                  <Select
-                    value={formData.venueType}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, venueType: value as any }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez un type de lieu" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="DOMAINE">Domaine</SelectItem>
-                      <SelectItem value="AUBERGE">Auberge</SelectItem>
-                      <SelectItem value="HOTEL">Hôtel</SelectItem>
-                      <SelectItem value="RESTAURANT">Restaurant</SelectItem>
-                      <SelectItem value="SALLE_DE_RECEPTION">Salle de réception</SelectItem>
-                      <SelectItem value="CHATEAU">Château</SelectItem>
-                      <SelectItem value="BATEAU">Bateau</SelectItem>
-                      <SelectItem value="PLAGE">Plage</SelectItem>
-                      <SelectItem value="UNKNOWN">Inconnu</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Editor
-                  apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
-                  value={formData.description}
-                  onEditorChange={(content: string) =>
-                    setFormData({ ...formData, description: content })
-                  }
-                  init={{
-                    height: 300,
-                    menubar: false,
-                    plugins: [
-                      "advlist", "autolink", "lists", "link", "image", "charmap", "preview",
-                      "anchor", "searchreplace", "visualblocks", "code", "fullscreen",
-                      "insertdatetime", "media", "table", "code", "help", "wordcount"
-                    ],
-                    toolbar: "undo redo | blocks | " +
-                      "bold italic forecolor | alignleft aligncenter " +
-                      "alignright alignjustify | bullist numlist outdent indent | " +
-                      "removeformat | help",
-                    content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }"
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="logo">Logo</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    ref={logoInputRef}
-                    id="logo"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                    className="flex-1"
-                  />
-                  {logoPreview && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleRemoveLogo}
+      <Tabs defaultValue="informations" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="informations">Informations</TabsTrigger>
+          <TabsTrigger value="options">Options</TabsTrigger>
+          <TabsTrigger value="media">Photos et médias</TabsTrigger>
+          <TabsTrigger value="divers">Divers</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="informations">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Informations de l'entreprise */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informations de l&apos;entreprise</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="companyName">Nom de l&apos;entreprise</Label>
+                    <Input
+                      id="companyName"
+                      value={formData.companyName}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, companyName: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="serviceType">Type de service</Label>
+                    <Select
+                      value={formData.serviceType}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, serviceType: value as any }))
+                      }
                     >
-                      Supprimer
-                    </Button>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez un type de service" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="LIEU">Lieu de réception</SelectItem>
+                        <SelectItem value="TRAITEUR">Traiteur</SelectItem>
+                        <SelectItem value="FAIRE_PART">Faire-part</SelectItem>
+                        <SelectItem value="CADEAUX_INVITES">Cadeaux invités</SelectItem>
+                        <SelectItem value="PHOTOGRAPHE">Photographe</SelectItem>
+                        <SelectItem value="MUSIQUE">Musique</SelectItem>
+                        <SelectItem value="VOITURE">Voiture</SelectItem>
+                        <SelectItem value="BUS">Bus</SelectItem>
+                        <SelectItem value="DECORATION">Décoration</SelectItem>
+                        <SelectItem value="CHAPITEAU">Chapiteau</SelectItem>
+                        <SelectItem value="ANIMATION">Animation</SelectItem>
+                        <SelectItem value="FLORISTE">Floriste</SelectItem>
+                        <SelectItem value="LISTE">Liste</SelectItem>
+                        <SelectItem value="ORGANISATION">Organisation</SelectItem>
+                        <SelectItem value="VIDEO">Vidéo</SelectItem>
+                        <SelectItem value="LUNE_DE_MIEL">Lune de miel</SelectItem>
+                        <SelectItem value="WEDDING_CAKE">Wedding cake</SelectItem>
+                        <SelectItem value="OFFICIANT">Officiant</SelectItem>
+                        <SelectItem value="FOOD_TRUCK">Food truck</SelectItem>
+                        <SelectItem value="VIN">Vin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {formData.serviceType === "LIEU" && (
+                    <div>
+                      <Label htmlFor="venueType">Type de lieu</Label>
+                      <Select
+                        value={formData.venueType}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({ ...prev, venueType: value as any }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez un type de lieu" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="DOMAINE">Domaine</SelectItem>
+                          <SelectItem value="AUBERGE">Auberge</SelectItem>
+                          <SelectItem value="HOTEL">Hôtel</SelectItem>
+                          <SelectItem value="RESTAURANT">Restaurant</SelectItem>
+                          <SelectItem value="SALLE_DE_RECEPTION">Salle de réception</SelectItem>
+                          <SelectItem value="CHATEAU">Château</SelectItem>
+                          <SelectItem value="BATEAU">Bateau</SelectItem>
+                          <SelectItem value="PLAGE">Plage</SelectItem>
+                          <SelectItem value="UNKNOWN">Inconnu</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Editor
+                      apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+                      value={formData.description}
+                      onEditorChange={(content: string) =>
+                        setFormData({ ...formData, description: content })
+                      }
+                      init={{
+                        height: 300,
+                        menubar: false,
+                        plugins: [
+                          "advlist", "autolink", "lists", "link", "image", "charmap", "preview",
+                          "anchor", "searchreplace", "visualblocks", "code", "fullscreen",
+                          "insertdatetime", "media", "table", "code", "help", "wordcount"
+                        ],
+                        toolbar: "undo redo | blocks | " +
+                          "bold italic forecolor | alignleft aligncenter " +
+                          "alignright alignjustify | bullist numlist outdent indent | " +
+                          "removeformat | help",
+                        content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }"
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="logo">Logo</Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        ref={logoInputRef}
+                        id="logo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="flex-1"
+                      />
+                      {logoPreview && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleRemoveLogo}
+                        >
+                          Supprimer
+                        </Button>
+                      )}
+                    </div>
+                    {logoPreview && (
+                      <div className="mt-2">
+                        <div className="relative w-32 h-32 border rounded-md overflow-hidden">
+                          <img
+                            src={logoPreview}
+                            alt="Logo preview"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {formData.logo}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="isActive"
+                      checked={formData.isActive}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, isActive: checked })
+                      }
+                    />
+                    <Label htmlFor="isActive">Vitrine active</Label>
+                  </div>
                 </div>
-                {logoPreview && (
-                  <div className="mt-2">
-                    <div className="relative w-32 h-32 border rounded-md overflow-hidden">
-                      <img
-                        src={logoPreview}
-                        alt="Logo preview"
-                        className="w-full h-full object-contain"
+              </CardContent>
+            </Card>
+
+            {/* Informations de facturation */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informations de facturation</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="billingStreet">Adresse de facturation</Label>
+                    <Input
+                      id="billingStreet"
+                      value={formData.billingStreet}
+                      onChange={(e) =>
+                        setFormData({ ...formData, billingStreet: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="billingCity">Ville</Label>
+                      <Input
+                        id="billingCity"
+                        value={formData.billingCity}
+                        onChange={(e) =>
+                          setFormData({ ...formData, billingCity: e.target.value })
+                        }
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {formData.logo}
-                    </p>
+                    <div>
+                      <Label htmlFor="billingPostalCode">Code postal</Label>
+                      <Input
+                        id="billingPostalCode"
+                        value={formData.billingPostalCode}
+                        onChange={(e) =>
+                          setFormData({ ...formData, billingPostalCode: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
-                )}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isActive: checked })
-                  }
-                />
-                <Label htmlFor="isActive">Vitrine active</Label>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  <div>
+                    <Label htmlFor="billingCountry">Pays</Label>
+                    <Input
+                      id="billingCountry"
+                      value={formData.billingCountry}
+                      onChange={(e) =>
+                        setFormData({ ...formData, billingCountry: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="siret">Numéro SIRET</Label>
+                      <Input
+                        id="siret"
+                        value={formData.siret}
+                        onChange={(e) =>
+                          setFormData({ ...formData, siret: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vatNumber">Numéro de TVA</Label>
+                      <Input
+                        id="vatNumber"
+                        value={formData.vatNumber}
+                        onChange={(e) =>
+                          setFormData({ ...formData, vatNumber: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Informations de facturation */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations de facturation</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="billingStreet">Adresse de facturation</Label>
-                <Input
-                  id="billingStreet"
-                  value={formData.billingStreet}
-                  onChange={(e) =>
-                    setFormData({ ...formData, billingStreet: e.target.value })
-                  }
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="billingCity">Ville</Label>
-                  <Input
-                    id="billingCity"
-                    value={formData.billingCity}
-                    onChange={(e) =>
-                      setFormData({ ...formData, billingCity: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="billingPostalCode">Code postal</Label>
-                  <Input
-                    id="billingPostalCode"
-                    value={formData.billingPostalCode}
-                    onChange={(e) =>
-                      setFormData({ ...formData, billingPostalCode: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="billingCountry">Pays</Label>
-                <Input
-                  id="billingCountry"
-                  value={formData.billingCountry}
-                  onChange={(e) =>
-                    setFormData({ ...formData, billingCountry: e.target.value })
-                  }
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="siret">Numéro SIRET</Label>
-                  <Input
-                    id="siret"
-                    value={formData.siret}
-                    onChange={(e) =>
-                      setFormData({ ...formData, siret: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vatNumber">Numéro de TVA</Label>
-                  <Input
-                    id="vatNumber"
-                    value={formData.vatNumber}
-                    onChange={(e) =>
-                      setFormData({ ...formData, vatNumber: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Adresse du lieu et zone d'intervention */}
+            {session?.user?.role === "PARTNER" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Adresse du lieu et zone d&apos;intervention</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4">
+                    <div>
+                      <Label htmlFor="venueAddress">Adresse du lieu</Label>
+                      <Input
+                        id="venueAddress"
+                        value={formData.venueAddress}
+                        onChange={(e) =>
+                          setFormData({ ...formData, venueAddress: e.target.value })
+                        }
+                        onBlur={(e) => handleAddressSearch(e.target.value)}
+                        placeholder="Entrez l'adresse complète..."
+                      />
+                    </div>
+                    {storefrontData && (
+                      <Map
+                        latitude={storefrontData.venueLatitude}
+                        longitude={storefrontData.venueLongitude}
+                        interventionType={storefrontData.interventionType}
+                        interventionRadius={storefrontData.interventionRadius}
+                        onLocationChange={handleLocationChange}
+                      />
+                    )}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="venueLatitude">Latitude</Label>
+                        <Input
+                          id="venueLatitude"
+                          type="number"
+                          step="any"
+                          value={formData.venueLatitude.toString()}
+                          onChange={(e) =>
+                            setFormData({ ...formData, venueLatitude: parseFloat(e.target.value) })
+                          }
+                          readOnly
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="venueLongitude">Longitude</Label>
+                        <Input
+                          id="venueLongitude"
+                          type="number"
+                          step="any"
+                          value={formData.venueLongitude.toString()}
+                          onChange={(e) =>
+                            setFormData({ ...formData, venueLongitude: parseFloat(e.target.value) })
+                          }
+                          readOnly
+                        />
+                      </div>
+                    </div>
 
-        {/* Adresse du lieu et zone d'intervention (uniquement pour les partenaires) */}
-        {session?.user?.role === "PARTNER" && (
+                    {/* Zone d'intervention */}
+                    <div className="space-y-4">
+                      <Label>Zone d&apos;intervention</Label>
+                      <RadioGroup
+                        value={formData.interventionType}
+                        onValueChange={handleInterventionTypeChange}
+                        className="flex flex-col space-y-2"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="all_france" id="all_france" />
+                          <Label htmlFor="all_france">Toute la France</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="radius" id="radius" />
+                          <Label htmlFor="radius">Rayon autour de l&apos;adresse</Label>
+                        </div>
+                      </RadioGroup>
+
+                      {formData.interventionType === "radius" && (
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            max="500"
+                            value={formData.interventionRadius.toString()}
+                            onChange={(e) => handleRadiusChange(e.target.value)}
+                            className="w-24"
+                          />
+                          <Label>km</Label>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Button type="submit">Enregistrer les modifications</Button>
+          </form>
+        </TabsContent>
+
+        <TabsContent value="options">
           <Card>
             <CardHeader>
-              <CardTitle>Adresse du lieu et zone d&apos;intervention</CardTitle>
+              <CardTitle>Options du partenaire</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4">
-                <div>
-                  <Label htmlFor="venueAddress">Adresse du lieu</Label>
-                  <Input
-                    id="venueAddress"
-                    value={formData.venueAddress}
-                    onChange={(e) =>
-                      setFormData({ ...formData, venueAddress: e.target.value })
-                    }
-                    onBlur={(e) => handleAddressSearch(e.target.value)}
-                    placeholder="Entrez l'adresse complète..."
-                  />
-                </div>
-                <div className="h-[300px] w-full rounded-md overflow-hidden">
-                  <div ref={mapRef} className="w-full h-full" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="venueLatitude">Latitude</Label>
-                    <Input
-                      id="venueLatitude"
-                      type="number"
-                      step="any"
-                      value={formData.venueLatitude.toString()}
-                      onChange={(e) =>
-                        setFormData({ ...formData, venueLatitude: parseFloat(e.target.value) })
-                      }
-                      readOnly
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="venueLongitude">Longitude</Label>
-                    <Input
-                      id="venueLongitude"
-                      type="number"
-                      step="any"
-                      value={formData.venueLongitude.toString()}
-                      onChange={(e) =>
-                        setFormData({ ...formData, venueLongitude: parseFloat(e.target.value) })
-                      }
-                      readOnly
-                    />
-                  </div>
-                </div>
-
-                {/* Zone d'intervention */}
-                <div className="space-y-4">
-                  <Label>Zone d&apos;intervention</Label>
-                  <RadioGroup
-                    value={formData.interventionType}
-                    onValueChange={handleInterventionTypeChange}
-                    className="flex flex-col space-y-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="all_france" id="all_france" />
-                      <Label htmlFor="all_france">Toute la France</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="radius" id="radius" />
-                      <Label htmlFor="radius">Rayon autour de l&apos;adresse</Label>
-                    </div>
-                  </RadioGroup>
-
-                  {formData.interventionType === "radius" && (
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        type="number"
-                        min="1"
-                        max="500"
-                        value={formData.interventionRadius.toString()}
-                        onChange={(e) => handleRadiusChange(e.target.value)}
-                        className="w-24"
-                      />
-                      <Label>km</Label>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Bienvenue dans la section des options. Cette section permettra de configurer toutes les options spécifiques au partenaire.
+              </p>
             </CardContent>
           </Card>
-        )}
+        </TabsContent>
 
-        <Button type="submit">Enregistrer les modifications</Button>
-      </form>
+        <TabsContent value="media">
+          <Card>
+            <CardHeader>
+              <CardTitle>Photos et médias</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Bienvenue dans la section des photos et médias. Cette section permettra de gérer toutes les photos et vidéos de la vitrine.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="divers">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations diverses</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Bienvenue dans la section des informations diverses. Cette section contiendra des informations supplémentaires sur la vitrine.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
