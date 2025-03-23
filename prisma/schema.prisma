@@ -10,6 +10,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ServiceType {
+  LIEU
+  TRAITEUR
+  FAIRE_PART
+  CADEAUX_INVITES
+  PHOTOGRAPHE
+  MUSIQUE
+  VOITURE
+  BUS
+  DECORATION
+  CHAPITEAU
+  ANIMATION
+  FLORISTE
+  LISTE
+  ORGANISATION
+  VIDEO
+  LUNE_DE_MIEL
+  WEDDING_CAKE
+  OFFICIANT
+  FOOD_TRUCK
+  VIN
+}
+
+enum VenueType {
+  DOMAINE
+  AUBERGE
+  HOTEL
+  RESTAURANT
+  SALLE_DE_RECEPTION
+  CHATEAU
+  BATEAU
+  PLAGE
+  UNKNOWN
+}
+
 model PartnerStorefront {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt DateTime @default(now())
@@ -20,6 +55,8 @@ model PartnerStorefront {
   description String
   logo        String?
   isActive    Boolean @default(false)
+  serviceType ServiceType
+  venueType   VenueType? @default(UNKNOWN)
 
   // Informations de facturation
   billingStreet     String
