@@ -14,6 +14,7 @@ import dynamic from "next/dynamic"
 import "leaflet/dist/leaflet.css"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import MediaManager from "../components/MediaManager"
 
 // Chargement dynamique de Leaflet uniquement côté client
 const L = dynamic(() => import("leaflet"), {
@@ -58,13 +59,13 @@ export default function PartnerStorefrontPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<StorefrontData>({
     companyName: "",
     description: "",
     logo: "",
     isActive: false,
-    serviceType: "LIEU" as const,
-    venueType: "UNKNOWN" as const,
+    serviceType: "LIEU",
+    venueType: "UNKNOWN",
     billingStreet: "",
     billingCity: "",
     billingPostalCode: "",
@@ -954,16 +955,7 @@ export default function PartnerStorefrontPage() {
         </TabsContent>
 
         <TabsContent value="media">
-          <Card>
-            <CardHeader>
-              <CardTitle>Photos et médias</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Bienvenue dans la section des photos et médias. Cette section permettra de gérer toutes les photos et vidéos de la vitrine.
-              </p>
-            </CardContent>
-          </Card>
+          <MediaManager />
         </TabsContent>
 
         <TabsContent value="divers">
