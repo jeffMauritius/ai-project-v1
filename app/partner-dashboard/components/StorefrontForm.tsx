@@ -18,6 +18,7 @@ import MediaManager from './MediaManager'
 import { ReceptionOptions } from './ReceptionOptions'
 import { ServiceType, VenueType } from '@prisma/client'
 import { Textarea } from '@/components/ui/textarea'
+import { useRouter } from 'next/navigation'
 
 // Chargement dynamique du composant Map
 const Map = dynamic(() => import('../../components/Map'), {
@@ -30,31 +31,44 @@ interface StorefrontFormProps {
     id: string
     companyName: string
     description: string
-    logo: string
+    logo: string | null
     isActive: boolean
-    serviceType: string
-    venueType: string
+    serviceType: ServiceType
+    venueType: VenueType | null
     billingStreet: string
     billingCity: string
     billingPostalCode: string
     billingCountry: string
     siret: string
     vatNumber: string
-    venueAddress: string
+    venueAddress: string | null
     venueLatitude: number
     venueLongitude: number
     interventionType: string
     interventionRadius: number
     receptionSpaces: any[]
     receptionOptions: any
+    createdAt: Date
+    updatedAt: Date
+    userId: string
   }
 }
 
 export function StorefrontForm({ storefront }: StorefrontFormProps) {
   const { data: session } = useSession()
   const { toast } = useToast()
-  const [formData, setFormData] = useState(storefront)
+  const [formData, setFormData] = useState({
+    ...storefront,
+    venueLatitude: storefront.venueLatitude || 48.8566,
+    venueLongitude: storefront.venueLongitude || 2.3522,
+    interventionRadius: storefront.interventionRadius || 50,
+    interventionType: storefront.interventionType || 'all_france',
+    venueType: storefront.venueType || VenueType.UNKNOWN,
+    venueAddress: storefront.venueAddress || '',
+    isActive: storefront.isActive || false,
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
 
   console.log('[StorefrontForm] Storefront reçu:', storefront)
   console.log('[StorefrontForm] Type de service:', storefront.serviceType)
@@ -66,28 +80,54 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/partner-storefront', {
-        method: 'PUT',
+      console.log("[StorefrontForm] Début de la soumission")
+      console.log("[StorefrontForm] Données du formulaire:", formData)
+
+      const dataToSend = {
+        ...formData,
+        serviceType: formData.serviceType as ServiceType,
+        venueType: formData.venueType as VenueType,
+        venueLatitude: Number(formData.venueLatitude),
+        venueLongitude: Number(formData.venueLongitude),
+        interventionRadius: Number(formData.interventionRadius),
+        venueAddress: formData.venueAddress || null,
+        isActive: formData.isActive,
+      }
+
+      console.log("[StorefrontForm] Données préparées pour l'envoi:", dataToSend)
+
+      const response = await fetch("/api/partner-storefront", {
+        method: storefront.id ? "PUT" : "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
+      console.log("[StorefrontForm] Statut de la réponse:", response.status)
+      console.log("[StorefrontForm] En-têtes de la réponse:", Object.fromEntries(response.headers.entries()))
+
+      const responseData = await response.json()
+      console.log("[StorefrontForm] Données de la réponse:", responseData)
+
       if (!response.ok) {
-        throw new Error('Erreur lors de la mise à jour')
+        throw new Error(responseData.message || "Une erreur est survenue lors de la connexion")
       }
 
       toast({
-        title: 'Succès',
-        description: 'Votre vitrine a été mise à jour avec succès.',
+        title: "Succès",
+        description: "Vitrine sauvegardée avec succès",
       })
+
+      if (!storefront.id) {
+        router.refresh()
+      }
     } catch (error) {
-      console.error('Erreur:', error)
+      console.error("[StorefrontForm] Erreur détaillée:", error)
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de la mise à jour de votre vitrine.',
-        variant: 'destructive',
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la connexion",
+        variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)
@@ -132,7 +172,7 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
                 <Label htmlFor="serviceType">Type de service</Label>
                 <Select
                   value={formData.serviceType}
-                  onValueChange={(value) => setFormData({ ...formData, serviceType: value })}
+                  onValueChange={(value: ServiceType) => setFormData({ ...formData, serviceType: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un type de service" />
@@ -150,22 +190,18 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="venueType">Type de lieu</Label>
                 <Select
-                  value={formData.venueType}
-                  onValueChange={(value) => setFormData({ ...formData, venueType: value })}
+                  value={formData.venueType || 'UNKNOWN'}
+                  onValueChange={(value: VenueType) => setFormData({ ...formData, venueType: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un type de lieu" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="DOMAINE">Domaine</SelectItem>
-                    <SelectItem value="AUBERGE">Auberge</SelectItem>
-                    <SelectItem value="HOTEL">Hôtel</SelectItem>
-                    <SelectItem value="RESTAURANT">Restaurant</SelectItem>
-                    <SelectItem value="SALLE_DE_RECEPTION">Salle de réception</SelectItem>
-                    <SelectItem value="CHATEAU">Château</SelectItem>
-                    <SelectItem value="BATEAU">Bateau</SelectItem>
-                    <SelectItem value="PLAGE">Plage</SelectItem>
-                    <SelectItem value="UNKNOWN">Autre</SelectItem>
+                    {Object.values(VenueType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -255,7 +291,7 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
                 <Label htmlFor="venueAddress">Adresse du lieu</Label>
                 <Input
                   id="venueAddress"
-                  value={formData.venueAddress}
+                  value={formData.venueAddress || ''}
                   onChange={(e) => setFormData({ ...formData, venueAddress: e.target.value })}
                 />
               </div>

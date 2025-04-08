@@ -1,17 +1,12 @@
-'use client'
-import { SessionProvider } from "next-auth/react"
-import { ThemeProvider } from 'next-themes'
+"use client";
 
-export function Providers({
-  children
-}: {
-  children: React.ReactNode
-}) {
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState, ReactNode } from "react";
+
+export function Providers({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
-    <SessionProvider refetchInterval={0}>
-      <ThemeProvider attribute="class">
-        {children}
-      </ThemeProvider>
-    </SessionProvider>
-  )
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }
