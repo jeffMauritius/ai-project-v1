@@ -21,6 +21,8 @@ const storefrontSchema = z.object({
   venueLongitude: z.number().optional(),
   interventionType: z.string().default("all_france"),
   interventionRadius: z.number().optional().default(50),
+  logo: z.string().optional(),
+  isActive: z.boolean().default(false),
 })
 
 export async function GET(request: Request) {
@@ -90,7 +92,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
+    console.log("[PARTNER_STOREFRONT_POST] Données reçues:", body)
+
     const validatedData = storefrontSchema.parse(body)
+    console.log("[PARTNER_STOREFRONT_POST] Données validées:", validatedData)
     
     // Vérifier si une vitrine existe déjà pour cet utilisateur
     const existingStorefront = await prisma.partnerStorefront.findUnique({
@@ -158,6 +163,9 @@ export async function PUT(request: Request) {
     const body = await request.json()
     console.log("[PARTNER_STOREFRONT_PUT] Données reçues:", body)
 
+    const validatedData = storefrontSchema.parse(body)
+    console.log("[PARTNER_STOREFRONT_PUT] Données validées:", validatedData)
+
     // Vérifier si l'utilisateur existe
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -183,23 +191,7 @@ export async function PUT(request: Request) {
     // Mettre à jour la vitrine
     const updatedStorefront = await prisma.partnerStorefront.update({
       where: { userId: user.id },
-      data: {
-        companyName: body.companyName,
-        description: body.description,
-        logo: body.logo,
-        isActive: body.isActive,
-        billingStreet: body.billingStreet,
-        billingCity: body.billingCity,
-        billingPostalCode: body.billingPostalCode,
-        billingCountry: body.billingCountry,
-        siret: body.siret,
-        vatNumber: body.vatNumber,
-        venueAddress: body.venueAddress,
-        venueLatitude: body.venueLatitude,
-        venueLongitude: body.venueLongitude,
-        interventionType: body.interventionType,
-        interventionRadius: body.interventionRadius,
-      },
+      data: validatedData,
       include: {
         media: true,
         receptionSpaces: true,
@@ -212,6 +204,11 @@ export async function PUT(request: Request) {
     return NextResponse.json(updatedStorefront)
   } catch (error: any) {
     console.error("[PARTNER_STOREFRONT_PUT] Erreur:", error)
+    
+    if (error instanceof z.ZodError) {
+      return new NextResponse(JSON.stringify(error.errors), { status: 400 })
+    }
+    
     return new NextResponse(
       `Erreur lors de la mise à jour de la vitrine: ${error.message}`,
       { status: 500 }

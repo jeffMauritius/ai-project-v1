@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,7 @@ import { signIn, useSession } from 'next-auth/react'
 
 export default function Login() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,15 +24,23 @@ export default function Login() {
 
   useEffect(() => {
     if (session?.user?.role) {
-      if (session.user.role === "PARTNER") {
-        router.push('/partner-dashboard')
-      } else if (session.user.role === "ADMIN") {
-        router.push('/admin/dashboard')
+      const callbackUrl = searchParams.get('callbackUrl') || '/'
+      if (callbackUrl.startsWith('/')) {
+        router.push(callbackUrl)
       } else {
-        router.push('/dashboard/planning')
+        switch (session.user.role) {
+          case "PARTNER":
+            router.push('/partner-dashboard')
+            break
+          case "ADMIN":
+            router.push('/admin/dashboard')
+            break
+          default:
+            router.push('/dashboard/planning')
+        }
       }
     }
-  }, [session, router])
+  }, [session, router, searchParams])
 
   if (!mounted) {
     return null
@@ -45,19 +54,22 @@ export default function Login() {
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
     const password = formData.get('password') as string
+    const callbackUrl = searchParams.get('callbackUrl') || '/'
     
     try {
       const result = await signIn('credentials', {
         email: email,
         password: password,
-        redirect: true
+        redirect: false,
+        callbackUrl: callbackUrl
       });
 
       if (result?.error) {
-        throw new Error(result.error)
+        setError(result.error)
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Une erreur est survenue')
+      setError('Une erreur est survenue lors de la connexion')
+      console.error('Erreur de connexion:', error)
     } finally {
       setIsLoading(false)
     }

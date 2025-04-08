@@ -34,37 +34,43 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Mot de passe', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email et mot de passe requis')
-        }
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Email et mot de passe requis')
+          }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        })
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          })
 
-        if (!user || !user.password) {
-          throw new Error('Utilisateur non trouvé')
-        }
+          if (!user || !user.password) {
+            throw new Error('Email ou mot de passe incorrect')
+          }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
 
-        if (!isPasswordValid) {
-          throw new Error('Mot de passe incorrect')
-        }
+          if (!isPasswordValid) {
+            throw new Error('Email ou mot de passe incorrect')
+          }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role as Role,
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role as Role,
+          }
+        } catch (error) {
+          console.error('Erreur d\'authentification:', error)
+          throw error
         }
       },
     }),
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 jours
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -82,16 +88,20 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Rediriger vers le dashboard approprié selon le rôle
-      if (url.startsWith(baseUrl)) return url
-      if (url.startsWith('/')) return `${baseUrl}${url}`
-      
+      // Si l'URL est relative ou commence par la baseUrl, on la garde
+      if (url.startsWith(baseUrl) || url.startsWith('/')) {
+        return url
+      }
+
+      // Sinon, on redirige vers le dashboard approprié
       const session = await getServerSession(authOptions)
-      if (!session?.user) return baseUrl
+      if (!session?.user) {
+        return `${baseUrl}/auth/login`
+      }
 
       switch (session.user.role) {
         case 'PARTNER':
-          return `${baseUrl}/partner/dashboard`
+          return `${baseUrl}/partner-dashboard`
         case 'ADMIN':
           return `${baseUrl}/admin/dashboard`
         default:
@@ -100,7 +110,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/auth/signin',
+    signIn: '/auth/login',
     error: '/auth/error',
   },
+  debug: process.env.NODE_ENV === 'development',
 }

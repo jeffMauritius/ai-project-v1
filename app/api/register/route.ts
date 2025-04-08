@@ -13,15 +13,21 @@ const registerSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    console.log("[REGISTER] Début de la requête d'inscription");
     const body = await req.json();
+    console.log("[REGISTER] Corps de la requête reçu:", { ...body, password: '[REDACTED]' });
+    
     const validatedData = registerSchema.parse(body);
+    console.log("[REGISTER] Données validées");
 
     // Check if user already exists
+    console.log("[REGISTER] Vérification de l'existence de l'utilisateur");
     const existingUser = await prisma.user.findUnique({
       where: { email: validatedData.email }
     });
 
     if (existingUser) {
+      console.log("[REGISTER] Utilisateur déjà existant");
       return NextResponse.json(
         { error: "Un utilisateur avec cet email existe déjà" },
         { status: 400 }
@@ -29,9 +35,11 @@ export async function POST(req: Request) {
     }
 
     // Hash password
+    console.log("[REGISTER] Hashage du mot de passe");
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
     // Create user
+    console.log("[REGISTER] Création de l'utilisateur");
     const user = await prisma.user.create({
       data: {
         email: validatedData.email,
@@ -40,13 +48,16 @@ export async function POST(req: Request) {
         role: validatedData.role,
       },
     });
+    console.log("[REGISTER] Utilisateur créé avec succès");
 
     // Create empty profile for user
+    console.log("[REGISTER] Création du profil");
     await prisma.profile.create({
       data: {
         userId: user.id,
       },
     });
+    console.log("[REGISTER] Profil créé avec succès");
 
     // Ne pas renvoyer le mot de passe
     const { password, ...userWithoutPassword } = user;
@@ -59,13 +70,22 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
+    console.error("[REGISTER] Erreur détaillée:", error);
+    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Données invalides", details: error.errors },
         { status: 400 }
       );
     }
-    console.error("Registration error:", error);
+    
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: `Erreur lors de la création de l'utilisateur: ${error.message}` },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Erreur lors de la création de l'utilisateur" },
       { status: 500 }
