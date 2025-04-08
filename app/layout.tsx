@@ -6,8 +6,8 @@ import { Providers } from './providers'
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Mon Mariage AI - Planificateur de Mariage Intelligent',
-  description: 'Planifiez le mariage de vos rêves avec l\'aide de l\'intelligence artificielle',
+  title: 'AI Project',
+  description: 'Application de gestion de mariage',
   icons: {
     icon: 'https://raw.githubusercontent.com/tailwindlabs/heroicons/master/src/24/solid/heart.svg'
   }
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <Providers>{children}</Providers>
       </body>

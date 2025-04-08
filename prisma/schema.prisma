@@ -186,3 +186,38 @@ enum Role {
   PARTNER
   ADMIN
 }
+
+model Image {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  url             String
+  order           Int      @default(0)
+  establishmentId String   @db.ObjectId
+  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+
+  @@map("Image")
+}
+
+model Establishment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime @default("2025-04-06T03:35:25.436+00:00")
+  updatedAt     DateTime @default("2025-04-06T03:35:25.436+00:00")
+  type          String   @default("Domaine mariage")
+  name          String   @default("Domaine de la Maison de Colette")
+  description   String   @default("Face à la mer, sans voisins ni vis à vis, au centre d'un Domaine de se...")
+  startingPrice Float    @default(25)
+  currency      String   @default("EUR")
+  city          String   @default(". Saint-Coulomb")
+  region        String   @default("Ille et Vilaine")
+  country       String   @default("France")
+  maxCapacity   Int      @default(20)
+  rating        Float    @default(5)
+  reviewCount   Int      @default(0)
+  imageUrl      String   @default("/placeholder-venue.jpg")
+  images        String[] @default([])
+  featureIds    String[] @default([]) @db.ObjectId
+  amenityIds    String[] @default([]) @db.ObjectId
+  // Relation avec les images
+  Images        Image[]
+
+  @@map("Establishment")
+}
