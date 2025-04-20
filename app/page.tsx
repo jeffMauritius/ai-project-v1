@@ -1,6 +1,4 @@
-import Navbar from './components/Navbar'
 import AISearchBar from './components/AISearchBar'
-import Footer from './components/Footer'
 import React from 'react'
 import { 
   MagnifyingGlassIcon, 
@@ -50,8 +48,7 @@ const features = [
 export default function Home() {
   return (
     <>
-      <Navbar />
-      <main>
+      <main className="flex min-h-screen flex-col items-center justify-between">
         {/* Hero Section */}
         <div className="relative isolate">
           <div className="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8 dark:bg-gray-900">
@@ -106,7 +103,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      <Footer />
     </>
   )
 }

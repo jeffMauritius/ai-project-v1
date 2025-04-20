@@ -1,5 +1,3 @@
-import Navbar from '../../components/Navbar'
-import Footer from '../../components/Footer'
 import PageNavigation from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -7,8 +5,7 @@ import { ArrowRight } from "lucide-react"
 
 export default function Blog() {
   return (
-    <>
-      <Navbar />
+    <div>
       <PageNavigation />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,7 +35,6 @@ export default function Blog() {
           </div>
         </div>
       </main>
-      <Footer />
-    </>
+    </div>
   )
 }

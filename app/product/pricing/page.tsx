@@ -1,9 +1,11 @@
-import Navbar from '../../components/Navbar'
-import Footer from '../../components/Footer'
+'use client'
+
+import { useState } from 'react'
 import PageNavigation from '../../components/PageNavigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
+import { motion } from "framer-motion"
 
 const plans = [
   {
@@ -50,8 +52,7 @@ const plans = [
 
 export default function Pricing() {
   return (
-    <>
-      <Navbar />
+    <div>
       <PageNavigation />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,7 +77,6 @@ export default function Pricing() {
                 )}
                 <CardHeader>
                   <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
                   <div className="mt-4">
                     <span className="text-4xl font-bold text-gray-900 dark:text-white">{plan.price}</span>
                     {plan.period && (
@@ -102,7 +102,6 @@ export default function Pricing() {
           </div>
         </div>
       </main>
-      <Footer />
-    </>
+    </div>
   )
 }
