@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import * as argon2 from "argon2";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { Role } from "@prisma/client";
@@ -34,9 +34,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password
+    // Hash password with argon2
     console.log("[REGISTER] Hashage du mot de passe");
-    const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+    const hashedPassword = await argon2.hash(validatedData.password);
 
     // Create user
     console.log("[REGISTER] Création de l'utilisateur");
