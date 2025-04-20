@@ -1,44 +1,25 @@
-'use client'
+import Link from "next/link"
+import { ChevronLeft } from "lucide-react"
 
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline' 
-import { useRouter } from 'next/navigation' 
-import { Button } from "@/components/ui/button" 
-import { useEffect, useState } from 'react' 
+interface PageNavigationProps {
+  title?: string
+  href?: string
+}
 
-export default function PageNavigation() {
-  const router = useRouter()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
-
+const PageNavigation = ({ 
+  title = "Retour aux produits",
+  href = "/product"
+}: PageNavigationProps) => {
   return (
-    <div className="fixed inset-y-0 left-4 right-4 z-10 pointer-events-none">
-      <div className="h-full flex items-center justify-between">
-        <Button
-          onClick={() => router.back()}
-          variant="ghost"
-          size="icon"
-          className="pointer-events-auto"
-          aria-label="Page précédente"
-        >
-          <ChevronLeftIcon className="h-6 w-6" />
-        </Button>
-        <Button
-          onClick={() => router.forward()}
-          variant="ghost"
-          size="icon"
-          className="pointer-events-auto"
-          aria-label="Page suivante"
-        >
-          <ChevronRightIcon className="h-6 w-6" />
-        </Button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+        <ChevronLeft className="h-4 w-4" />
+        <Link href={href} className="hover:text-primary transition-colors">
+          {title}
+        </Link>
       </div>
     </div>
   )
 }
+
+export default PageNavigation

@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Navbar from '../../components/Navbar'
-import Footer from '../../components/Footer'
-import PageNavigation from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check, X } from "lucide-react"
+import PageNavigation from "@/components/PageNavigation"
 import { motion } from "framer-motion"
 
 const plans = [
@@ -82,17 +80,16 @@ const plans = [
   }
 ]
 
-export default function Compare() {
+export default function ComparePage() {
   const [selectedPlans, setSelectedPlans] = useState<string[]>(["Premium", "Pro"])
 
   const filteredPlans = plans.filter(plan => selectedPlans.includes(plan.name))
 
   return (
-    <>
-      <Navbar />
+    <div className="flex flex-col min-h-screen">
       <PageNavigation />
-      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow">
+        <section className="container px-4 md:px-6 py-12">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Comparer les plans
@@ -165,9 +162,8 @@ export default function Compare() {
               </motion.div>
             ))}
           </div>
-        </div>
+        </section>
       </main>
-      <Footer />
-    </>
+    </div>
   )
 }
