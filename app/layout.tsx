@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { Providers } from './providers'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import { headers } from 'next/headers'
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,13 +21,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const headersList = headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isAuthPage = pathname.startsWith("/auth/");
+
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          <Navbar />
+          {!isAuthPage && <Navbar />}
           {children}
-          <Footer />
+          {!isAuthPage && <Footer />}
         </Providers>
       </body>
     </html>
