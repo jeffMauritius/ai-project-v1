@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navbar from '../../components/Navbar'
-import Footer from '../../components/Footer'
 import PageNavigation from '../../components/PageNavigation'
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { motion } from "framer-motion"
+import { StarIcon } from '@heroicons/react/24/solid'
 
 const testimonials = [
   {
@@ -93,7 +92,6 @@ export default function Testimonials() {
 
   return (
     <div>
-      <Navbar />
       <PageNavigation />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -172,7 +170,6 @@ export default function Testimonials() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
