@@ -6,7 +6,7 @@ import ThemeToggle from './ThemeToggle'
 import { BuildingStorefrontIcon } from '@heroicons/react/24/outline' 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" 
 import { useEffect, useState } from 'react'
-import { signOut } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation'
 export default function Navbar() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     setMounted(true)
@@ -28,6 +29,7 @@ export default function Navbar() {
   const handleSignOut = async () => {
     try {
       await signOut({ 
+        redirect: true,
         callbackUrl: '/auth/login'
       });
     } catch (error) {
@@ -50,31 +52,51 @@ export default function Navbar() {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
+            {session?.user?.role === "PARTNER" && (
+              <Link
+                href="/partner-dashboard"
+                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Tableau de bord partenaire"
+              >
+                <BuildingStorefrontIcon className="h-5 w-5" />
+              </Link>
+            )}
             <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button type="button" className="relative h-8 w-8 rounded-full">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings" className="flex items-center">
-                    <Cog6ToothIcon className="mr-2 h-4 w-4" />
-                    <span>Paramètres</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut} className="flex items-center cursor-pointer">
-                  <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
-                  <span>Déconnexion</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {status === "loading" ? (
+              <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button type="button" className="relative h-8 w-8 rounded-full">
+                    <Avatar>
+                      <AvatarImage src={session.user?.image || "https://github.com/shadcn.png"} />
+                      <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings" className="flex items-center">
+                      <Cog6ToothIcon className="mr-2 h-4 w-4" />
+                      <span>Paramètres</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center cursor-pointer">
+                    <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
+                    <span>Déconnexion</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link 
+                href="/auth/login"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+              >
+                Connexion
+              </Link>
+            )}
           </div>
         </div>
       </div>
