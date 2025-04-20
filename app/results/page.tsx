@@ -1,7 +1,5 @@
 import Image from 'next/image'
-import Navbar from '../components/Navbar'
 import AISearchBar from '../components/AISearchBar'
-import Footer from '../components/Footer'
 import PageNavigation from '../components/PageNavigation'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { MapPinIcon, BanknotesIcon, CalendarDaysIcon } from '@heroicons/react/24/outline'
@@ -41,8 +39,7 @@ const mockResults = [
 
 export default function Results({ searchParams }: { searchParams: { q: string } }) {
   return (
-    <>
-      <Navbar />
+    <div>
       <PageNavigation />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,7 +105,6 @@ export default function Results({ searchParams }: { searchParams: { q: string } 
           </div>
         </div>
       </main>
-      <Footer />
-    </>
+    </div>
   )
 }
