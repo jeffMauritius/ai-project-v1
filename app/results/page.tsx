@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import AISearchBar from '../components/AISearchBar'
-import PageNavigation from '../components/PageNavigation'
+import { PageNavigation } from '../components/PageNavigation'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { MapPinIcon, BanknotesIcon, CalendarDaysIcon } from '@heroicons/react/24/outline'
 

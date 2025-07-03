@@ -1,4 +1,4 @@
-import PageNavigation from '../../components/PageNavigation'
+import { PageNavigation } from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"

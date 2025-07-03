@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import PageNavigation from '../components/PageNavigation'
+import { PageNavigation } from '../components/PageNavigation'
 
 export default function NotFound() {
   return (

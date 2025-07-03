@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import PageNavigation from '../../components/PageNavigation'
+import { PageNavigation } from '../../components/PageNavigation'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { MapPinIcon, BanknotesIcon, CalendarDaysIcon, CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon, PaperAirplaneIcon, MicrophoneIcon, DocumentPlusIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'

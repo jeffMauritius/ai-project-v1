@@ -1,5 +1,5 @@
 import Footer from '../../components/Footer'
-import PageNavigation from '../../components/PageNavigation'
+import { PageNavigation } from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Download, Newspaper } from "lucide-react"
