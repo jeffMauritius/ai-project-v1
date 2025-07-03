@@ -1,4 +1,4 @@
-import PageNavigation from '../components/PageNavigation'
+import { PageNavigation } from '../components/PageNavigation'
 
 export default function Partner() {
   return (

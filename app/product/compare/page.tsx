@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check, X } from "lucide-react"
-import PageNavigation from "@/components/PageNavigation"
+
 import { motion } from "framer-motion"
 
 const plans = [
@@ -87,7 +87,7 @@ export default function ComparePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <PageNavigation />
+
       <main className="flex-grow">
         <section className="container px-4 md:px-6 py-12">
           <div className="text-center mb-12">

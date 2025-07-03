@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import PageNavigation from '../../components/PageNavigation'
+import { PageNavigation } from '../../components/PageNavigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Sparkles, Users, Calendar, MessageSquare, Search, PenTool, Gift, BrainCircuit } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
