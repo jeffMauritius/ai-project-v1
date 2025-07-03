@@ -5,9 +5,7 @@ const nextConfig = {
     unoptimized: true,
     domains: ['images.unsplash.com']
   },
-  experimental: {
-    appDir: true
-  },
+
   compiler: {
     // Preserve warnings in development
     removeConsole: process.env.NODE_ENV === 'production' ? {
@@ -21,8 +19,7 @@ const nextConfig = {
     config.resolve.fallback = { fs: false }
     return config
   },
-  // Améliorer la gestion des polices
-  optimizeFonts: true
+
 };
 
 module.exports = nextConfig;

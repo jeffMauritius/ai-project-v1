@@ -2,11 +2,11 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 
 interface PageNavigationProps {
-  title: string
-  href: string
+  title?: string
+  href?: string
 }
 
-export function PageNavigation({ title, href }: PageNavigationProps) {
+export function PageNavigation({ title = "Retour", href = "/" }: PageNavigationProps) {
   return (
     <div className="flex items-center space-x-1">
       <Link
