@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -23,7 +22,6 @@ export default async function DashboardLayout({
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="flex">
           <Sidebar />
