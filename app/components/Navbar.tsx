@@ -21,10 +21,26 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const { data: session, status } = useSession()
+  const [storefrontId, setStorefrontId] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    // Récupère l'id de la vitrine si PARTNER
+    const fetchStorefront = async () => {
+      if (session?.user?.role === 'PARTNER') {
+        try {
+          const res = await fetch('/api/partner-storefront')
+          if (res.ok) {
+            const data = await res.json()
+            setStorefrontId(data.id)
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+    fetchStorefront()
+  }, [session])
 
   const handleSignOut = async () => {
     try {
@@ -52,11 +68,11 @@ export default function Navbar() {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            {session?.user?.role === "PARTNER" && (
+            {session?.user?.role === "PARTNER" && storefrontId && (
               <Link
-                href="/partner-dashboard"
+                href={`/storefront/${storefrontId}`}
                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Tableau de bord partenaire"
+                aria-label="Voir ma vitrine publique"
               >
                 <BuildingStorefrontIcon className="h-5 w-5" />
               </Link>

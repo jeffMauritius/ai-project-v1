@@ -27,38 +27,50 @@ const storefrontSchema = z.object({
 
 export async function GET(request: Request) {
   try {
+    // Récupérer les paramètres de la requête
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    // Si un ID est fourni, accès public à la vitrine
+    if (id) {
+      const storefront = await prisma.partnerStorefront.findUnique({
+        where: { id },
+        include: {
+          media: true,
+          receptionSpaces: true,
+          receptionOptions: true,
+          user: true,
+        },
+      })
+      if (!storefront) {
+        return new NextResponse('Storefront non trouvé', { status: 404 })
+      }
+      return NextResponse.json(storefront)
+    }
+
+    // Sinon, accès privé par session (partenaire connecté)
     const session = await getServerSession(authOptions)
     console.log("[PARTNER_STOREFRONT_GET] Session:", session)
-    
     if (!session?.user?.id) {
       console.log("[PARTNER_STOREFRONT_GET] Pas de session ou pas d'ID utilisateur")
       return new NextResponse("Non autorisé", { status: 401 })
     }
-
     // Vérifier si l'utilisateur existe et a le bon rôle
     const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
+      where: { id: session.user.id },
     })
     console.log("[PARTNER_STOREFRONT_GET] Utilisateur trouvé:", user)
-
     if (!user) {
       console.log("[PARTNER_STOREFRONT_GET] Utilisateur non trouvé dans la base de données")
       return new NextResponse("Utilisateur non trouvé", { status: 404 })
     }
-
     if (user.role !== "PARTNER") {
       console.log("[PARTNER_STOREFRONT_GET] L'utilisateur n'a pas le rôle PARTNER")
       return new NextResponse("Accès non autorisé", { status: 403 })
     }
-
     console.log("[PARTNER_STOREFRONT_GET] Recherche du storefront pour l'utilisateur:", session.user.id)
-    
     const storefront = await prisma.partnerStorefront.findUnique({
-      where: {
-        userId: session.user.id,
-      },
+      where: { userId: session.user.id },
       include: {
         media: true,
         receptionSpaces: true,
@@ -66,14 +78,11 @@ export async function GET(request: Request) {
         user: true,
       },
     })
-
     console.log("[PARTNER_STOREFRONT_GET] Résultat de la recherche:", storefront)
-
     if (!storefront) {
       console.log("[PARTNER_STOREFRONT_GET] Aucun storefront trouvé pour l'utilisateur")
       return new NextResponse("Storefront non trouvé", { status: 404 })
     }
-
     return NextResponse.json(storefront)
   } catch (error) {
     console.error("[PARTNER_STOREFRONT_GET] Erreur:", error)

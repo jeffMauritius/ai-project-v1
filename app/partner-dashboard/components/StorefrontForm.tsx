@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -70,6 +70,12 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log("TinyMCE API KEY:", process.env.NEXT_PUBLIC_TINY_MCE_API_KEY)
+    }
+  }, [])
+
   console.log('[StorefrontForm] Storefront reçu:', storefront)
   console.log('[StorefrontForm] Type de service:', storefront.serviceType)
   console.log('[StorefrontForm] Options de réception:', storefront.receptionOptions)
@@ -80,6 +86,16 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
     setIsSubmitting(true)
 
     try {
+      // Validation côté client pour le numéro de TVA
+      if (!formData.vatNumber || formData.vatNumber.trim().length === 0) {
+        toast({
+          title: "Erreur",
+          description: "Le numéro de TVA est requis.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
       console.log("[StorefrontForm] Début de la soumission")
       console.log("[StorefrontForm] Données du formulaire:", formData)
 
@@ -90,7 +106,9 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
         venueLatitude: Number(formData.venueLatitude),
         venueLongitude: Number(formData.venueLongitude),
         interventionRadius: Number(formData.interventionRadius),
-        venueAddress: formData.venueAddress || null,
+        venueAddress: formData.venueAddress ? formData.venueAddress : '',
+        logo: formData.logo ? formData.logo : '',
+        vatNumber: formData.vatNumber ? formData.vatNumber : '',
         isActive: formData.isActive,
       }
 
@@ -161,11 +179,13 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Editor
-                  apiKey={process.env.NEXT_PUBLIC_TINY_MCE_API_KEY}
-                  value={formData.description}
-                  onEditorChange={(content) => setFormData({ ...formData, description: content })}
-                />
+                {typeof window !== 'undefined' && (
+                  <Editor
+                    apiKey={process.env.NEXT_PUBLIC_TINY_MCE_API_KEY || ''}
+                    value={formData.description}
+                    onEditorChange={(content) => setFormData({ ...formData, description: content })}
+                  />
+                )}
               </div>
 
               <div className="space-y-2">
