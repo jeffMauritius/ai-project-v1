@@ -1,0 +1,108 @@
+{
+  "decoration": {
+    "sections": [
+      {
+        "section_id": 1,
+        "title": "Services proposés",
+        "questions": [
+          {
+            "question_id": 1,
+            "content": "Quels services proposez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Location de mobilier",
+              "Location de vaisselle",
+              "Décoration",
+              "Organisation de mariages et d'événements",
+              "Ustensiles de cuisine",
+              "Montage",
+              "Location équipement d'illumination"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Matériel disponible",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "Matériel à louer",
+            "component_type": "checkbox",
+            "options": [
+              "Autel",
+              "Chapiteau",
+              "Tonnelle",
+              "Tables",
+              "Chaises",
+              "Vaisselle",
+              "Estrade",
+              "Illuminations",
+              "Meubles",
+              "Arche"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Services inclus",
+        "questions": [
+          {
+            "question_id": 3,
+            "content": "Vos prix incluent",
+            "component_type": "checkbox",
+            "options": [
+              "Transport",
+              "Livraison du matériel",
+              "Montage",
+              "Démontage",
+              "Rangement",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 4,
+        "title": "Planning et contact",
+        "questions": [
+          {
+            "question_id": 4,
+            "content": "Combien de temps à l'avance dois-je vous contacter ?",
+            "component_type": "select",
+            "options": [
+              "1 mois",
+              "2 mois",
+              "3 mois",
+              "4 mois",
+              "5 mois",
+              "6 mois",
+              "Plus de 6 mois"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 5,
+        "title": "Showroom",
+        "questions": [
+          {
+            "question_id": 5,
+            "content": "Disposez-vous d'un showroom ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+} 
