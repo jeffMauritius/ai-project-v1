@@ -1,0 +1,136 @@
+{
+  "officiants": {
+    "sections": [
+      {
+        "section_id": 1,
+        "title": "Tarification",
+        "questions": [
+          {
+            "question_id": 1,
+            "content": "À partir de quel prix puis-je profiter de vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "unit": "€",
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Capacité",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "Capacité des mariages que vous organisez",
+            "component_type": "radio",
+            "options": [
+              "Moins de 100 invités",
+              "Entre 100 et 300 invités",
+              "Entre 300 et 500 invités",
+              "Plus de 500 invités"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Services proposés",
+        "questions": [
+          {
+            "question_id": 3,
+            "content": "Quels services proposez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Cérémonie",
+              "Situation géographique",
+              "Restauration",
+              "Décoration",
+              "Animation",
+              "Faire-part",
+              "Carterie",
+              "Accessoires - Cadeaux",
+              "Liste de mariage",
+              "Photographie et vidéo",
+              "Musique et animation",
+              "Location de voitures",
+              "Voyages de noce",
+              "Matériel technique (son, lumière, audiovisuel, etc.)",
+              "Aide vestimentaire mariés",
+              "Aide vestimentaire invités",
+              "Maquillage et coiffure",
+              "Coordinateur de mariage (présent le jour du mariage)",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 4,
+        "title": "Types de cérémonies",
+        "questions": [
+          {
+            "question_id": 4,
+            "content": "Quels types de cérémonies organisez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Religieuse",
+              "Civile",
+              "À l'étranger",
+              "En plein air",
+              "Symbolique",
+              "À thème",
+              "Écologique",
+              "Autres"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 5,
+            "content": "Organisez-vous les mariages religieux non catholiques ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 5,
+        "title": "Spécialisation et méthode",
+        "questions": [
+          {
+            "question_id": 6,
+            "content": "Dans quels types de cérémonies vous spécialisez-vous ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "question_id": 7,
+            "content": "Quelle est votre méthode de travail ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      },
+      {
+        "section_id": 6,
+        "title": "Paiement",
+        "questions": [
+          {
+            "question_id": 8,
+            "content": "Comment s'effectue le paiement ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+} 

@@ -1,0 +1,73 @@
+{
+  "organisation": {
+    "sections": [
+      {
+        "section_id": 1,
+        "title": "Services proposés",
+        "questions": [
+          {
+            "question_id": 1,
+            "content": "Quels services proposez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Cérémonie",
+              "Restauration",
+              "Décoration",
+              "Animation",
+              "Faire-part",
+              "Carterie",
+              "Accessoires - Cadeaux",
+              "Liste de mariage",
+              "Photographie et vidéo",
+              "Musique et animation",
+              "Location de voitures",
+              "Voyages de noce",
+              "Matériel technique (son, lumière, audiovisuel, etc.)",
+              "Aide vestimentaire mariés",
+              "Aide vestimentaire invités",
+              "Maquillage et coiffure",
+              "Coordinateur de mariage (présent le jour du mariage)",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Types de cérémonies",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "Quels types de cérémonies organisez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Religieuse",
+              "Civile",
+              "À l'étranger",
+              "En plein air",
+              "Symbolique",
+              "À thème",
+              "Écologique",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Spécialisation",
+        "questions": [
+          {
+            "question_id": 3,
+            "content": "Dans quels types de cérémonies vous spécialisez-vous ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+} 
