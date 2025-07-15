@@ -1,0 +1,267 @@
+{
+  "musique_dj": {
+    "sections": [
+      {
+        "section_id": 1,
+        "title": "Services proposés",
+        "questions": [
+          {
+            "question_id": 1,
+            "content": "Quels services proposez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Musique pour la cérémonie",
+              "Musique pour le vin d'honneur",
+              "Musique pour la soirée dansante",
+              "Animation",
+              "Karaoké",
+              "Audiovisuel",
+              "Dj",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Tarification",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "À partir de quel prix puis-je profiter de vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "unit": "€",
+            "required": true
+          },
+          {
+            "question_id": 17,
+            "content": "Facturez-vous par heure ou par événement ?",
+            "component_type": "radio",
+            "options": [
+              "Heure",
+              "Événement"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 18,
+            "content": "Si besoin est, accepteriez-vous de faire des heures supplémentaires ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 19,
+            "content": "Quel est le tarif des heures supplémentaires ?",
+            "component_type": "input",
+            "field_type": "number",
+            "unit": "€/heure",
+            "required": false
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Style et formation",
+        "questions": [
+          {
+            "question_id": 3,
+            "content": "Quels styles musicaux jouez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Général",
+              "Latino",
+              "Raï",
+              "Pop",
+              "Musique du monde",
+              "Folklorique",
+              "Rock",
+              "Jazz",
+              "Disco",
+              "Ambiance",
+              "Chœurs",
+              "Classique",
+              "Autres"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 4,
+            "content": "Type de formation musicale",
+            "component_type": "select",
+            "options": [
+              "Dj",
+              "Orchestre",
+              "Groupe",
+              "Duo",
+              "Trio",
+              "Quatuor",
+              "Chœur",
+              "Soliste",
+              "Gospel"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 5,
+            "content": "Taille du groupe",
+            "component_type": "radio",
+            "options": [
+              "Soliste",
+              "Petit (2-3 musiciens)",
+              "Moyen (4-6 musiciens)",
+              "Grand (plus de 6 musiciens)"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 4,
+        "title": "Répertoire et personnalisation",
+        "questions": [
+          {
+            "question_id": 6,
+            "content": "Répertoire",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "question_id": 7,
+            "content": "Est-il possible de demander une chanson qui ne figure pas dans le répertoire ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 5,
+        "title": "Expérience et matériel",
+        "questions": [
+          {
+            "question_id": 8,
+            "content": "Expérience",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "question_id": 9,
+            "content": "Disposez-vous de votre propre matériel ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 10,
+            "content": "Avez-vous besoin de matériel spécifique ou de conditions particulières pour pouvoir travailler ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      },
+      {
+        "section_id": 6,
+        "title": "Déplacements et disponibilité",
+        "questions": [
+          {
+            "question_id": 11,
+            "content": "Pouvez-vous vous déplacer ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 12,
+            "content": "Facturez-vous les déplacements ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "conditional_field": {
+              "show_when": "Oui",
+              "field": {
+                "content": "Tarif des déplacements",
+                "component_type": "input",
+                "field_type": "number",
+                "unit": "€"
+              }
+            },
+            "required": true
+          },
+          {
+            "question_id": 13,
+            "content": "Couvrez-vous plus d'un mariage par jour ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 7,
+        "title": "Conditions de travail",
+        "questions": [
+          {
+            "question_id": 14,
+            "content": "Travaillez-vous seul ou en équipe ?",
+            "component_type": "radio",
+            "options": [
+              "Seul",
+              "En équipe"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 15,
+            "content": "Combien de temps dure la prestation ?",
+            "component_type": "select",
+            "options": [
+              "2 heures",
+              "3 heures",
+              "4 heures",
+              "5 heures",
+              "6 heures",
+              "7 heures",
+              "8 heures",
+              "Plus de 8 heures",
+              "Sur mesure"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 16,
+            "content": "Acceptez-vous de travailler en plein air ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+} 

@@ -1,0 +1,157 @@
+{
+  "voiture": {
+    "sections": [
+      {
+        "section_id": 1,
+        "title": "Types de véhicules",
+        "questions": [
+          {
+            "question_id": 1,
+            "content": "Types de véhicule",
+            "component_type": "checkbox",
+            "options": [
+              "Voiture haut de gamme",
+              "Voiture de collection",
+              "Limousine",
+              "Calèche",
+              "Voiture sportive",
+              "Van",
+              "Voiture rétro",
+              "Motos et side-car",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Tarification",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "À partir de quel prix puis-je profiter de vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "unit": "€",
+            "required": true
+          },
+          {
+            "question_id": 8,
+            "content": "Facturez-vous par heure ou par événement ?",
+            "component_type": "radio",
+            "options": [
+              "Heure",
+              "Événement"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Services inclus",
+        "questions": [
+          {
+            "question_id": 3,
+            "content": "Quels sont les services inclus dans le forfait mariage ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "question_id": 3.1,
+            "content": "Quel est le nombre de kilomètres peut-on faire ?",
+            "component_type": "input",
+            "field_type": "number",
+            "unit": "km",
+            "required": false
+          },
+          {
+            "question_id": 3.2,
+            "content": "L'assurance est-elle incluse ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 4,
+        "title": "Chauffeur",
+        "questions": [
+          {
+            "question_id": 4,
+            "content": "La location inclut-elle les services d'un chauffeur ?",
+            "component_type": "radio",
+            "options": [
+              "Avec chauffeur",
+              "Sans chauffeur"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 5,
+        "title": "Durée de location",
+        "questions": [
+          {
+            "question_id": 5,
+            "content": "Y a-t-il une durée minimum de location ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "conditional_field": {
+              "show_when": "Oui",
+              "field": {
+                "content": "Durée minimum",
+                "component_type": "input",
+                "field_type": "number",
+                "unit": "heures"
+              }
+            },
+            "required": true
+          },
+          {
+            "question_id": 6,
+            "content": "Y a-t-il une durée maximum de location ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "conditional_field": {
+              "show_when": "Oui",
+              "field": {
+                "content": "Durée maximum",
+                "component_type": "input",
+                "field_type": "number",
+                "unit": "heures"
+              }
+            },
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 6,
+        "title": "Services additionnels",
+        "questions": [
+          {
+            "question_id": 7,
+            "content": "Services additionnels",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+} 
