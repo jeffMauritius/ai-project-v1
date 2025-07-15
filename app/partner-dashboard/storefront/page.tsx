@@ -9,6 +9,26 @@ import { PartnerStorefront, ServiceType, VenueType } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { PlusCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { OptionsTab } from "../components/OptionsTab"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import dynamic from 'next/dynamic'
+
+// Chargement dynamique du composant Map
+const Map = dynamic(() => import('../../components/Map'), {
+  ssr: false,
+  loading: () => <div>Chargement de la carte...</div>,
+})
+
+// Chargement dynamique du composant MediaManager
+const MediaManager = dynamic(() => import('../components/MediaManager'), {
+  ssr: false,
+  loading: () => <div>Chargement du gestionnaire de médias...</div>,
+})
+
+
 
 export default function PartnerStorefrontPage() {
   const { data: session } = useSession()
@@ -45,6 +65,12 @@ export default function PartnerStorefrontPage() {
       fetchStorefrontData()
     }
   }, [session, toast])
+
+  const handleStorefrontUpdate = (updatedData: any) => {
+    // Logique pour sauvegarder les données mises à jour
+    console.log('Données mises à jour:', updatedData)
+    setStorefront(updatedData)
+  }
 
   if (isLoading) {
     return (
@@ -122,9 +148,107 @@ export default function PartnerStorefrontPage() {
         <CardTitle>{storefront ? 'Gérer votre vitrine' : 'Créer votre vitrine'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <StorefrontForm
-          storefront={storefrontFormData}
-        />
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="general">Général</TabsTrigger>
+            <TabsTrigger value="location">Localisation</TabsTrigger>
+            <TabsTrigger value="media">Médias</TabsTrigger>
+            <TabsTrigger value="options">Options</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="general" className="space-y-6">
+            <StorefrontForm
+              storefront={storefrontFormData}
+            />
+          </TabsContent>
+
+          <TabsContent value="location" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Localisation</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="venueAddress">Adresse du lieu</Label>
+                  <Input
+                    id="venueAddress"
+                    value={storefrontFormData.venueAddress || ''}
+                    onChange={(e) => {
+                      const updatedData = { ...storefrontFormData, venueAddress: e.target.value };
+                      setStorefront(updatedData);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Zone d&apos;intervention</Label>
+                  <RadioGroup
+                    value={storefrontFormData.interventionType}
+                    onValueChange={(value) => {
+                      const updatedData = { ...storefrontFormData, interventionType: value };
+                      setStorefront(updatedData);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="all_france" id="all_france" />
+                      <Label htmlFor="all_france">Toute la France</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="radius" id="radius" />
+                      <Label htmlFor="radius">Rayon d&apos;intervention</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {storefrontFormData.interventionType === "radius" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="interventionRadius">Rayon d&apos;intervention (km)</Label>
+                    <Input
+                      id="interventionRadius"
+                      type="number"
+                      value={storefrontFormData.interventionRadius}
+                      onChange={(e) => {
+                        const updatedData = { ...storefrontFormData, interventionRadius: parseInt(e.target.value) };
+                        setStorefront(updatedData);
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div className="h-[400px]">
+                  <Map
+                    latitude={storefrontFormData.venueLatitude || 48.8566}
+                    longitude={storefrontFormData.venueLongitude || 2.3522}
+                    interventionType={storefrontFormData.interventionType}
+                    interventionRadius={storefrontFormData.interventionRadius}
+                    onLocationChange={(lat: number, lng: number) => {
+                      const updatedData = { ...storefrontFormData, venueLatitude: lat, venueLongitude: lng };
+                      setStorefront(updatedData);
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="media" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Médias</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MediaManager />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="options" className="space-y-6">
+            <OptionsTab 
+              storefrontData={storefrontFormData} 
+              onUpdate={handleStorefrontUpdate} 
+            />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   )
