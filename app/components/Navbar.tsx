@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline' 
 import ThemeToggle from './ThemeToggle' 
 import { BuildingStorefrontIcon } from '@heroicons/react/24/outline' 
@@ -64,7 +65,7 @@ export default function Navbar() {
         <div className="flex h-16 justify-between">
           <div className="flex">
             <Link href="/" className="flex flex-shrink-0 items-center">
-              <span className="text-2xl font-semibold text-pink-600 dark:text-pink-400">MonMariage.ai</span>
+              <Image src="/monmariage-logo.png" alt="MonMariage.ai logo" height={40} width={180} className="h-10 w-auto" priority />
             </Link>
           </div>
           <div className="flex items-center space-x-4">

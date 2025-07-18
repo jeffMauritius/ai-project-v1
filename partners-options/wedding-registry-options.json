@@ -1,0 +1,81 @@
+{
+  "liste_cadeau_mariage": {
+    "sections": [
+      {
+        "section_id": 1,
+        "title": "Produits proposés",
+        "questions": [
+          {
+            "question_id": 1,
+            "content": "Quels sont les produits que vous proposez ?",
+            "component_type": "checkbox",
+            "options": [
+              "Liste de mariage",
+              "Mobilier",
+              "Luminaire",
+              "Grand électroménager",
+              "Petit électroménager",
+              "Objets pour la maison",
+              "Décoration",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Services en ligne",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "Proposez-vous des listes de mariage en ligne ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Planning et contact",
+        "questions": [
+          {
+            "question_id": 3,
+            "content": "Combien de temps à l'avance dois-je vous contacter ?",
+            "component_type": "select",
+            "options": [
+              "1 mois",
+              "2 mois",
+              "3 mois",
+              "4 mois",
+              "5 mois",
+              "6 mois",
+              "Plus de 6 mois"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 4,
+        "title": "Showroom",
+        "questions": [
+          {
+            "question_id": 4,
+            "content": "Disposez-vous d'un showroom ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+} 

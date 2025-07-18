@@ -1,0 +1,503 @@
+[33mcommit 6557e055594dab494eb4c36a30226e19b986ac66[m[33m ([m[1;36mHEAD -> [m[1;32mfix-connexion[m[33m, [m[1;31morigin/fix-connexion[m[33m)[m
+Author: jr <jr@AMW-WKS-JRA-1.myguest.virtualbox.org>
+Date:   Fri Jul 11 15:13:35 2025 +0400
+
+    Fix Connexion
+
+[33mcommit d85accdc371fc3bf3bf461370740885e21b59c77[m
+Merge: d8d73ea 836335e
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Mon Jul 14 07:08:04 2025 +0200
+
+    Merge pull request #11 from jeffMauritius/fix-tiny-mce
+    
+    Fix tiny mce
+
+[33mcommit 836335ec21f90e2a92a8c5677decc879d6269e73[m[33m ([m[1;31morigin/fix-tiny-mce[m[33m)[m
+Author: Jeff <jeff@wakasign.com>
+Date:   Mon Jul 14 07:00:49 2025 +0200
+
+    fix tiny mce et le storefront
+
+[33mcommit d8d73eacd298723d1f94126453e1035902aadf6d[m[33m ([m[1;32mrelease-juillet[m[33m)[m
+Merge: 84d678b 99f605f
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Thu Jul 3 07:45:11 2025 +0200
+
+    Merge pull request #10 from jeffMauritius/fix-import
+    
+    fix import
+
+[33mcommit c75ce7cb39fb2eec1a09ca5861dd0dd79efe51d1[m
+Merge: cc80896 813e225
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Thu Jul 3 07:45:11 2025 +0200
+
+    Merge pull request #10 from jeffMauritius/fix-import
+    
+    fix import
+
+[33mcommit 99f605f61ac66ce4a442805f59922bf9660e9539[m[33m ([m[1;31morigin/fix-import[m[33m)[m
+Author: Jeff <jeff@wakasign.com>
+Date:   Thu Jul 3 07:44:14 2025 +0200
+
+    fix import
+
+[33mcommit 813e225efde8b298859ab8ff1ad2867f629dbb27[m
+Author: Jeff <jeff@wakasign.com>
+Date:   Thu Jul 3 07:44:14 2025 +0200
+
+    fix import
+
+[33mcommit 84d678bf329e8e073be2528fc1d171576376d618[m
+Merge: 3b1ed52 4ed267a
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Thu Jul 3 07:37:31 2025 +0200
+
+    Merge pull request #9 from jeffMauritius/fix-nextjs-version
+    
+    Fix nextjs version
+
+[33mcommit cc80896e7cdc6869a1e095501cf5c1934d9d6fd3[m
+Merge: 71764de 601591e
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Thu Jul 3 07:37:31 2025 +0200
+
+    Merge pull request #9 from jeffMauritius/fix-nextjs-version
+    
+    Fix nextjs version
+
+[33mcommit 4ed267aa379fb81c72a828d4aa031b2d98fb2902[m[33m ([m[1;31morigin/fix-nextjs-version[m[33m)[m
+Merge: 4eda041 e0fee97
+Author: Jeff <jeff@wakasign.com>
+Date:   Thu Jul 3 07:35:42 2025 +0200
+
+    fix .env
+
+[33mcommit 601591ee1e4d5467d161b055b9d0f294da788511[m
+Merge: 4eda041 71764de
+Author: Jeff <jeff@wakasign.com>
+Date:   Thu Jul 3 07:35:42 2025 +0200
+
+    fix .env
+
+[33mcommit e0fee9741f22e1107443bf411e0f2ee549cef5fa[m
+Merge: 71764de 3b1ed52
+Author: Jeff <jeff@wakasign.com>
+Date:   Thu Jul 3 07:14:13 2025 +0200
+
+    fix rebase
+
+[33mcommit 4eda041b4e49124f6dbbf9ab32ee8a6f156c29bd[m
+Author: Jeff <jeff@wakasign.com>
+Date:   Thu Jul 3 06:54:36 2025 +0200
+
+    Fix Next.js configuration and async headers
+
+[33mcommit 3b1ed52419886cf9f4ef1b742019dd18e044e4b3[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun May 25 03:17:14 2025 +0200
+
+    Update .env
+
+[33mcommit 71764de2702abb55f83404d178eebf491d289fd4[m
+Merge: 5c43970 b3d839e
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Apr 20 07:47:15 2025 +0400
+
+    Merge pull request #8 from jeffMauritius/fix-auth
+    
+    fix auth
+
+[33mcommit f44c31d888226b2621f291a6985fc0eaea6ceede[m
+Merge: 0c1064d d5bb2e2
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Apr 20 07:47:15 2025 +0400
+
+    Merge pull request #8 from jeffMauritius/fix-auth
+    
+    fix auth
+
+[33mcommit b3d839e5b228c6267315b15d83f9b4338c855cf0[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Apr 20 07:46:16 2025 +0400
+
+    fix auth
+
+[33mcommit d5bb2e287837d4628569923ccb66df3191730468[m[33m ([m[1;31morigin/fix-auth[m[33m, [m[1;32mfix-auth[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Apr 20 07:46:16 2025 +0400
+
+    fix auth
+
+[33mcommit 5c43970c6d4b5b5908f92decf189e4271e9bf42b[m
+Merge: 6169d22 4e3f6aa
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Apr 20 07:08:46 2025 +0400
+
+    Merge pull request #7 from jeffMauritius/add-etablisments
+    
+    fix header
+
+[33mcommit 0c1064d52fd9361060d220d8e5e7f583ac8e99fb[m
+Merge: e80bf8e 5c07afb
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Apr 20 07:08:46 2025 +0400
+
+    Merge pull request #7 from jeffMauritius/add-etablisments
+    
+    fix header
+
+[33mcommit 4e3f6aa1c5e38f2ea698380fe5beb63ec7da2909[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Apr 20 06:37:58 2025 +0400
+
+    fix header
+
+[33mcommit 5c07afbd8a01af892e18b2a96f5e16d42012eae8[m[33m ([m[1;31morigin/add-etablisments[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Apr 20 06:37:58 2025 +0400
+
+    fix header
+
+[33mcommit 6169d22a0780616884e2acd7518b429473645f69[m
+Merge: 9a1538d 8599343
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Tue Apr 8 06:42:52 2025 +0400
+
+    Merge pull request #6 from jeffMauritius/add-etablisments
+    
+    add etablisments page
+
+[33mcommit e80bf8eb0eaacfce0e3651061be6eed6968b94e1[m
+Merge: 892d918 3a60196
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Tue Apr 8 06:42:52 2025 +0400
+
+    Merge pull request #6 from jeffMauritius/add-etablisments
+    
+    add etablisments page
+
+[33mcommit 859934305dc37ff422a9caf422b9bd60c196cce1[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Tue Apr 8 06:41:39 2025 +0400
+
+    add etablisments page
+
+[33mcommit 3a6019674c49d9dc4bf4f9c4869551fac01b09e2[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Tue Apr 8 06:41:39 2025 +0400
+
+    add etablisments page
+
+[33mcommit 9a1538d996c732b0ea0d3d13bf4f6d680869e0e4[m
+Merge: 2f0ede5 03ae92d
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 20:48:04 2025 +0400
+
+    Merge pull request #5 from jeffMauritius/partner-options
+    
+    add options in partnerfront
+
+[33mcommit 892d91819f314f4e3af074a5a96b69119d3e4758[m
+Merge: 9a443fd bb62c82
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 20:48:04 2025 +0400
+
+    Merge pull request #5 from jeffMauritius/partner-options
+    
+    add options in partnerfront
+
+[33mcommit 03ae92d86f7421219086d35778581bde7d767190[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 20:47:23 2025 +0400
+
+    add options in partnerfront
+
+[33mcommit bb62c82a4a55ae7d5571e95329efe02e3da0843f[m[33m ([m[1;31morigin/partner-options[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 20:47:23 2025 +0400
+
+    add options in partnerfront
+
+[33mcommit 2f0ede5fb49b266e449f8e43e3eadb4cc337d2e2[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 10:21:57 2025 +0400
+
+    fix build
+
+[33mcommit 9a443fd42924ec20d66366596bce518ad4f074e2[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 10:21:57 2025 +0400
+
+    fix build
+
+[33mcommit 47d6ea36d701aef24b09dfbacde08eddedbcde3d[m
+Merge: 2b9973c a5ce2af
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 09:34:57 2025 +0400
+
+    Merge pull request #4 from jeffMauritius/partner-storefront-add-media
+    
+    add media section in partner storefront  media section
+
+[33mcommit 794789022c44ab4192635c445722a6462aabf6f9[m
+Merge: e41cd11 5f272a5
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 09:34:57 2025 +0400
+
+    Merge pull request #4 from jeffMauritius/partner-storefront-add-media
+    
+    add media section in partner storefront  media section
+
+[33mcommit a5ce2af14b85cac71c1e0862038bcdc44ca7f689[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 09:33:34 2025 +0400
+
+    add media section in partner storefront  media section
+
+[33mcommit 5f272a5284571a3581fe50ed32443ea12b60f4f9[m[33m ([m[1;31morigin/partner-storefront-add-media[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 09:33:34 2025 +0400
+
+    add media section in partner storefront  media section
+
+[33mcommit 2b9973cb8231770b2d31c66453d8ee7bf091bb1f[m
+Merge: 1edbf5b 9a2ee47
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 08:19:09 2025 +0400
+
+    Merge pull request #3 from jeffMauritius/add-tabs-partnerfront
+    
+    add tabs for partnerfront to separate informations
+
+[33mcommit e41cd11d82b739755c57a1d71c54cc766b927871[m
+Merge: 8e0acd3 d634957
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 08:19:09 2025 +0400
+
+    Merge pull request #3 from jeffMauritius/add-tabs-partnerfront
+    
+    add tabs for partnerfront to separate informations
+
+[33mcommit 9a2ee477722690b02e5775be1145aaff7342c70a[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 08:18:05 2025 +0400
+
+    add tabs for partnerfront to separate informations
+
+[33mcommit d6349577cbc83c25e368823e5780667a3c8a6e4d[m[33m ([m[1;31morigin/add-tabs-partnerfront[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 08:18:05 2025 +0400
+
+    add tabs for partnerfront to separate informations
+
+[33mcommit 1edbf5bd0c022df3b93377513c5372a879542798[m
+Merge: f735fde 7f55459
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 07:42:35 2025 +0400
+
+    Merge pull request #2 from jeffMauritius/fix-partner
+    
+    fix partnerstypes
+
+[33mcommit 8e0acd36a0853db9cdfd3b865b538881ccbae855[m
+Merge: 8882534 a56dcf0
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 23 07:42:35 2025 +0400
+
+    Merge pull request #2 from jeffMauritius/fix-partner
+    
+    fix partnerstypes
+
+[33mcommit 7f55459ff1d7de159abe699372ad3419d16e19ce[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 07:41:35 2025 +0400
+
+    fix partnerstypes
+
+[33mcommit a56dcf03262726ac60f4d1e2bbcee5812501e604[m[33m ([m[1;31morigin/fix-partner[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 23 07:41:35 2025 +0400
+
+    fix partnerstypes
+
+[33mcommit f735fdee2f1a731c94f0823dd734bcc91c923fca[m
+Merge: 4e7d424 7f2ad53
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sat Mar 22 21:57:33 2025 +0400
+
+    Merge pull request #1 from jeffMauritius/partner-dashboard-storefront
+    
+    wip for partner dashboard storefront
+
+[33mcommit 8882534d8656fb17122fb63cd0d13129dbcdd2c7[m
+Merge: 56e3610 8e74469
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sat Mar 22 21:57:33 2025 +0400
+
+    Merge pull request #1 from jeffMauritius/partner-dashboard-storefront
+    
+    wip for partner dashboard storefront
+
+[33mcommit 7f2ad532e124f387347010e74e5224dd9cd89443[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 22 21:56:38 2025 +0400
+
+    wip for partner dashboard storefront
+
+[33mcommit 8e744697990be3266f7479e051765074b11a9208[m[33m ([m[1;31morigin/partner-dashboard-storefront[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 22 21:56:38 2025 +0400
+
+    wip for partner dashboard storefront
+
+[33mcommit 4e7d42468e99d44cfd51c01eb5f4b837a8330cc2[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 22 10:19:07 2025 +0400
+
+    fix register PARTNER
+
+[33mcommit 56e36101407fc4ceda7b85bb3fe5ad8eab299db5[m[33m ([m[1;31morigin/feature-partner-dashboard-settings[m[33m)[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 22 10:19:07 2025 +0400
+
+    fix register PARTNER
+
+[33mcommit 0fcc86de701ec76e3be2c35f04258d61848dd041[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Fri Mar 21 22:28:20 2025 +0400
+
+    fix authentication
+
+[33mcommit 68a61a848f901c10474d4d1a79ac4b7c770aa2c1[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Fri Mar 21 22:28:20 2025 +0400
+
+    fix authentication
+
+[33mcommit 32646a4a1088110e0c27fafe77a4dbdbf81b4bd9[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Thu Mar 13 19:20:15 2025 +0400
+
+    remove .env
+
+[33mcommit 29128ad27f9d5c6aafca9c82ceeb8f4b86127f85[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Thu Mar 13 19:20:15 2025 +0400
+
+    remove .env
+
+[33mcommit 494ae09e7896c3d868c5d5ec99ce16708e652c8e[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Tue Mar 11 16:33:01 2025 +0400
+
+    fix register
+
+[33mcommit a7dcfbc4a0fee15d9d6784036da57579b98bae7d[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Tue Mar 11 16:33:01 2025 +0400
+
+    fix register
+
+[33mcommit 17a567b76a55ec7a7d4efa39be50f811e788a144[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Tue Mar 11 11:46:33 2025 +0400
+
+    add mongodb
+
+[33mcommit 531cb2849c2a4e693d5572e2742a8a7ba0bce33a[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Tue Mar 11 11:46:33 2025 +0400
+
+    add mongodb
+
+[33mcommit 5c3041af8abd5739964e720c562d871b934f162e[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Tue Mar 11 09:14:53 2025 +0400
+
+    fix front errors
+
+[33mcommit a39c363f777af9b8dce81dcb2edf3cd200f5028f[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Tue Mar 11 09:14:53 2025 +0400
+
+    fix front errors
+
+[33mcommit 4ee59af4da81c5f11899d5a9aa22c844faebde93[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 9 19:16:20 2025 +0400
+
+    install nextauth. and create signin and register
+
+[33mcommit 047b65cb0f3674fbbde7c43026a246b032211f03[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 9 19:16:20 2025 +0400
+
+    install nextauth. and create signin and register
+
+[33mcommit 50d637b58e1010d9594ec75b1e6687b580ab9794[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 9 18:42:35 2025 +0400
+
+    fix build errors after installing prisma
+
+[33mcommit 8d8913e4b517a4001c49837111f5d6094b8ef334[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 9 18:42:35 2025 +0400
+
+    fix build errors after installing prisma
+
+[33mcommit e58bc37efd86713e00d730ada3d3dda05eba6e93[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 9 17:49:58 2025 +0400
+
+    install prisma  mongodb
+
+[33mcommit 550c619b941339c60571a8fcafd518e441597121[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 9 17:49:58 2025 +0400
+
+    install prisma  mongodb
+
+[33mcommit 5a755854092cd50678910535bcec7db9b3c37c10[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sun Mar 9 08:34:08 2025 +0400
+
+    fix build errors
+
+[33mcommit c3384d41a45d794d4d7a106cd913f741ff86e496[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sun Mar 9 07:35:11 2025 +0400
+
+    refacto ui to add shadcn/ui
+
+[33mcommit 237470475d03e65f06a4cb8618337edeabacf768[m
+Author: roussel jeff <167596326+jeffMauritius@users.noreply.github.com>
+Date:   Sat Mar 8 23:20:33 2025 +0400
+
+    downgrade nextjs14 to 13.5.1
+
+[33mcommit 182672f254398b74059e583a2f356b93d2140081[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 8 21:46:27 2025 +0400
+
+    fix build error
+
+[33mcommit 5795c58122edbea668db70ab733694c45d5bb1bf[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 8 20:16:47 2025 +0400
+
+    upgrade to nextjs 14
+
+[33mcommit d2eead5abb0ea9ffdebec46dcf9c68d07be31331[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 8 19:04:10 2025 +0400
+
+    first commit
+
+[33mcommit 9c0f4c044fa34d670e2938dcc0844692461600a5[m
+Author: jeff <jfroussel75@gmail.com>
+Date:   Sat Mar 8 19:03:44 2025 +0400
+
+    first commit
