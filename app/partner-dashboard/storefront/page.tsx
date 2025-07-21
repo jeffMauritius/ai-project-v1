@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { StorefrontForm } from "../components/StorefrontForm"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,6 +37,48 @@ export default function PartnerStorefrontPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const router = useRouter()
+
+  // Valeurs par défaut pour StorefrontForm
+  const defaultStorefront = useMemo(() => ({
+    id: '',
+    companyName: '',
+    description: '',
+    logo: null,
+    isActive: false,
+    serviceType: ServiceType.LIEU,
+    venueType: VenueType.UNKNOWN,
+    billingStreet: '',
+    billingCity: '',
+    billingPostalCode: '',
+    billingCountry: '',
+    siret: '',
+    vatNumber: '',
+    venueAddress: null,
+    venueLatitude: 48.8566,
+    venueLongitude: 2.3522,
+    interventionType: 'all_france',
+    interventionRadius: 50,
+    receptionSpaces: [],
+    receptionOptions: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    userId: session?.user?.id || ''
+  }), [session?.user?.id])
+
+  // Fusionne les données de la BDD avec les valeurs par défaut
+  const storefrontFormData = useMemo(() => {
+    return storefront
+      ? {
+          ...defaultStorefront,
+          ...storefront,
+          venueLatitude: 'venueLatitude' in storefront && storefront.venueLatitude !== null ? storefront.venueLatitude : 48.8566,
+          venueLongitude: 'venueLongitude' in storefront && storefront.venueLongitude !== null ? storefront.venueLongitude : 2.3522,
+          interventionRadius: 'interventionRadius' in storefront && storefront.interventionRadius !== null ? storefront.interventionRadius : 50,
+          receptionSpaces: 'receptionSpaces' in storefront ? (storefront as any).receptionSpaces : [],
+          receptionOptions: 'receptionOptions' in storefront ? (storefront as any).receptionOptions : {},
+        }
+      : defaultStorefront;
+  }, [storefront, defaultStorefront]);
 
   useEffect(() => {
     const fetchStorefrontData = async () => {
@@ -101,46 +143,6 @@ export default function PartnerStorefrontPage() {
       </div>
     )
   }
-
-  // Valeurs par défaut pour StorefrontForm
-  const defaultStorefront = {
-    id: '',
-    companyName: '',
-    description: '',
-    logo: null,
-    isActive: false,
-    serviceType: ServiceType.LIEU,
-    venueType: VenueType.UNKNOWN,
-    billingStreet: '',
-    billingCity: '',
-    billingPostalCode: '',
-    billingCountry: '',
-    siret: '',
-    vatNumber: '',
-    venueAddress: null,
-    venueLatitude: 48.8566,
-    venueLongitude: 2.3522,
-    interventionType: 'all_france',
-    interventionRadius: 50,
-    receptionSpaces: [],
-    receptionOptions: {},
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: session?.user?.id || ''
-  }
-
-  // Fusionne les données de la BDD avec les valeurs par défaut
-  const storefrontFormData = storefront
-    ? {
-        ...defaultStorefront,
-        ...storefront,
-        venueLatitude: 'venueLatitude' in storefront && storefront.venueLatitude !== null ? storefront.venueLatitude : 48.8566,
-        venueLongitude: 'venueLongitude' in storefront && storefront.venueLongitude !== null ? storefront.venueLongitude : 2.3522,
-        interventionRadius: 'interventionRadius' in storefront && storefront.interventionRadius !== null ? storefront.interventionRadius : 50,
-        receptionSpaces: 'receptionSpaces' in storefront ? (storefront as any).receptionSpaces : [],
-        receptionOptions: 'receptionOptions' in storefront ? (storefront as any).receptionOptions : {},
-      }
-    : defaultStorefront;
 
   return (
     <Card>

@@ -96,6 +96,12 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
       for (const provider of relevantProviders) {
         if (!provider) continue;
         
+        // Éviter de recharger si déjà chargé
+        if (providerOptions[provider.value]) {
+          newProviderOptions[provider.value] = providerOptions[provider.value];
+          continue;
+        }
+        
         console.log(`[OptionsTab] Chargement des options pour ${provider.value} depuis ${provider.optionsFile}.json`);
         newLoading[provider.value] = true;
         try {
@@ -116,7 +122,7 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
     if (relevantProviders.length > 0) {
       loadRelevantProviderOptions();
     }
-  }, [relevantProviders]);
+  }, [storefrontData?.serviceType]); // Dépendance uniquement sur le type de service
 
   const handleSaveOptions = (providerType: string, data: any) => {
     const updatedData = {
