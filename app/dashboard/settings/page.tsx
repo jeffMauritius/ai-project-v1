@@ -9,7 +9,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"
 import { CardDescription } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ImageIcon, FileIcon as GoogleIcon, Facebook, Apple } from "lucide-react"
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useToast } from "@/components/ui/use-toast"
 import {
   Dialog,
@@ -165,16 +165,19 @@ export default function Settings() {
       
       toast({
         title: "Compte supprimé",
-        description: "Votre compte a été supprimé avec succès. Vous allez être redirigé vers la page de connexion.",
+        description: "Votre compte a été supprimé avec succès. Vous allez être déconnecté et redirigé vers la page de connexion.",
       })
 
-      // Close dialog and redirect to login page
+      // Close dialog and reset
       setIsDeleteDialogOpen(false)
       setDeleteEmail("")
       
-      // Redirect to login page after a short delay
-      setTimeout(() => {
-        window.location.href = '/auth/login'
+      // Sign out the user and redirect to login page
+      setTimeout(async () => {
+        await signOut({ 
+          redirect: true,
+          callbackUrl: '/auth/login'
+        })
       }, 2000)
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
