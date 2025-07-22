@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,8 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"
 import { CardDescription } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ImageIcon, FileIcon as GoogleIcon, Facebook, Apple } from "lucide-react"
+import { useSession } from 'next-auth/react'
+import { useToast } from "@/components/ui/use-toast"
 import {
   Dialog,
   DialogContent,
@@ -20,10 +22,12 @@ import {
 } from "@/components/ui/dialog"
 
 export default function Settings() {
-  const [isEditing, setIsEditing] = useState(false)
+  const { data: session, update } = useSession()
+  const { toast } = useToast()
   const [avatarUrl, setAvatarUrl] = useState("https://github.com/shadcn.png")
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const [notifications, setNotifications] = useState({
     email: {
       newMessage: true,
@@ -42,6 +46,93 @@ export default function Settings() {
     }
   })
 
+  // Update avatar URL when session changes
+  useEffect(() => {
+    if (session?.user?.image) {
+      setAvatarUrl(session.user.image)
+    }
+  }, [session?.user?.image])
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/gif', 'image/png']
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Type de fichier non supporté",
+        description: "Veuillez sélectionner un fichier JPG, GIF ou PNG.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate file size (1MB max)
+    if (file.size > 1 * 1024 * 1024) {
+      toast({
+        title: "Fichier trop volumineux",
+        description: "La taille du fichier ne doit pas dépasser 1MB.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSelectedFile(file)
+  }
+
+  const handleAvatarUpload = async () => {
+    if (!selectedFile) return
+
+    setIsUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+
+      const response = await fetch('/api/user/avatar', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.text()
+        throw new Error(errorData || 'Erreur lors de l\'upload')
+      }
+
+      const data = await response.json()
+      
+      // Update the avatar URL
+      setAvatarUrl(data.avatarUrl)
+      
+      // Update the session to reflect the new avatar
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          image: data.avatarUrl
+        }
+      })
+
+      toast({
+        title: "Succès",
+        description: "Votre photo de profil a été mise à jour avec succès.",
+      })
+
+      // Close dialog and reset
+      setIsUploadDialogOpen(false)
+      setSelectedFile(null)
+    } catch (error) {
+      console.error('Erreur lors de l\'upload:', error)
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de l'upload.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Paramètres du compte</h1>
@@ -55,7 +146,7 @@ export default function Settings() {
           <div className="flex items-center gap-6 mb-6">
             <Avatar className="h-24 w-24">
               <AvatarImage src={avatarUrl} />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarFallback>{session?.user?.name?.[0] || "U"}</AvatarFallback>
             </Avatar>
             <div>
               <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
@@ -75,7 +166,7 @@ export default function Settings() {
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
                         <AvatarImage src={selectedFile ? URL.createObjectURL(selectedFile) : avatarUrl} />
-                        <AvatarFallback>JD</AvatarFallback>
+                        <AvatarFallback>{session?.user?.name?.[0] || "U"}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <label 
@@ -96,15 +187,18 @@ export default function Settings() {
                             name="picture"
                             type="file"
                             className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) setSelectedFile(file)
-                            }}
+                            accept="image/jpeg,image/jpg,image/gif,image/png"
+                            onChange={handleFileSelect}
                           />
                         </label>
                       </div>
                     </div>
+                    {selectedFile && (
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <p>Fichier sélectionné: {selectedFile.name}</p>
+                        <p>Taille: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                    )}
                   </div>
                   <DialogFooter>
                     <Button
@@ -113,20 +207,15 @@ export default function Settings() {
                         setSelectedFile(null)
                         setIsUploadDialogOpen(false)
                       }}
+                      disabled={isUploading}
                     >
                       Annuler
                     </Button>
                     <Button
-                      onClick={() => {
-                        if (selectedFile) {
-                          setAvatarUrl(URL.createObjectURL(selectedFile))
-                          setIsUploadDialogOpen(false)
-                          setSelectedFile(null)
-                        }
-                      }}
-                      disabled={!selectedFile}
+                      onClick={handleAvatarUpload}
+                      disabled={!selectedFile || isUploading}
                     >
-                      Enregistrer
+                      {isUploading ? 'Enregistrement...' : 'Enregistrer'}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -137,32 +226,20 @@ export default function Settings() {
             </div>
           </div>
         <form className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="space-y-6">
             <div>
-              <Label htmlFor="firstname" className="text-gray-700 dark:text-gray-300">
-                Prénom
+              <Label htmlFor="fullname" className="text-gray-700 dark:text-gray-300">
+                Nom complet
               </Label>
               <Input
-                id="firstname"
+                id="fullname"
                 type="text"
                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                defaultValue="John"
-                disabled={!isEditing}
+                value={session?.user?.name || ''}
+                disabled={true}
               />
             </div>
             <div>
-              <Label htmlFor="lastname" className="text-gray-700 dark:text-gray-300">
-                Nom
-              </Label>
-              <Input
-                id="lastname"
-                type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                defaultValue="Doe"
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="sm:col-span-2">
               <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
                 Email
               </Label>
@@ -170,36 +247,10 @@ export default function Settings() {
                 id="email"
                 type="email"
                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                defaultValue="john.doe@example.com"
-                disabled={!isEditing}
+                value={session?.user?.email || ''}
+                disabled={true}
               />
             </div>
-          </div>
-          <div className="flex justify-end">
-            {isEditing ? (
-              <>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="mr-3"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
-                >
-                  Enregistrer
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                onClick={() => setIsEditing(true)}
-              >
-                Modifier
-              </Button>
-            )}
           </div>
         </form>
         </CardContent>
