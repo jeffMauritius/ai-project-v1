@@ -100,7 +100,7 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
       const dataToSend = {
         ...formData,
         serviceType: formData.serviceType as ServiceType,
-        venueType: formData.venueType as VenueType,
+        venueType: formData.serviceType !== ServiceType.LIEU ? VenueType.UNKNOWN : formData.venueType as VenueType,
         venueLatitude: Number(formData.venueLatitude),
         venueLongitude: Number(formData.venueLongitude),
         interventionRadius: Number(formData.interventionRadius),
