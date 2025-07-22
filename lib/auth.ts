@@ -126,7 +126,7 @@ export const authOptions: NextAuthOptions = {
         case 'ADMIN':
           return `${baseUrl}/admin/dashboard`
         default:
-          return `${baseUrl}/dashboard`
+          return `${baseUrl}/dashboard/settings`
       }
     },
   },
