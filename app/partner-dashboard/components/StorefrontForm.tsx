@@ -196,24 +196,26 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="venueType">Type de lieu</Label>
-            <Select
-              value={formData.venueType || 'UNKNOWN'}
-              onValueChange={(value: VenueType) => setFormData({ ...formData, venueType: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type de lieu" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(VenueType).map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {formData.serviceType === 'LIEU' && (
+            <div className="space-y-2">
+              <Label htmlFor="venueType">Type de lieu</Label>
+              <Select
+                value={formData.venueType || 'UNKNOWN'}
+                onValueChange={(value: VenueType) => setFormData({ ...formData, venueType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez un type de lieu" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(VenueType).map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2">
             <Switch
