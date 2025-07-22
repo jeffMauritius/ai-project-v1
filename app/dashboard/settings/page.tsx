@@ -28,6 +28,9 @@ export default function Settings() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deleteEmail, setDeleteEmail] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
   const [notifications, setNotifications] = useState({
     email: {
       newMessage: true,
@@ -130,6 +133,58 @@ export default function Settings() {
       })
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deleteEmail) {
+      toast({
+        title: "Email requis",
+        description: "Veuillez entrer votre adresse email pour confirmer la suppression.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch('/api/user/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: deleteEmail }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.text()
+        throw new Error(errorData || 'Erreur lors de la suppression du compte')
+      }
+
+      const data = await response.json()
+      
+      toast({
+        title: "Compte supprimé",
+        description: "Votre compte a été supprimé avec succès. Vous allez être redirigé vers la page de connexion.",
+      })
+
+      // Close dialog and redirect to login page
+      setIsDeleteDialogOpen(false)
+      setDeleteEmail("")
+      
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        window.location.href = '/auth/login'
+      }, 2000)
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error)
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression du compte.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -546,6 +601,7 @@ export default function Settings() {
               <Button 
                 variant="destructive"
                 className="w-full sm:w-auto"
+                onClick={() => setIsDeleteDialogOpen(true)}
               >
                 Supprimer mon compte
               </Button>
@@ -553,6 +609,69 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de confirmation de suppression de compte */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 dark:text-red-400">
+              Confirmer la suppression du compte
+            </DialogTitle>
+            <DialogDescription>
+              Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="delete-email" className="text-gray-700 dark:text-gray-300">
+                Confirmez votre adresse email
+              </Label>
+              <Input
+                id="delete-email"
+                type="email"
+                placeholder="Entrez votre adresse email"
+                value={deleteEmail}
+                onChange={(e) => setDeleteEmail(e.target.value)}
+                className="w-full"
+              />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Pour confirmer la suppression, veuillez entrer votre adresse email : <strong>{session?.user?.email}</strong>
+              </p>
+            </div>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium mb-2">
+                ⚠️ Attention : Cette action supprimera définitivement :
+              </p>
+              <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
+                <li>• Toutes vos informations personnelles</li>
+                <li>• Votre historique de messages et conversations</li>
+                <li>• Vos préférences et paramètres</li>
+                <li>• Vos listes et favoris</li>
+                <li>• Toutes vos données de profil</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false)
+                setDeleteEmail("")
+              }}
+              disabled={isDeleting}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={!deleteEmail || isDeleting}
+            >
+              {isDeleting ? 'Suppression...' : 'Supprimer définitivement'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
     </div>
   )
