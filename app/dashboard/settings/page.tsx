@@ -104,10 +104,10 @@ export default function Settings() {
 
       const data = await response.json()
       
-      // Update the avatar URL
+      // Update the avatar URL immediately
       setAvatarUrl(data.avatarUrl)
       
-      // Update the session to reflect the new avatar
+      // Update the session with the new avatar URL
       await update({
         ...session,
         user: {
@@ -115,7 +115,7 @@ export default function Settings() {
           image: data.avatarUrl
         }
       })
-
+      
       toast({
         title: "Succès",
         description: "Votre photo de profil a été mise à jour avec succès.",
