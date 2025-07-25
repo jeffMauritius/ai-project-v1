@@ -2,11 +2,21 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { EnvelopeIcon, LockClosedIcon, UserIcon, BuildingStorefrontIcon, IdentificationIcon } from '@heroicons/react/24/outline'
+import { BuildingStorefrontIcon } from '@heroicons/react/24/outline'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useState, useEffect } from 'react'
 
 const partnerTypes = [
@@ -29,6 +39,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const router = useRouter()
   
   useEffect(() => {
@@ -104,7 +115,7 @@ export default function Register() {
             }`}
           >
             <div className="flex items-center justify-center">
-              <UserIcon className="h-5 w-5 mr-2" />
+              <BuildingStorefrontIcon className="h-5 w-5 mr-2" />
               Futur marié
             </div>
           </button>
@@ -134,38 +145,28 @@ export default function Register() {
             <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">
               Nom complet
             </Label>
-            <div className="mt-1 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UserIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </div>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="pl-10"
-                placeholder="John Doe"
-              />
-            </div>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              required
+              className="mt-1"
+              placeholder="John Doe"
+            />
           </div>
           <div>
             <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
               Adresse email
             </Label>
-            <div className="mt-1 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <EnvelopeIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </div>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="pl-10"
-                placeholder="vous@exemple.fr"
-              />
-            </div>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              className="mt-1"
+              placeholder="vous@exemple.fr"
+            />
           </div>
 
           {accountType === 'partner' && (
@@ -190,20 +191,15 @@ export default function Register() {
                 <Label htmlFor="siret" className="text-gray-700 dark:text-gray-300">
                   Numéro SIRET
                 </Label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <IdentificationIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                  </div>
-                  <Input
-                    id="siret"
-                    name="siret"
-                    type="text"
-                    required
-                    pattern="[0-9]{14}"
-                    className="pl-10"
-                    placeholder="12345678901234"
-                  />
-                </div>
+                <Input
+                  id="siret"
+                  name="siret"
+                  type="text"
+                  required
+                  pattern="[0-9]{14}"
+                  className="mt-1"
+                  placeholder="12345678901234"
+                />
                 <p className="mt-1 text-xs text-gray-500">Format : 14 chiffres sans espaces</p>
               </div>
             </>
@@ -213,40 +209,30 @@ export default function Register() {
             <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
               Mot de passe
             </Label>
-            <div className="mt-1 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="pl-10"
-                placeholder="••••••••"
-              />
-            </div>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              className="mt-1"
+              placeholder="••••••••"
+            />
           </div>
 
           <div>
             <Label htmlFor="password-confirmation" className="text-gray-700 dark:text-gray-300">
               Confirmer le mot de passe
             </Label>
-            <div className="mt-1 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </div>
-              <Input
-                id="password-confirmation"
-                name="password-confirmation"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="pl-10"
-                placeholder="••••••••"
-              />
-            </div>
+            <Input
+              id="password-confirmation"
+              name="password-confirmation"
+              type="password"
+              autoComplete="new-password"
+              required
+              className="mt-1"
+              placeholder="••••••••"
+            />
           </div>
 
           <div className="flex items-center">
@@ -257,9 +243,13 @@ export default function Register() {
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
               J&apos;accepte les{' '}
-              <Link href="/legal/terms" className="font-medium text-pink-600 hover:text-pink-500">
+              <button
+                type="button"
+                onClick={() => setIsTermsModalOpen(true)}
+                className="font-medium text-pink-600 hover:text-pink-500"
+              >
                 conditions d&apos;utilisation
-              </Link>
+              </button>
             </label>
           </div>
 
@@ -274,6 +264,87 @@ export default function Register() {
           </div>
         </form>
       </div>
+
+      {/* Modal des conditions d'utilisation */}
+      <Dialog open={isTermsModalOpen} onOpenChange={setIsTermsModalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Conditions d'utilisation</DialogTitle>
+            <DialogDescription>
+              Veuillez lire attentivement les conditions d'utilisation avant de créer votre compte.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <h3>1. Acceptation des conditions</h3>
+              <p>
+                En créant un compte sur MonMariage.ai, vous acceptez d'être lié par ces conditions d'utilisation. 
+                Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre service.
+              </p>
+
+              <h3>2. Description du service</h3>
+              <p>
+                MonMariage.ai est une plateforme qui met en relation les futurs mariés avec des prestataires 
+                de services de mariage. Nous facilitons la recherche, la comparaison et la réservation de 
+                services pour votre mariage.
+              </p>
+
+              <h3>3. Compte utilisateur</h3>
+              <p>
+                Vous êtes responsable de maintenir la confidentialité de vos informations de connexion 
+                et de toutes les activités qui se produisent sous votre compte. Vous devez nous notifier 
+                immédiatement toute utilisation non autorisée de votre compte.
+              </p>
+
+              <h3>4. Utilisation acceptable</h3>
+              <p>
+                Vous vous engagez à utiliser notre service uniquement à des fins légales et conformes 
+                à ces conditions. Vous ne devez pas utiliser notre service pour :
+              </p>
+              <ul>
+                <li>Violer toute loi applicable</li>
+                <li>Harceler, abuser ou nuire à d'autres utilisateurs</li>
+                <li>Transmettre du contenu offensant ou inapproprié</li>
+                <li>Tenter d'accéder non autorisé à nos systèmes</li>
+              </ul>
+
+              <h3>5. Protection des données</h3>
+              <p>
+                Nous nous engageons à protéger vos données personnelles conformément à notre politique 
+                de confidentialité. Vos informations ne seront utilisées que dans le cadre de la 
+                fourniture de nos services.
+              </p>
+
+              <h3>6. Limitation de responsabilité</h3>
+              <p>
+                MonMariage.ai agit comme intermédiaire entre les utilisateurs et les prestataires. 
+                Nous ne sommes pas responsables de la qualité des services fournis par les prestataires 
+                ou des accords conclus entre utilisateurs et prestataires.
+              </p>
+
+              <h3>7. Modifications</h3>
+              <p>
+                Nous nous réservons le droit de modifier ces conditions à tout moment. Les modifications 
+                entrent en vigueur dès leur publication sur notre site.
+              </p>
+
+              <h3>8. Contact</h3>
+              <p>
+                Pour toute question concernant ces conditions d'utilisation, veuillez nous contacter 
+                à l'adresse suivante : contact@monmariage.ai
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setIsTermsModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              J'ai compris
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

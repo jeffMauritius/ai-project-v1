@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     } else if (token.role === "ADMIN") {
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     } else {
-      return NextResponse.redirect(new URL("/dashboard/planning", request.url));
+      return NextResponse.redirect(new URL("/dashboard/settings", request.url));
     }
   }
 
@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
   // Si l'utilisateur est connecté mais essaie d'accéder à une page non autorisée
   if (token) {
     if (token.role === "USER" && (isPartnerPage || isAdminPage)) {
-      return NextResponse.redirect(new URL("/dashboard/planning", request.url));
+      return NextResponse.redirect(new URL("/dashboard/settings", request.url));
     }
     if (token.role === "PARTNER" && (isDashboardPage || isAdminPage)) {
       return NextResponse.redirect(new URL("/partner-dashboard", request.url));
