@@ -20,7 +20,8 @@ export default function Login() {
 
   useEffect(() => {
     if (session?.user) {
-      const callbackUrl = searchParams.get('callbackUrl') || '/dashboard/settings'
+      const callbackUrl = searchParams.get('callbackUrl') || 
+        (session.user.role === 'PARTNER' ? '/partner-dashboard/settings' : '/dashboard/settings')
       router.push(callbackUrl)
     }
   }, [session, router, searchParams])
@@ -49,8 +50,8 @@ export default function Login() {
           description: "Email ou mot de passe incorrect",
         })
       } else if (result?.ok) {
-        const callbackUrl = searchParams.get('callbackUrl') || '/dashboard/settings'
-        router.push(callbackUrl)
+        // La redirection sera gérée par le useEffect qui détecte le changement de session
+        // Le callback sera déterminé en fonction du rôle de l'utilisateur
       }
     } catch (error) {
       setError('Une erreur est survenue')

@@ -68,6 +68,18 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
+  // Pré-remplir les données avec celles de la session si elles sont vides
+  useEffect(() => {
+    if (session?.user && (!formData.companyName || !formData.siret)) {
+      setFormData(prev => ({
+        ...prev,
+        companyName: prev.companyName || session.user.name || '',
+        siret: prev.siret || '',
+        // Le type de service est déjà défini dans storefront.serviceType
+      }))
+    }
+  }, [session, formData.companyName, formData.siret])
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log("TinyMCE API KEY:", process.env.NEXT_PUBLIC_TINY_MCE_API_KEY)
@@ -78,6 +90,7 @@ export function StorefrontForm({ storefront }: StorefrontFormProps) {
   console.log('[StorefrontForm] Type de service:', storefront.serviceType)
   console.log('[StorefrontForm] Options de réception:', storefront.receptionOptions)
   console.log('[StorefrontForm] Espaces de réception:', storefront.receptionSpaces)
+  console.log('[StorefrontForm] Session utilisateur:', session?.user)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

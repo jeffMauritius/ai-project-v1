@@ -34,6 +34,7 @@ export default function PartnerStorefrontPage() {
   const { data: session } = useSession()
   const { toast } = useToast()
   const [storefront, setStorefront] = useState<PartnerStorefront | null>(null)
+  const [partnerData, setPartnerData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const router = useRouter()
@@ -41,17 +42,17 @@ export default function PartnerStorefrontPage() {
   // Valeurs par défaut pour StorefrontForm
   const defaultStorefront = useMemo(() => ({
     id: '',
-    companyName: '',
+    companyName: partnerData?.user?.name || session?.user?.name || '',
     description: '',
     logo: null,
     isActive: false,
-    serviceType: ServiceType.LIEU,
+    serviceType: storefront?.serviceType || ServiceType.LIEU,
     venueType: VenueType.UNKNOWN,
     billingStreet: '',
     billingCity: '',
     billingPostalCode: '',
-    billingCountry: '',
-    siret: '',
+    billingCountry: 'France',
+    siret: partnerData?.storefront?.siret || '',
     vatNumber: '',
     venueAddress: null,
     venueLatitude: 48.8566,
@@ -63,7 +64,7 @@ export default function PartnerStorefrontPage() {
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: session?.user?.id || ''
-  }), [session?.user?.id])
+  }), [session?.user?.id, session?.user?.name, partnerData, storefront?.serviceType])
 
   // Fusionne les données de la BDD avec les valeurs par défaut
   const storefrontFormData = useMemo(() => {
@@ -83,6 +84,14 @@ export default function PartnerStorefrontPage() {
   useEffect(() => {
     const fetchStorefrontData = async () => {
       try {
+        // Récupérer les données du partenaire
+        const partnerResponse = await fetch("/api/user/partner-data")
+        if (partnerResponse.ok) {
+          const partnerDataResult = await partnerResponse.json()
+          setPartnerData(partnerDataResult)
+        }
+
+        // Récupérer les données de la vitrine
         const response = await fetch("/api/partner-storefront")
         if (response.ok) {
           const data = await response.json()

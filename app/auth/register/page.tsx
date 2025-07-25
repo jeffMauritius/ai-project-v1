@@ -59,19 +59,29 @@ export default function Register() {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const name = formData.get('name') as string
+    const partnerType = formData.get('partner-type') as string
+    const siret = formData.get('siret') as string
     
     try {
+      const requestBody: any = {
+        email,
+        password,
+        name,
+        role: accountType === 'partner' ? 'PARTNER' : 'USER'
+      }
+
+      // Ajouter les données spécifiques aux partenaires
+      if (accountType === 'partner') {
+        requestBody.partnerType = partnerType
+        requestBody.siret = siret
+      }
+
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email,
-          password,
-          name,
-          role: accountType === 'partner' ? 'PARTNER' : 'USER'
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
@@ -79,7 +89,6 @@ export default function Register() {
       if (!response.ok) {
         throw new Error(data.error || 'Une erreur est survenue')
       }
-
 
       router.push('/auth/login')
     } catch (error) {
