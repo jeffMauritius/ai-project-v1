@@ -20,7 +20,7 @@ export default function Login() {
 
   useEffect(() => {
     if (session?.user) {
-      const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+      const callbackUrl = searchParams.get('callbackUrl') || '/dashboard/settings'
       router.push(callbackUrl)
     }
   }, [session, router, searchParams])
@@ -49,7 +49,7 @@ export default function Login() {
           description: "Email ou mot de passe incorrect",
         })
       } else if (result?.ok) {
-        const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+        const callbackUrl = searchParams.get('callbackUrl') || '/dashboard/settings'
         router.push(callbackUrl)
       }
     } catch (error) {
