@@ -6,23 +6,26 @@ import { z } from "zod"
 import { ServiceType, VenueType } from "@prisma/client"
 
 const storefrontSchema = z.object({
-  companyName: z.string().min(1, "Le nom de l'entreprise est requis"),
-  description: z.string().min(1, "La description est requise"),
-  serviceType: z.nativeEnum(ServiceType),
-  venueType: z.nativeEnum(VenueType).optional(),
-  billingStreet: z.string().min(1, "L'adresse de facturation est requise"),
-  billingCity: z.string().min(1, "La ville de facturation est requise"),
-  billingPostalCode: z.string().min(1, "Le code postal de facturation est requis"),
-  billingCountry: z.string().min(1, "Le pays de facturation est requis"),
-  siret: z.string().min(1, "Le numéro SIRET est requis"),
-  vatNumber: z.string().min(1, "Le numéro de TVA est requis"),
-  venueAddress: z.string().optional(),
-  venueLatitude: z.number().optional(),
-  venueLongitude: z.number().optional(),
-  interventionType: z.string().default("all_france"),
-  interventionRadius: z.number().optional().default(50),
-  logo: z.string().optional(),
-  isActive: z.boolean().default(false),
+  companyName: z.string().min(1, "Le nom de l'entreprise est requis").max(100, "Le nom de l'entreprise ne peut pas dépasser 100 caractères"),
+  description: z.string().min(10, "La description doit contenir au moins 10 caractères").max(2000, "La description ne peut pas dépasser 2000 caractères"),
+  serviceType: z.nativeEnum(ServiceType, {
+    errorMap: () => ({ message: "Veuillez sélectionner un type de service valide" })
+  }),
+  venueType: z.nativeEnum(VenueType).nullable(),
+  billingStreet: z.string().min(1, "L'adresse de facturation est requise").max(200, "L'adresse de facturation ne peut pas dépasser 200 caractères"),
+  billingCity: z.string().min(1, "La ville est requise").max(100, "La ville ne peut pas dépasser 100 caractères"),
+  billingPostalCode: z.string().min(1, "Le code postal est requis").regex(/^\d{5}$/, "Le code postal doit contenir 5 chiffres"),
+  billingCountry: z.string().min(1, "Le pays est requis").max(100, "Le pays ne peut pas dépasser 100 caractères"),
+  siret: z.string().min(1, "Le numéro SIRET est requis").regex(/^\d{14}$/, "Le numéro SIRET doit contenir exactement 14 chiffres"),
+  vatNumber: z.string().min(1, "Le numéro de TVA est requis").regex(/^[A-Z]{2}[0-9A-Z]+$/, "Le numéro de TVA doit commencer par 2 lettres majuscules suivies de chiffres et lettres"),
+  venueAddress: z.string().nullable(),
+  venueLatitude: z.number().min(-90).max(90),
+  venueLongitude: z.number().min(-180).max(180),
+  interventionType: z.string().min(1, "Le type d'intervention est requis"),
+  interventionRadius: z.number().min(1, "Le rayon d'intervention doit être supérieur à 0").max(1000, "Le rayon d'intervention ne peut pas dépasser 1000 km"),
+  isActive: z.boolean(),
+  logo: z.string().nullable(),
+  id: z.string().optional(),
 })
 
 export async function GET(request: Request) {
@@ -197,10 +200,13 @@ export async function PUT(request: Request) {
       return new NextResponse("Vitrine non trouvée", { status: 404 })
     }
 
+    // Préparer les données pour la mise à jour (exclure les champs non modifiables)
+    const { id, ...updateData } = validatedData
+
     // Mettre à jour la vitrine
     const updatedStorefront = await prisma.partnerStorefront.update({
       where: { userId: user.id },
-      data: validatedData,
+      data: updateData,
       include: {
         media: true,
         receptionSpaces: true,
