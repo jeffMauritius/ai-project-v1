@@ -1,66 +1,35 @@
 {
-  "costume_marie": {
+  "costume_marié": {
     "sections": [
       {
         "section_id": 1,
-        "title": "Produits et services proposés",
+        "title": "Produits et services",
         "questions": [
           {
             "question_id": 1,
             "content": "Quels produits et services proposez-vous ?",
             "component_type": "checkbox",
-            "options": [
-              "Vente de costumes de marié",
-              "Conception et fabrication de costumes de marié",
-              "Location de costumes de marié",
-              "Conception et fabrication d'accessoires pour le marié",
-              "Vente de costumes de témoin",
-              "Conception et fabrication de costumes de témoin",
-              "Conseil en image et en stylisme",
-              "Vente d'accessoires pour mariés",
-              "Autres"
-            ],
+            "options": ["Vente de costumes de marié", "Conception et fabrication de costumes de marié", "Location de costumes de marié", "Conception et fabrication d'accessoires pour le marié", "Vente de costumes de témoin", "Conception et fabrication de costumes de témoin", "Conseil en image et en stylisme", "Vente d'accessoires pour mariés", "Autres"],
             "required": true
+          },
+          {
+            "question_id": 2,
+            "content": "Quels styles de costumes offrez-vous ?",
+            "component_type": "checkbox",
+            "options": ["Costume classique", "Jaquette", "Queue-de-pie", "Redingote", "Redingote courte", "Smoking"],
+            "required": false
           }
         ]
       },
       {
         "section_id": 2,
-        "title": "Styles de costumes",
-        "questions": [
-          {
-            "question_id": 2,
-            "content": "Quels styles de costumes offrez-vous ?",
-            "component_type": "checkbox",
-            "options": [
-              "Costume classique",
-              "Jaquette",
-              "Queue-de-pie",
-              "Redingote",
-              "Redingote courte",
-              "Smoking"
-            ],
-            "required": true
-          }
-        ]
-      },
-      {
-        "section_id": 3,
-        "title": "Accessoires pour mariés",
+        "title": "Accessoires",
         "questions": [
           {
             "question_id": 3,
             "content": "Quels accessoires pour mariés proposez-vous ?",
             "component_type": "checkbox",
-            "options": [
-              "Chaussures",
-              "Cravates",
-              "Gilets",
-              "Bijoux",
-              "Bretelles",
-              "Boutons de manchette",
-              "Autres"
-            ],
+            "options": ["Chaussures", "Cravates", "Gilets", "Bijoux", "Bretelles", "Boutons de manchette", "Autres"],
             "required": false
           }
         ]
