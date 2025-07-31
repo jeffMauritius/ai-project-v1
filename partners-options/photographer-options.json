@@ -3,12 +3,19 @@
     "sections": [
       {
         "section_id": 1,
+<<<<<<< HEAD
+        "title": "Styles et techniques",
+=======
         "title": "Style et techniques",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 1,
             "content": "Quels styles de photos réalisez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Traditionnel", "Artistique", "Photojournalisme", "D'auteur", "Reportage", "Posé", "Documentaire", "Autres"],
+=======
             "options": [
               "Traditionnel",
               "Artistique",
@@ -19,24 +26,33 @@
               "Documentaire",
               "Autres"
             ],
+>>>>>>> origin/main
             "required": true
           },
           {
             "question_id": 2,
             "content": "Quelles techniques proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Numérique", "Argentique", "Autres"],
+            "required": false
+=======
             "options": [
               "Numérique",
               "Argentique",
               "Autres"
             ],
             "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 3,
             "content": "Quel type de matériel utilisez-vous ?",
             "component_type": "textarea",
+<<<<<<< HEAD
+=======
             "field_type": "text",
+>>>>>>> origin/main
             "required": false
           }
         ]
@@ -49,6 +65,16 @@
             "question_id": 4,
             "content": "Quels services complémentaires proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Photographie", "Vidéo", "Séance d'engagement", "Après le mariage", "Drone", "Streaming vidéo en direct", "Remise du matériel en format numérique", "Matériel sur clé USB", "Album", "Mini album", "Album digital", "Photos en haute résolution", "Négatifs", "Blu-ray ou DVD avec toutes les photographies", "Photocall", "Photomaton", "Autres"],
+            "required": false
+          },
+          {
+            "question_id": 5,
+            "content": "Disposez-vous d'une plateforme pour partager les photos en ligne ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+=======
             "options": [
               "Photographie",
               "Vidéo",
@@ -68,12 +94,25 @@
               "Photomaton",
               "Autres"
             ],
+>>>>>>> origin/main
             "required": false
           }
         ]
       },
       {
         "section_id": 3,
+<<<<<<< HEAD
+        "title": "Tarification et délais",
+        "questions": [
+          {
+            "question_id": 6,
+            "content": "Quel est le temps approximatif de livraison du reportage final ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 3-4 semaines",
+            "required": false
+          },
+=======
         "title": "Livraison et plateforme",
         "questions": [
           {
@@ -107,11 +146,15 @@
         "section_id": 4,
         "title": "Forfaits et tarification",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 7,
             "content": "Quels sont les services inclus dans le forfait mariage ?",
             "component_type": "textarea",
+<<<<<<< HEAD
+=======
             "field_type": "text",
+>>>>>>> origin/main
             "required": false
           },
           {
@@ -121,11 +164,45 @@
             "field_type": "number",
             "unit": "€",
             "required": true
+<<<<<<< HEAD
+          }
+        ]
+      },
+      {
+        "section_id": 4,
+        "title": "Conditions de travail",
+        "questions": [
+          {
+            "question_id": 9,
+            "content": "Pouvez-vous vous déplacer ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "question_id": 10,
+            "content": "Facturez-vous les déplacements ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+=======
+>>>>>>> origin/main
           },
           {
             "question_id": 11,
             "content": "Facturez-vous par heure ou par événement ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Heure", "Événement"],
+            "required": false
+          },
+          {
+            "question_id": 12,
+            "content": "Si besoin est, accepteriez-vous de faire des heures supplémentaires ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Heure",
               "Événement"
@@ -182,6 +259,7 @@
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 13,
@@ -190,6 +268,9 @@
             "field_type": "number",
             "unit": "€/heure",
             "required": false
+<<<<<<< HEAD
+          },
+=======
           }
         ]
       },
@@ -197,15 +278,21 @@
         "section_id": 7,
         "title": "Sécurité et remplacement",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 14,
             "content": "Avez-vous un remplaçant en cas d'empêchement ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Oui",
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       }

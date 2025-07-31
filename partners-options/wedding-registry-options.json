@@ -9,6 +9,17 @@
             "question_id": 1,
             "content": "Quels sont les produits que vous proposez ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Liste de mariage", "Mobilier", "Luminaire", "Grand électroménager", "Petit électroménager", "Objets pour la maison", "Décoration", "Autres"],
+            "required": true
+          },
+          {
+            "question_id": 2,
+            "content": "Proposez-vous des listes de mariage en ligne ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Liste de mariage",
               "Mobilier",
@@ -20,11 +31,15 @@
               "Autres"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 2,
+<<<<<<< HEAD
+        "title": "Contact et showroom",
+=======
         "title": "Services en ligne",
         "questions": [
           {
@@ -42,10 +57,18 @@
       {
         "section_id": 3,
         "title": "Planning et contact",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 3,
             "content": "Combien de temps à l'avance dois-je vous contacter ?",
+<<<<<<< HEAD
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 3 mois",
+            "required": false
+          },
+=======
             "component_type": "select",
             "options": [
               "1 mois",
@@ -64,15 +87,21 @@
         "section_id": 4,
         "title": "Showroom",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 4,
             "content": "Disposez-vous d'un showroom ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Oui",
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       }

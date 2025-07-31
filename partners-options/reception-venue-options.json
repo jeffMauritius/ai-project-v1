@@ -1,126 +1,113 @@
 {
   "lieu_reception": {
+    "title": "Lieu de réception",
     "sections": [
       {
-        "section_id": 1,
         "title": "Vos espaces de réceptions",
-        "questions": [
+        "fields": [
           {
-            "question_id": 1,
-            "content": "Nom",
+            "id": "nom",
+            "question": "Nom",
             "component_type": "input",
             "field_type": "text",
             "required": true
           },
           {
-            "question_id": 2,
-            "content": "Description",
+            "id": "description",
+            "question": "Description",
             "component_type": "textarea",
             "field_type": "text",
-            "required": true
-          },
-          {
-            "question_id": 3,
-            "content": "Surface",
-            "component_type": "input",
-            "field_type": "number",
-            "unit": "m²",
-            "required": true
-          },
-          {
-            "question_id": 4,
-            "content": "Capacité assise",
-            "component_type": "input",
-            "field_type": "number",
-            "required": true
-          },
-          {
-            "question_id": 5,
-            "content": "Capacité debout",
-            "component_type": "input",
-            "field_type": "number",
-            "required": true
-          },
-          {
-            "question_id": 6,
-            "content": "Piste de danse",
-            "component_type": "boolean",
             "required": false
           },
           {
-            "question_id": 7,
-            "content": "Accès PMR",
-            "component_type": "boolean",
+            "id": "surface",
+            "question": "Surface",
+            "component_type": "input",
+            "field_type": "number",
             "required": false
           },
           {
-            "question_id": 8,
-            "content": "Accès direct à un extérieur privatif",
+            "id": "capacite_assise",
+            "question": "Capacité assise",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          },
+          {
+            "id": "capacite_debout",
+            "question": "Capacité debout",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          },
+          {
+            "id": "piste_danse",
+            "question": "Piste de danse",
             "component_type": "boolean",
+            "field_type": "boolean",
+            "required": false
+          },
+          {
+            "id": "acces_pmr",
+            "question": "Accès PMR",
+            "component_type": "boolean",
+            "field_type": "boolean",
+            "required": false
+          },
+          {
+            "id": "acces_exterieur",
+            "question": "Acces direct à un extérieur privatif",
+            "component_type": "boolean",
+            "field_type": "boolean",
             "required": false
           }
         ]
       },
       {
-        "section_id": 2,
         "title": "Durée de location",
-        "questions": [
+        "fields": [
           {
-            "question_id": 9,
-            "content": "Durée de location",
-            "component_type": "select",
-            "options": [
-              "Journée complète",
-              "Demi-journée",
-              "Week-end complet",
-              "Semaine complète",
-              "Sur mesure"
-            ],
-            "required": true
+            "id": "duree_location",
+            "question": "Durée de location",
+            "component_type": "input",
+            "field_type": "text",
+            "required": false
           }
         ]
       },
       {
-        "section_id": 3,
         "title": "Tarif",
-        "questions": [
+        "fields": [
           {
-            "question_id": 10,
-            "content": "Tarif",
+            "id": "tarif",
+            "question": "Tarif",
             "component_type": "input",
             "field_type": "number",
-            "unit": "€",
-            "required": true
+            "required": false
           }
         ]
       },
       {
-        "section_id": 4,
-        "title": "Hébergement",
-        "questions": [
+        "title": "Hebergement",
+        "fields": [
           {
-            "question_id": 11,
-            "content": "Type d'hébergement",
+            "id": "type_hebergement",
+            "question": "Type d'hebergement",
             "component_type": "select",
-            "options": [
-              "Chambres d'hôtes",
-              "Gîtes",
-              "Hôtel",
-              "Aucun hébergement",
-              "Sur mesure"
-            ],
-            "required": true
+            "field_type": "select",
+            "options": ["Chambres d'hôtes", "Hôtel", "Gîte", "Aucun"],
+            "required": false
           },
           {
-            "question_id": 12,
-            "content": "Nombre de chambres",
+            "id": "nombre_chambres",
+            "question": "Nombre de chambre",
             "component_type": "input",
             "field_type": "number",
             "required": false
           },
           {
-            "question_id": 13,
-            "content": "Nombre de lits",
+            "id": "nombre_lits",
+            "question": "Nombre de lit",
             "component_type": "input",
             "field_type": "number",
             "required": false
@@ -128,155 +115,117 @@
         ]
       },
       {
-        "section_id": 5,
         "title": "Restauration",
-        "questions": [
+        "fields": [
           {
-            "question_id": 14,
-            "content": "Le traiteur est-il imposé ?",
+            "id": "traiteur_impose",
+            "question": "Le traiteur est-il imposé ?",
             "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
           },
           {
-            "question_id": 15,
-            "content": "Proposez-vous directement la restauration",
+            "id": "propose_restauration",
+            "question": "Proposez vous directement la restauration",
+            "component_type": "boolean",
+            "field_type": "boolean",
+            "required": false
+          },
+          {
+            "id": "apporter_boissons",
+            "question": "Puis-je amener mes propres boissons ?",
             "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "id": "droit_bouchon",
+            "question": "Appliquez vous un droit de bouchon",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "id": "tarif_bouchon",
+            "question": "Tarif droit de bouchon",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false,
+            "condition": {
+              "field": "droit_bouchon",
+              "value": "Oui"
+            }
+          },
+          {
+            "id": "limite_horaire",
+            "question": "Y'a-t-il une limite horaire à respecter pour l'événement ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "id": "photographe_impose",
+            "question": "Le photographe est-il imposé ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "id": "exclusivite_musique",
+            "question": "Exclusivité musique",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
           }
         ]
       },
       {
-        "section_id": 6,
-        "title": "Boissons",
-        "questions": [
+        "title": "Services",
+        "fields": [
           {
-            "question_id": 20,
-            "content": "Puis-je amener mes propres boissons ?",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
-          },
-          {
-            "question_id": 21,
-            "content": "Appliquez-vous un droit de bouchon",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "conditional_field": {
-              "show_when": "Oui",
-              "field": {
-                "content": "Tarif du droit de bouchon",
-                "component_type": "input",
-                "field_type": "number",
-                "unit": "€"
-              }
-            },
-            "required": true
-          }
-        ]
-      },
-      {
-        "section_id": 7,
-        "title": "Contraintes et services",
-        "questions": [
-          {
-            "question_id": 22,
-            "content": "Y a-t-il une limite horaire à respecter pour l'événement ?",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "conditional_field": {
-              "show_when": "Oui",
-              "field": {
-                "content": "Limite horaire",
-                "component_type": "input",
-                "field_type": "text",
-                "placeholder": "ex: 23h00"
-              }
-            },
-            "required": true
-          },
-          {
-            "question_id": 23,
-            "content": "Le photographe est-il imposé ?",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
-          },
-          {
-            "question_id": 24,
-            "content": "Exclusivité musique",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
-          },
-          {
-            "question_id": 25,
-            "content": "Quels autres types de services proposez-vous ?",
+            "id": "autres_services",
+            "question": "Quels autres types de services proposez vous ?",
             "component_type": "textarea",
             "field_type": "text",
             "required": false
           },
           {
-            "question_id": 26,
-            "content": "Le ménage est-il inclus ?",
+            "id": "menage_inclus",
+            "question": "Le ménage est il inclus ?",
             "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
           },
           {
-            "question_id": 27,
-            "content": "Le lieu accepte-t-il les animaux",
+            "id": "accepte_animaux",
+            "question": "Le lieu accepte t'il les animaux",
             "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
           },
           {
-            "question_id": 28,
-            "content": "Peut-il y avoir plusieurs événements le même jour",
+            "id": "plusieurs_evenements",
+            "question": "Peut'il y avoir plusieurs évennements le même jour",
             "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
           },
           {
-            "question_id": 29,
-            "content": "Disposez-vous d'un gardien ou agent de sécurité",
+            "id": "gardien_securite",
+            "question": "Disposez vous d'un gardien ou agent de sécurité",
             "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
           }
         ]
       }

@@ -9,6 +9,11 @@
             "question_id": 1,
             "content": "Types de véhicule",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Voiture haut de gamme", "Voiture de collection", "Limousine", "Calèche", "Voiture sportive", "Van", "Voiture rétro", "Motos et side-car", "Autres"],
+            "required": true
+          },
+=======
             "options": [
               "Voiture haut de gamme",
               "Voiture de collection",
@@ -28,6 +33,7 @@
         "section_id": 2,
         "title": "Tarification",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 2,
             "content": "À partir de quel prix puis-je profiter de vos services ?",
@@ -35,6 +41,8 @@
             "field_type": "number",
             "unit": "€",
             "required": true
+<<<<<<< HEAD
+=======
           },
           {
             "question_id": 8,
@@ -45,29 +53,76 @@
               "Événement"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
+<<<<<<< HEAD
+        "section_id": 2,
+=======
         "section_id": 3,
+>>>>>>> origin/main
         "title": "Services inclus",
         "questions": [
           {
             "question_id": 3,
             "content": "Quels sont les services inclus dans le forfait mariage ?",
             "component_type": "textarea",
+<<<<<<< HEAD
+            "required": false
+          },
+          {
+            "question_id": 4,
+            "content": "Quel est le nombre de kilomètres peut on faire?",
+=======
             "field_type": "text",
             "required": false
           },
           {
             "question_id": 3.1,
             "content": "Quel est le nombre de kilomètres peut-on faire ?",
+>>>>>>> origin/main
             "component_type": "input",
             "field_type": "number",
             "unit": "km",
             "required": false
           },
           {
+<<<<<<< HEAD
+            "question_id": 5,
+            "content": "L'assurance est elle incluse",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Conditions de location",
+        "questions": [
+          {
+            "question_id": 6,
+            "content": "La location inclut-elle les services d'un chauffeur ?",
+            "component_type": "radio",
+            "options": ["Avec chauffeur", "Sans chauffeur"],
+            "required": false
+          },
+          {
+            "question_id": 7,
+            "content": "Y a-t-il une durée minimum de location ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "question_id": 8,
+            "content": "Y a-t-il une durée maximum de location ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "question_id": 3.2,
             "content": "L'assurance est-elle incluse ?",
             "component_type": "radio",
@@ -76,11 +131,27 @@
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 4,
+<<<<<<< HEAD
+        "title": "Services additionnels",
+        "questions": [
+          {
+            "question_id": 9,
+            "content": "Services additionnels",
+            "component_type": "textarea",
+            "required": false
+          },
+          {
+            "question_id": 10,
+            "content": "Facturez-vous par heure ou par événement ?",
+            "component_type": "radio",
+            "options": ["Heure", "Événement"],
+=======
         "title": "Chauffeur",
         "questions": [
           {
@@ -148,6 +219,7 @@
             "content": "Services additionnels",
             "component_type": "textarea",
             "field_type": "text",
+>>>>>>> origin/main
             "required": false
           }
         ]

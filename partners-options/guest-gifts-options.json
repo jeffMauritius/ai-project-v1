@@ -3,12 +3,27 @@
     "sections": [
       {
         "section_id": 1,
+<<<<<<< HEAD
+        "title": "Types de produits",
+=======
         "title": "Types d'articles",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 1,
             "content": "Quel type d'articles proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Savons aromatisés", "Produits cosmétiques", "Mémoires USB", "Ballerines", "Bracelets et boucles d'oreilles", "Cartes, stylos et portes-clés", "Fioles miniatures", "Parfums", "Bougies", "Cadeaux solidaires", "Produits alimentaires", "Plantes", "Autres"],
+            "required": true
+          },
+          {
+            "question_id": 2,
+            "content": "Disposez-vous d'un catalogue fixe ou est-il possible de commander un cadeau sur-mesure ?",
+            "component_type": "radio",
+            "options": ["Catalogue", "Sur mesure"],
+            "required": false
+=======
             "options": [
               "Savons aromatisés",
               "Produits cosmétiques",
@@ -25,11 +40,15 @@
               "Autres"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 2,
+<<<<<<< HEAD
+        "title": "Délais et livraison",
+=======
         "title": "Type de service",
         "questions": [
           {
@@ -47,10 +66,17 @@
       {
         "section_id": 3,
         "title": "Planning et livraison",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 3,
             "content": "Combien de temps à l'avance dois-je vous contacter ?",
+<<<<<<< HEAD
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 2 mois",
+            "required": false
+=======
             "component_type": "select",
             "options": [
               "1 mois",
@@ -62,10 +88,18 @@
               "Plus de 6 mois"
             ],
             "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 4,
             "content": "Quels sont les délais de livraison ?",
+<<<<<<< HEAD
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 1-2 semaines",
+            "required": false
+          },
+=======
             "component_type": "textarea",
             "field_type": "text",
             "required": false
@@ -76,16 +110,21 @@
         "section_id": 4,
         "title": "Services additionnels",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 5,
             "content": "Quels autres types de services proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Faire-part de mariage", "Services d'impression", "Designs personnalisés", "Autres"],
+=======
             "options": [
               "Faire-part de mariage",
               "Services d'impression",
               "Designs personnalisés",
               "Autres"
             ],
+>>>>>>> origin/main
             "required": false
           }
         ]

@@ -9,6 +9,26 @@
             "question_id": 1,
             "content": "Quelles animations proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Pour les enfants", "Pour les adultes", "Magie", "Théâtre", "Comique", "Danse", "Autres", "Garderie", "Animateur enfant", "Éclairage", "Sonorisation", "Pyrothechnie", "Photobooth", "Autres"],
+            "required": true
+          },
+          {
+            "question_id": 2,
+            "content": "Combien de temps dure la prestation ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 2 heures",
+            "required": false
+          },
+          {
+            "question_id": 3,
+            "content": "Combien de temps de préparation avez-vous besoin ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 1 heure",
+            "required": false
+=======
             "options": [
               "Pour les enfants",
               "Pour les adultes",
@@ -26,11 +46,14 @@
               "Autres"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 2,
+<<<<<<< HEAD
+=======
         "title": "Durée et planning",
         "questions": [
           {
@@ -69,22 +92,33 @@
       },
       {
         "section_id": 3,
+>>>>>>> origin/main
         "title": "Conditions de travail",
         "questions": [
           {
             "question_id": 4,
             "content": "Travaillez-vous seul ou en équipe ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Seul", "En équipe"],
+            "required": false
+=======
             "options": [
               "Seul",
               "En équipe"
             ],
             "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 5,
             "content": "Acceptez-vous de travailler en plein air ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+=======
             "options": [
               "Oui",
               "Non"
@@ -97,6 +131,7 @@
         "section_id": 4,
         "title": "Tarification",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 6,
             "content": "À partir de quel prix puis-je profiter de vos services ?",
@@ -104,11 +139,26 @@
             "field_type": "number",
             "unit": "€",
             "required": true
+<<<<<<< HEAD
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Tarification et déplacements",
+        "questions": [
+=======
           },
+>>>>>>> origin/main
           {
             "question_id": 7,
             "content": "Facturez-vous par heure ou par événement ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Heure", "Événement"],
+            "required": false
+          },
+=======
             "options": [
               "Heure",
               "Événement"
@@ -121,20 +171,30 @@
         "section_id": 5,
         "title": "Déplacements",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 8,
             "content": "Pouvez-vous vous déplacer ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Oui",
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 9,
             "content": "Facturez-vous les déplacements ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Oui",
               "Non"
@@ -149,6 +209,7 @@
               }
             },
             "required": true
+>>>>>>> origin/main
           }
         ]
       }

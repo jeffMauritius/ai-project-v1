@@ -9,6 +9,17 @@
             "question_id": 1,
             "content": "Quels types de voyages de noces proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Circuit dans plusieurs pays", "Croisière", "Détente", "Aventure", "Culturel", "Luxe", "Autres"],
+            "required": true
+          },
+          {
+            "question_id": 2,
+            "content": "Organisez-vous les lunes de miel sur-mesure ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Circuit dans plusieurs pays",
               "Croisière",
@@ -19,11 +30,43 @@
               "Autres"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 2,
+<<<<<<< HEAD
+        "title": "Packages et destinations",
+        "questions": [
+          {
+            "question_id": 3,
+            "content": "Avez-vous des packages pour les mariés ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "question_id": 4,
+            "content": "Proposez vous des préstations spécifiques pour les mariés?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "question_id": 5,
+            "content": "Proposez vous d'organiser un système de cagnotte",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "question_id": 6,
+            "content": "Quelles sont vos destinations phares ?",
+            "component_type": "checkbox",
+            "options": ["Europe", "Asie", "Océanie", "Afrique", "États-Unis", "Amérique Latine", "Caraïbes", "Moyen-Orient", "Autres"],
+            "required": false
+=======
         "title": "Services personnalisés",
         "questions": [
           {
@@ -62,11 +105,37 @@
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 3,
+<<<<<<< HEAD
+        "title": "Services et contact",
+        "questions": [
+          {
+            "question_id": 7,
+            "content": "Combien de temps à l'avance dois-je vous contacter ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 6 mois",
+            "required": false
+          },
+          {
+            "question_id": 8,
+            "content": "Quels services proposez-vous ?",
+            "component_type": "checkbox",
+            "options": ["Organisation de voyages de noce", "Organisation de mariages à l'étranger", "Autres"],
+            "required": false
+          },
+          {
+            "question_id": 9,
+            "content": "Travaillez-vous avec un tour opérateur ?",
+            "component_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+=======
         "title": "Destinations",
         "questions": [
           {
@@ -139,6 +208,7 @@
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       }

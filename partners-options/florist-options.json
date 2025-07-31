@@ -9,6 +9,11 @@
             "question_id": 1,
             "content": "Quels services proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Bouquet de mariée", "Décoration florale pour la cérémonie", "Décoration florale pour le vin d'honneur", "Conservation du bouquet", "Organisation de mariage", "Accessoires de mariage", "Décoration de voiture", "Broches", "Accessoires pour cheveux", "Boutonnières", "Autres"],
+            "required": true
+          },
+=======
             "options": [
               "Bouquet de mariée",
               "Décoration florale pour la cérémonie",
@@ -30,6 +35,7 @@
         "section_id": 2,
         "title": "Tarification",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 2,
             "content": "À partir de quel prix puis-je profiter de vos services ?",
@@ -41,25 +47,38 @@
         ]
       },
       {
+<<<<<<< HEAD
+        "section_id": 2,
+        "title": "Forfaits et personnalisation",
+=======
         "section_id": 3,
         "title": "Forfaits et services",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 3,
             "content": "Quels sont les services inclus dans le forfait mariage ?",
             "component_type": "textarea",
+<<<<<<< HEAD
+=======
             "field_type": "text",
+>>>>>>> origin/main
             "required": false
           },
           {
             "question_id": 4,
             "content": "Réalisez-vous des bouquets de mariée personnalisés ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Oui",
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           }
         ]
       }

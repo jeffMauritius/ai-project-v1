@@ -9,6 +9,11 @@
             "question_id": 1,
             "content": "Quels types de gâteaux réalisez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Fondant", "Traditionnel", "Thématique", "Cupcakes", "Pièces montées", "Design exclusifs", "Autres"],
+            "required": true
+          },
+=======
             "options": [
               "Fondant",
               "Traditionnel",
@@ -26,10 +31,16 @@
         "section_id": 2,
         "title": "Personnalisation",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 2,
             "content": "Réalisez-vous des design sur-mesure ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+=======
             "options": [
               "Oui",
               "Non"
@@ -42,6 +53,7 @@
         "section_id": 3,
         "title": "Tarification",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 3,
             "content": "À partir de quel prix puis-je profiter de vos services ?",
@@ -53,12 +65,24 @@
         ]
       },
       {
+<<<<<<< HEAD
+        "section_id": 2,
+        "title": "Régimes particuliers et livraison",
+=======
         "section_id": 4,
         "title": "Planning et contact",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 4,
             "content": "Combien de temps à l'avance dois-je vous contacter ?",
+<<<<<<< HEAD
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "ex: 1 mois",
+            "required": false
+          },
+=======
             "component_type": "select",
             "options": [
               "1 mois",
@@ -77,10 +101,16 @@
         "section_id": 5,
         "title": "Régimes particuliers",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 5,
             "content": "Disposez-vous de gâteaux pour régimes particuliers ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
+            "options": ["Sans gluten", "Sans lactose", "Sans oeufs", "Sans fruits secs", "Pour diabétiques", "Autres"],
+            "required": false
+          },
+=======
             "options": [
               "Sans gluten",
               "Sans lactose",
@@ -97,20 +127,30 @@
         "section_id": 6,
         "title": "Livraison",
         "questions": [
+>>>>>>> origin/main
           {
             "question_id": 6,
             "content": "Livrez-vous à domicile ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Oui",
               "Non"
             ],
             "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 7,
             "content": "Y a-t-il des frais d'envoi ?",
             "component_type": "radio",
+<<<<<<< HEAD
+            "options": ["Oui", "Non"],
+            "required": false
+=======
             "options": [
               "Oui",
               "Non"
@@ -125,6 +165,7 @@
               }
             },
             "required": true
+>>>>>>> origin/main
           }
         ]
       }
