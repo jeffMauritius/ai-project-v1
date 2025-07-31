@@ -10,7 +10,14 @@
             "question": "Quel type de cuisine proposez-vous ?",
             "component_type": "select",
             "field_type": "select",
-            "options": ["Traditionnelle", "Régionale", "Cuisine créative", "Internationale", "Fusion", "Autres"],
+            "options": [
+              "Traditionnelle",
+              "Régionale",
+              "Cuisine créative",
+              "Internationale",
+              "Fusion",
+              "Autres"
+            ],
             "required": false
           },
           {
@@ -18,7 +25,18 @@
             "question": "Proposez-vous des menus spécifiques ?",
             "component_type": "select",
             "field_type": "select",
-            "options": ["Végétariens", "Végétaliens", "Sans gluten", "Diabétique", "Hypertension", "Halal", "Biologique", "Casher", "Vegan", "Autres"],
+            "options": [
+              "Végétariens",
+              "Végétaliens",
+              "Sans gluten",
+              "Diabétique",
+              "Hypertension",
+              "Halal",
+              "Biologique",
+              "Casher",
+              "Vegan",
+              "Autres"
+            ],
             "required": false
           },
           {
@@ -57,7 +75,13 @@
             "question": "Quels services complémentaires proposez-vous ?",
             "component_type": "select",
             "field_type": "select",
-            "options": ["Location de vaisselle et d'ustensiles", "Location de mobilier", "Service Boisson", "Dessert", "Wedding Cake"],
+            "options": [
+              "Location de vaisselle et d'ustensiles",
+              "Location de mobilier",
+              "Service Boisson",
+              "Dessert",
+              "Wedding Cake"
+            ],
             "required": false
           },
           {
@@ -65,7 +89,10 @@
             "question": "Cuisinez-vous sur le lieu de la réception ?",
             "component_type": "radio",
             "field_type": "radio",
-            "options": ["Oui", "Non"],
+            "options": [
+              "Oui",
+              "Non"
+            ],
             "required": false
           },
           {
@@ -73,7 +100,10 @@
             "question": "Proposez-vous des menus personnalisés ?",
             "component_type": "radio",
             "field_type": "radio",
-            "options": ["Oui", "Non"],
+            "options": [
+              "Oui",
+              "Non"
+            ],
             "required": false
           },
           {
@@ -81,7 +111,10 @@
             "question": "Proposez-vous des gâteaux de mariage ?",
             "component_type": "radio",
             "field_type": "radio",
-            "options": ["Oui", "Non"],
+            "options": [
+              "Oui",
+              "Non"
+            ],
             "required": false
           },
           {
@@ -89,7 +122,10 @@
             "question": "Puis-je apporter mon propre gâteau de mariage ? Facturez-vous une majoration ?",
             "component_type": "radio",
             "field_type": "radio",
-            "options": ["Oui", "Non"],
+            "options": [
+              "Oui",
+              "Non"
+            ],
             "required": false
           }
         ]
@@ -109,7 +145,10 @@
             "question": "Y'a-t-il une limite horaire à respecter pour l'événement ?",
             "component_type": "radio",
             "field_type": "radio",
-            "options": ["Oui", "Non"],
+            "options": [
+              "Oui",
+              "Non"
+            ],
             "required": false
           },
           {
@@ -123,4 +162,4 @@
       }
     ]
   }
-} 
+}

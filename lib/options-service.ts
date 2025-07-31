@@ -50,23 +50,22 @@ export const SERVICE_TYPE_TO_JSON_KEY: Record<ServiceType, string> = {
 
 // Types pour les options
 export interface OptionField {
-  question_id: number;
-  content: string;
+  id: string;
+  question: string;
   component_type: string;
   field_type?: string;
   required?: boolean;
   options?: string[];
-  unit?: string;
-  conditional_field?: {
-    depends_on: string;
+  placeholder?: string;
+  condition?: {
+    field: string;
     value: string;
   };
 }
 
 export interface OptionSection {
-  section_id: number;
   title: string;
-  questions: OptionField[];
+  fields: OptionField[];
 }
 
 export interface ProviderOptions {
@@ -139,14 +138,14 @@ export class OptionsService {
 
     // Parcourir toutes les sections et questions
     providerData.sections.forEach(section => {
-      section.questions.forEach(question => {
-        const fieldKey = `question_${question.question_id}`;
+      section.fields.forEach(field => {
+        const fieldKey = `question_${field.id}`;
         const value = formData[fieldKey];
 
         if (!value) return;
 
         // Mapping intelligent basé sur le contenu de la question
-        this.mapQuestionToSearchable(question, value, searchable);
+        this.mapQuestionToSearchable(field, value, searchable);
       });
     });
 
@@ -157,11 +156,11 @@ export class OptionsService {
    * Mappe une question vers les searchableOptions
    */
   private static mapQuestionToSearchable(
-    question: OptionField,
+    field: OptionField,
     value: any,
     searchable: SearchableOptions
   ): void {
-    const content = question.content.toLowerCase();
+    const content = field.question.toLowerCase();
 
     // Capacité
     if (content.includes('capacité') || content.includes('assise') || content.includes('debout')) {

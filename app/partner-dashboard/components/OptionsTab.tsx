@@ -92,6 +92,8 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
   // Charger les options pour les prestataires pertinents
   useEffect(() => {
     const loadRelevantProviderOptions = async () => {
+      if (!storefrontData?.serviceType) return;
+      
       const newProviderOptions: Record<string, ProviderOptions> = {};
       const newLoading: Record<string, boolean> = {};
 
@@ -120,7 +122,7 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
     if (relevantProviders.length > 0) {
       loadRelevantProviderOptions();
     }
-  }, [storefrontData?.serviceType]); // Seulement dépendre du serviceType
+  }, [relevantProviders, storefrontData?.serviceType]); // Dépendre de relevantProviders et serviceType
 
   const handleSaveOptions = async (providerType: string, data: any) => {
     if (!storefrontData?.id) return;
@@ -199,6 +201,8 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
       {relevantProviders.map((provider) => {
         if (!provider) return null;
         
+        // Les données sauvegardées sont dans le format { question_1: value, question_2: value }
+        // On les passe directement au composant
         const savedOptions = storefrontData?.options || {};
         const isLoading = loading[provider.value];
         const isSaving = saving[provider.value];

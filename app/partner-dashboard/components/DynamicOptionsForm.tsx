@@ -65,17 +65,19 @@ export function DynamicOptionsForm({
     loadProviderOptions();
   }, [providerType, serviceType]);
 
-  const handleInputChange = (questionId: number, value: any) => {
+  const handleInputChange = (fieldId: string, value: any) => {
+    const fieldKey = getFieldKey(fieldId);
     const newFormData = {
       ...formData,
-      [`question_${questionId}`]: value
+      [fieldKey]: value
     };
     setFormData(newFormData);
     onSave(newFormData); // Toujours sauvegarder, même si invalide
   };
 
-  const handleCheckboxChange = (questionId: number, option: string, checked: boolean) => {
-    const currentValues = formData[`question_${questionId}`] || [];
+  const handleCheckboxChange = (fieldId: string, option: string, checked: boolean) => {
+    const fieldKey = getFieldKey(fieldId);
+    const currentValues = formData[fieldKey] || [];
     let newValues;
     if (checked) {
       newValues = [...currentValues, option];
@@ -84,41 +86,62 @@ export function DynamicOptionsForm({
     }
     const newFormData = {
       ...formData,
-      [`question_${questionId}`]: newValues
+      [fieldKey]: newValues
     };
     setFormData(newFormData);
     onSave(newFormData); // Toujours sauvegarder, même si invalide
   };
 
-  const handleRadioChange = (questionId: number, value: string) => {
+  const handleRadioChange = (fieldId: string, value: string) => {
+    const fieldKey = getFieldKey(fieldId);
     const newFormData = {
       ...formData,
-      [`question_${questionId}`]: value
+      [fieldKey]: value
     };
     setFormData(newFormData);
     onSave(newFormData); // Toujours sauvegarder, même si invalide
   };
 
-  const handleSelectChange = (questionId: number, value: string) => {
+  const handleSelectChange = (fieldId: string, value: string) => {
+    const fieldKey = getFieldKey(fieldId);
     const newFormData = {
       ...formData,
-      [`question_${questionId}`]: value
+      [fieldKey]: value
     };
     setFormData(newFormData);
     onSave(newFormData); // Toujours sauvegarder, même si invalide
   };
 
-  const handleSwitchChange = (questionId: number, checked: boolean) => {
+  const handleSwitchChange = (fieldId: string, checked: boolean) => {
+    const fieldKey = getFieldKey(fieldId);
     const newFormData = {
       ...formData,
-      [`question_${questionId}`]: checked
+      [fieldKey]: checked
     };
     setFormData(newFormData);
     onSave(newFormData); // Toujours sauvegarder, même si invalide
+  };
+
+  // Mapping des IDs descriptifs vers les clés numériques pour la compatibilité
+  const getFieldKey = (fieldId: string) => {
+    // Si les données existent avec l'ancien format numérique, on les utilise
+    // Sinon, on utilise le nouveau format descriptif
+    const numericKey = Object.keys(initialData).find(key => 
+      key.startsWith('question_') && initialData[key] !== undefined
+    );
+    
+    if (numericKey) {
+      // On utilise un mapping basé sur l'index du champ dans la section
+      const allFields = relevantOptions?.sections?.flatMap((section: any) => section.fields) || [];
+      const fieldIndex = allFields.findIndex((f: any) => f.id === fieldId);
+      return fieldIndex >= 0 ? `question_${fieldIndex + 1}` : `question_${fieldId}`;
+    }
+    
+    return `question_${fieldId}`;
   };
 
   const renderField = (field: any) => {
-    const fieldKey = `question_${field.question_id}`;
+    const fieldKey = getFieldKey(field.id);
     const fieldErrors = getFieldErrors(fieldKey, validationErrors);
     const hasError = fieldErrors.length > 0;
 
@@ -127,14 +150,14 @@ export function DynamicOptionsForm({
         return (
           <div className="space-y-2">
             <Label htmlFor={fieldKey}>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <Input
               id={fieldKey}
               type={field.field_type === "number" ? "number" : "text"}
               value={formData[fieldKey] || ""}
-              onChange={(e) => handleInputChange(field.question_id, field.field_type === "number" ? Number(e.target.value) : e.target.value)}
+              onChange={(e) => handleInputChange(field.id, field.field_type === "number" ? Number(e.target.value) : e.target.value)}
               placeholder={field.placeholder}
               className={hasError ? "border-red-500" : ""}
             />
@@ -149,13 +172,13 @@ export function DynamicOptionsForm({
         return (
           <div className="space-y-2">
             <Label htmlFor={fieldKey}>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <Textarea
               id={fieldKey}
               value={formData[fieldKey] || ""}
-              onChange={(e) => handleInputChange(field.question_id, e.target.value)}
+              onChange={(e) => handleInputChange(field.id, e.target.value)}
               placeholder={field.placeholder}
               className={hasError ? "border-red-500" : ""}
             />
@@ -170,7 +193,7 @@ export function DynamicOptionsForm({
         return (
           <div className="space-y-2">
             <Label>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -179,7 +202,7 @@ export function DynamicOptionsForm({
                   <Checkbox
                     id={`${fieldKey}_${option}`}
                     checked={(formData[fieldKey] || []).includes(option)}
-                    onCheckedChange={(checked) => handleCheckboxChange(field.question_id, option, !!checked)}
+                    onCheckedChange={(checked) => handleCheckboxChange(field.id, option, !!checked)}
                   />
                   <Label htmlFor={`${fieldKey}_${option}`} className="text-sm">
                     {option}
@@ -198,12 +221,12 @@ export function DynamicOptionsForm({
         return (
           <div className="space-y-2">
             <Label>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <RadioGroup
               value={formData[fieldKey] || ""}
-              onValueChange={(value) => handleRadioChange(field.question_id, value)}
+              onValueChange={(value) => handleRadioChange(field.id, value)}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {field.options?.map((option: string) => (
@@ -227,12 +250,12 @@ export function DynamicOptionsForm({
         return (
           <div className="space-y-2">
             <Label htmlFor={fieldKey}>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <Select
               value={formData[fieldKey] || ""}
-              onValueChange={(value) => handleSelectChange(field.question_id, value)}
+              onValueChange={(value) => handleSelectChange(field.id, value)}
             >
               <SelectTrigger className={hasError ? "border-red-500" : ""}>
                 <SelectValue placeholder="Sélectionnez une option" />
@@ -257,12 +280,12 @@ export function DynamicOptionsForm({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>
-                {field.content}
+                {field.question}
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </Label>
               <Switch
                 checked={formData[fieldKey] || false}
-                onCheckedChange={(checked) => handleSwitchChange(field.question_id, checked)}
+                onCheckedChange={(checked) => handleSwitchChange(field.id, checked)}
               />
             </div>
             {hasError && (
@@ -276,13 +299,13 @@ export function DynamicOptionsForm({
         return (
           <div className="space-y-2">
             <Label>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor={`${fieldKey}_min`} className="text-sm">
-                  {field.min_field?.content}
+                  {field.min_field?.question}
                 </Label>
                 <Input
                   id={`${fieldKey}_min`}
@@ -300,7 +323,7 @@ export function DynamicOptionsForm({
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`${fieldKey}_max`} className="text-sm">
-                  {field.max_field?.content}
+                  {field.max_field?.question}
                 </Label>
                 <Input
                   id={`${fieldKey}_max`}
@@ -379,11 +402,11 @@ export function DynamicOptionsForm({
     <Card>
       <CardContent className="p-6">
         <div className="space-y-6">
-          {relevantOptions.sections.map((section: any) => (
-            <div key={section.section_id} className="space-y-4">
+          {relevantOptions.sections.map((section: any, index: number) => (
+            <div key={index} className="space-y-4">
               <h3 className="text-lg font-semibold">{section.title}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.questions.map((field: any) => renderField(field))}
+                {section.fields.map((field: any) => renderField(field))}
               </div>
             </div>
           ))}
