@@ -163,8 +163,8 @@ export function DynamicOptionsForm({
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {field.options?.map((option) => (
-                <div key={option} className="flex items-center space-x-2">
+              {field.options?.map((option, index) => (
+                <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
                   <Checkbox
                     id={`${field.question_id}-${option}`}
                     checked={value?.includes(option) || false}
@@ -193,8 +193,8 @@ export function DynamicOptionsForm({
               onValueChange={(val) => handleInputChange(field.question_id, val)}
               required={field.required}
             >
-              {field.options?.map((option) => (
-                <div key={option} className="flex items-center space-x-2">
+              {field.options?.map((option, index) => (
+                <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
                   <RadioGroupItem value={option} id={`${field.question_id}-${option}`} />
                   <Label htmlFor={`${field.question_id}-${option}`} className="text-sm">
                     {option}
@@ -225,8 +225,8 @@ export function DynamicOptionsForm({
                 <SelectValue placeholder="Sélectionnez une option" />
               </SelectTrigger>
               <SelectContent>
-                {field.options?.map((option) => (
-                  <SelectItem key={option} value={option}>
+                {field.options?.map((option, index) => (
+                  <SelectItem key={`${field.question_id}-${option}-${index}`} value={option}>
                     {option}
                   </SelectItem>
                 ))}

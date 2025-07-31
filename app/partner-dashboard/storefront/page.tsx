@@ -61,7 +61,6 @@ export default function PartnerStorefrontPage() {
   const [showForm, setShowForm] = useState(false)
   const [locationErrors, setLocationErrors] = useState<Record<string, string>>({})
   const [isSavingLocation, setIsSavingLocation] = useState(false)
-  const [isGeocoding, setIsGeocoding] = useState(false)
   const geocodingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
 
@@ -292,7 +291,6 @@ export default function PartnerStorefrontPage() {
             
             // Définir un nouveau timeout pour éviter trop d'appels API
             geocodingTimeoutRef.current = setTimeout(async () => {
-              setIsGeocoding(true)
               try {
                 const coords = await geocodeAddress(value)
                 // Mettre à jour les coordonnées automatiquement
@@ -318,10 +316,8 @@ export default function PartnerStorefrontPage() {
               } catch (error) {
                 console.error('Erreur lors de la géocodification:', error)
                 // Ne pas afficher d'erreur à l'utilisateur pour la géocodification automatique
-              } finally {
-                setIsGeocoding(false)
               }
-            }, 2000) // Attendre 2 secondes après la dernière frappe pour respecter le rate limiting
+            }, 1500) // Attendre 1.5 secondes après la dernière frappe pour respecter le rate limiting
           }
         }
       } else if (field === 'interventionType') {
@@ -352,10 +348,6 @@ export default function PartnerStorefrontPage() {
     } catch (error) {
       console.error('Erreur de validation:', error)
     }
-
-    // Mettre à jour les données
-    const newData = { ...storefrontFormData, [field]: value }
-    setStorefront(newData)
   }
 
   const handleStorefrontUpdate = (updatedData: any) => {
@@ -430,64 +422,18 @@ export default function PartnerStorefrontPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="venueAddress">Adresse du lieu</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="venueAddress"
-                      value={storefrontFormData.venueAddress || ''}
-                      onChange={(e) => handleLocationFieldChange('venueAddress', e.target.value)}
-                      className={locationErrors.venueAddress ? 'border-red-500' : ''}
-                      placeholder="Entrez l'adresse complète..."
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={isGeocoding}
-                      onClick={async () => {
-                        const address = storefrontFormData.venueAddress
-                        if (!address || address.length < 5) {
-                          toast({
-                            title: "Adresse invalide",
-                            description: "Veuillez entrer une adresse complète (au moins 5 caractères)",
-                            variant: "destructive",
-                          })
-                          return
-                        }
-                        
-                        setIsGeocoding(true)
-                        try {
-                          const coords = await geocodeAddress(address)
-                          const geocodedData = { 
-                            ...storefrontFormData, 
-                            venueLatitude: coords.lat,
-                            venueLongitude: coords.lng
-                          }
-                          setStorefront(geocodedData)
-                          
-                          toast({
-                            title: "Coordonnées mises à jour",
-                            description: `${coords.displayName || 'Adresse trouvée'} - Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}${coords.usedVariant ? ` (via: ${coords.usedVariant})` : ''}`,
-                          })
-                        } catch (error) {
-                          const errorMessage = error instanceof Error ? error.message : "Erreur inconnue"
-                          toast({
-                            title: "Erreur de géocodification",
-                            description: errorMessage,
-                            variant: "destructive",
-                          })
-                        } finally {
-                          setIsGeocoding(false)
-                        }
-                      }}
-                    >
-                      {isGeocoding ? '⏳' : '📍'} {isGeocoding ? 'Géocodage...' : 'Géocoder'}
-                    </Button>
-                  </div>
+                  <Input
+                    id="venueAddress"
+                    value={storefrontFormData.venueAddress || ''}
+                    onChange={(e) => handleLocationFieldChange('venueAddress', e.target.value)}
+                    className={locationErrors.venueAddress ? 'border-red-500' : ''}
+                    placeholder="Entrez l'adresse complète..."
+                  />
                   {locationErrors.venueAddress && (
                     <p className="text-sm text-red-500">{locationErrors.venueAddress}</p>
                   )}
                   <p className="text-sm text-gray-500">
-                    Les coordonnées se mettent à jour automatiquement après 5 caractères, ou cliquez sur "Géocoder". 
-                    Format recommandé: "123 Rue de la Paix, 75001 Paris, France"
+                    Les coordonnées se mettent à jour automatiquement. Format recommandé: "123 Rue de la Paix, 75001 Paris, France"
                   </p>
                 </div>
 
@@ -548,7 +494,7 @@ export default function PartnerStorefrontPage() {
                       
                       const locationData: LocationFormData = {
                         venueAddress: storefrontFormData.venueAddress || '',
-                        interventionType: storefrontFormData.interventionType,
+                        interventionType: storefrontFormData.interventionType as "all_france" | "radius",
                         interventionRadius: storefrontFormData.interventionRadius,
                         venueLatitude: storefrontFormData.venueLatitude,
                         venueLongitude: storefrontFormData.venueLongitude,
@@ -569,7 +515,7 @@ export default function PartnerStorefrontPage() {
                         const dataToSend = {
                           ...storefrontFormData,
                           venueAddress: locationData.venueAddress,
-                          interventionType: locationData.interventionType,
+                          interventionType: locationData.interventionType as "all_france" | "radius",
                           interventionRadius: locationData.interventionRadius,
                           venueLatitude: locationData.venueLatitude,
                           venueLongitude: locationData.venueLongitude,

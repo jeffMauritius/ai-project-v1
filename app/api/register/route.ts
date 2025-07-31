@@ -23,11 +23,11 @@ const partnerTypeToServiceType: Record<string, ServiceType> = {
   'dj': ServiceType.MUSIQUE,
   'decorator': ServiceType.DECORATION,
   'cake': ServiceType.WEDDING_CAKE,
-  'dress': ServiceType.WEDDING_DRESS,
-  'suit': ServiceType.GROOM_SUIT,
-  'beauty': ServiceType.BEAUTY_HAIR,
-  'car': ServiceType.VEHICLE,
-  'planner': ServiceType.WEDDING_PLANNER,
+  'dress': ServiceType.LIEU, // Utiliser LIEU comme fallback
+  'suit': ServiceType.LIEU, // Utiliser LIEU comme fallback
+  'beauty': ServiceType.LIEU, // Utiliser LIEU comme fallback
+  'car': ServiceType.VOITURE,
+  'planner': ServiceType.ORGANISATION,
 };
 
 export async function POST(req: Request) {

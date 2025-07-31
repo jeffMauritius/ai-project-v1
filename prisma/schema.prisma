@@ -158,6 +158,8 @@ model User {
   // Relations
   storefront    PartnerStorefront?
   profile       Profile?
+  billingInfo   BillingInfo?
+  subscriptions Subscription[]
 
   @@map("User")
 }
@@ -220,4 +222,113 @@ model Establishment {
   Images        Image[]
 
   @@map("Establishment")
+}
+
+// Modèles pour le système d'abonnement
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+  TRIAL
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model SubscriptionPlan {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   // "Essentiel", "Pro", "Premium"
+  description String
+  price       Float
+  currency    String   @default("EUR")
+  billingInterval BillingInterval @default(MONTHLY)
+  features    String[] // Liste des fonctionnalités incluses
+  isActive    Boolean  @default(true)
+  isPopular   Boolean  @default(false)
+  maxPhotos   Int?     // Limite de photos pour ce plan
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model BillingInfo {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  cardLast4       String?  // 4 derniers chiffres de la carte
+  cardBrand       String?  // Visa, Mastercard, etc.
+  cardExpMonth    Int?
+  cardExpYear     Int?
+  billingName     String
+  billingEmail    String
+  billingAddress  String
+  billingCity     String
+  billingPostalCode String
+  billingCountry  String
+  siret           String?  // Pour les entreprises françaises
+  vatNumber       String?
+  stripeCustomerId String? // ID client Stripe
+  stripePaymentMethodId String? // ID méthode de paiement Stripe
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  userId          String   @unique @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("billing_info")
+}
+
+model Subscription {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  status            SubscriptionStatus @default(TRIAL)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd Boolean  @default(false)
+  trialStart        DateTime?
+  trialEnd          DateTime?
+  stripeSubscriptionId String? // ID abonnement Stripe
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  userId            String   @unique @db.ObjectId
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId            String   @db.ObjectId
+  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
+  payments          Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount            Float
+  currency          String   @default("EUR")
+  status            PaymentStatus @default(PENDING)
+  stripePaymentIntentId String? // ID paiement Stripe
+  stripeInvoiceId   String? // ID facture Stripe
+  description       String
+  paidAt            DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  subscriptionId    String   @db.ObjectId
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }
