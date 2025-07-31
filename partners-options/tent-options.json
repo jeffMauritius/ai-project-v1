@@ -3,6 +3,7 @@
     "sections": [
       {
         "section_id": 1,
+<<<<<<< HEAD
         "title": "Matériel proposé",
         "questions": [
           {
@@ -18,12 +19,50 @@
             "component_type": "checkbox",
             "options": ["Location de plancher", "Location de mobilier", "Décoration", "Autres"],
             "required": false
+=======
+        "title": "Types de matériel",
+        "questions": [
+          {
+            "question_id": 1,
+            "content": "Quels type de matériel proposez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Chapiteau",
+              "Tonnelle",
+              "Tente",
+              "Stores",
+              "Autres"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 2,
+<<<<<<< HEAD
         "title": "Tarification et services",
+=======
+        "title": "Services complémentaires",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "Quels services complémentaires proposez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Location de plancher",
+              "Location de mobilier",
+              "Décoration",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Tarification",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 3,
@@ -32,13 +71,35 @@
             "field_type": "number",
             "unit": "€",
             "required": true
+<<<<<<< HEAD
           },
+=======
+          }
+        ]
+      },
+      {
+        "section_id": 4,
+        "title": "Services inclus",
+        "questions": [
+>>>>>>> origin/main
           {
             "question_id": 4,
             "content": "Vos prix incluent",
             "component_type": "checkbox",
+<<<<<<< HEAD
             "options": ["Transport", "Livraison du matériel", "Montage", "Démontage", "Rangement", "Autres"],
             "required": false
+=======
+            "options": [
+              "Transport",
+              "Livraison du matériel",
+              "Montage",
+              "Démontage",
+              "Rangement",
+              "Autres"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       }

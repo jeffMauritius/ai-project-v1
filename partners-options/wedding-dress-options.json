@@ -1,14 +1,23 @@
 {
+<<<<<<< HEAD
   "robe_mariée": {
     "sections": [
       {
         "section_id": 1,
         "title": "Produits et services",
+=======
+  "robe_de_mariee": {
+    "sections": [
+      {
+        "section_id": 1,
+        "title": "Produits et services proposés",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 1,
             "content": "Quels produits et services proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
             "options": ["Vente de robe de mariée", "Création de robes de mariée", "Location de robe de mariée", "Vente d'accessoires pour les mariées", "Création d'accessoires de mariée", "Vente de robes de demoiselles d'honneur", "Création de robes de demoiselles d'honneur", "Conseil en image et en stylisme", "Autres"],
             "required": true
           },
@@ -18,18 +27,69 @@
             "component_type": "checkbox",
             "options": ["Glamour", "Moderne", "Original", "Princesse", "Romantique", "Vintage"],
             "required": false
+=======
+            "options": [
+              "Vente de robe de mariée",
+              "Création de robes de mariée",
+              "Location de robe de mariée",
+              "Vente d'accessoires pour les mariées",
+              "Création d'accessoires de mariée",
+              "Vente de robes de demoiselles d'honneur",
+              "Création de robes de demoiselles d'honneur",
+              "Conseil en image et en stylisme",
+              "Autres"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 2,
+<<<<<<< HEAD
         "title": "Accessoires",
+=======
+        "title": "Style des créations",
+        "questions": [
+          {
+            "question_id": 2,
+            "content": "Quel est le style de vos créations ?",
+            "component_type": "checkbox",
+            "options": [
+              "Glamour",
+              "Moderne",
+              "Original",
+              "Princesse",
+              "Romantique",
+              "Vintage"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Accessoires proposés",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 3,
             "content": "Proposez-vous d'autres accessoires ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
             "options": ["Lingerie", "Chaussures", "Bijoux", "Voiles", "Étoles", "Accessoires de coiffure", "Gants", "Autres"],
+=======
+            "options": [
+              "Lingerie",
+              "Chaussures",
+              "Bijoux",
+              "Voiles",
+              "Étoles",
+              "Accessoires de coiffure",
+              "Gants",
+              "Autres"
+            ],
+>>>>>>> origin/main
             "required": false
           }
         ]

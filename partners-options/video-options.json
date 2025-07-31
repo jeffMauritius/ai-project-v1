@@ -9,9 +9,41 @@
             "question_id": 1,
             "content": "Quels services proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
             "options": ["Photographie", "Vidéo", "Séance d'engagement", "Après le mariage", "Avant le mariage", "Drone", "Format 4k", "Vidéo streaming en direct", "Remise du matériel en format numérique", "Matériel sur clé USB", "Essais de montage", "Vidéo en haute définition", "Montage vidéo le jour même", "Multi caméra", "Save the date", "Vidéo de remerciements", "Bande annonce du mariage", "Interview des invités", "Autres"],
             "required": true
           },
+=======
+            "options": [
+              "Photographie",
+              "Vidéo",
+              "Séance d'engagement",
+              "Après le mariage",
+              "Avant le mariage",
+              "Drone",
+              "Format 4k",
+              "Vidéo streaming en direct",
+              "Remise du matériel en format numérique",
+              "Matériel sur clé USB",
+              "Essais de montage",
+              "Vidéo en haute définition",
+              "Montage vidéo le jour même",
+              "Multi caméra",
+              "Save the date",
+              "Vidéo de remerciements",
+              "Bande annonce du mariage",
+              "Interview des invités",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Tarification",
+        "questions": [
+>>>>>>> origin/main
           {
             "question_id": 2,
             "content": "À partir de quel prix puis-je profiter de vos services ?",
@@ -19,23 +51,45 @@
             "field_type": "number",
             "unit": "€",
             "required": true
+<<<<<<< HEAD
+=======
+          },
+          {
+            "question_id": 12,
+            "content": "Facturez-vous par heure ou par événement ?",
+            "component_type": "radio",
+            "options": [
+              "Heure",
+              "Événement"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
+<<<<<<< HEAD
         "section_id": 2,
+=======
+        "section_id": 3,
+>>>>>>> origin/main
         "title": "Forfaits et déplacements",
         "questions": [
           {
             "question_id": 3,
             "content": "Quels sont les services inclus dans le forfait mariage ?",
             "component_type": "textarea",
+<<<<<<< HEAD
+=======
+            "field_type": "text",
+>>>>>>> origin/main
             "required": false
           },
           {
             "question_id": 4,
             "content": "Facturez-vous les déplacements ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Oui", "Non"],
             "required": false
           }
@@ -64,11 +118,28 @@
             "content": "Utilisez-vous une technique particulière?",
             "component_type": "textarea",
             "required": false
+=======
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "conditional_field": {
+              "show_when": "Oui",
+              "field": {
+                "content": "Tarif des déplacements",
+                "component_type": "input",
+                "field_type": "number",
+                "unit": "€"
+              }
+            },
+            "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 4,
+<<<<<<< HEAD
         "title": "Matériel et équipe",
         "questions": [
           {
@@ -89,17 +160,89 @@
             "content": "Avez-vous un remplaçant en cas d'empêchement ?",
             "component_type": "radio",
             "options": ["Oui", "Non"],
+=======
+        "title": "Style et techniques",
+        "questions": [
+          {
+            "question_id": 5,
+            "content": "Quel style de vidéo réalisez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Traditionnel",
+              "Artistique",
+              "Documentaire",
+              "D'auteur",
+              "Cinéma",
+              "Autres"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 6,
+            "content": "Quelles techniques proposez-vous ?",
+            "component_type": "checkbox",
+            "options": [
+              "Numérique",
+              "Argentique",
+              "Autres"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 7,
+            "content": "Utilisez-vous une technique particulière ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "question_id": 8,
+            "content": "Quel type de matériel utilisez-vous ?",
+            "component_type": "textarea",
+            "field_type": "text",
+>>>>>>> origin/main
             "required": false
           }
         ]
       },
       {
         "section_id": 5,
+<<<<<<< HEAD
         "title": "Livraison et tarification",
+=======
+        "title": "Conditions de travail",
+        "questions": [
+          {
+            "question_id": 9,
+            "content": "Travaillez-vous seul ou en équipe ?",
+            "component_type": "radio",
+            "options": [
+              "Seul",
+              "En équipe"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 10,
+            "content": "Avez-vous un remplaçant en cas d'empêchement ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 6,
+        "title": "Livraison",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 11,
             "content": "Quel est le temps approximatif de livraison du reportage final ?",
+<<<<<<< HEAD
             "component_type": "input",
             "field_type": "text",
             "placeholder": "ex: 2-3 mois",
@@ -111,6 +254,19 @@
             "component_type": "radio",
             "options": ["Heure", "Événement"],
             "required": false
+=======
+            "component_type": "select",
+            "options": [
+              "1 semaine",
+              "2 semaines",
+              "3 semaines",
+              "1 mois",
+              "2 mois",
+              "3 mois",
+              "Plus de 3 mois"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       }

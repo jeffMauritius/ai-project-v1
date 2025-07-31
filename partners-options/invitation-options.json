@@ -9,9 +9,24 @@
             "question_id": 1,
             "content": "Disposez-vous d'un catalogue fixe ou est-il possible de commander une création sur-mesure ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Catalogue", "Commande sur mesure"],
             "required": true
           },
+=======
+            "options": [
+              "Catalogue",
+              "Commande sur mesure"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 2,
+        "title": "Budget et tarification",
+        "questions": [
+>>>>>>> origin/main
           {
             "question_id": 2,
             "content": "Quel est le budget ?",
@@ -19,6 +34,7 @@
             "field_type": "number",
             "unit": "€",
             "required": true
+<<<<<<< HEAD
           }
         ]
       },
@@ -26,19 +42,45 @@
         "section_id": 2,
         "title": "Impression et envoi",
         "questions": [
+=======
+          },
+>>>>>>> origin/main
           {
             "question_id": 3,
             "content": "Le prix du faire-part inclut-il l'impression ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Oui", "Non"],
             "required": false
           },
+=======
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Envois et livraison",
+        "questions": [
+>>>>>>> origin/main
           {
             "question_id": 4,
             "content": "Vous chargez-vous des envois nationaux ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Oui", "Non"],
             "required": false
+=======
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 5,
@@ -47,25 +89,55 @@
             "field_type": "number",
             "unit": "€",
             "required": false
+<<<<<<< HEAD
+=======
+          },
+          {
+            "question_id": 8,
+            "content": "Quels sont les délais de livraison ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+>>>>>>> origin/main
           }
         ]
       },
       {
+<<<<<<< HEAD
         "section_id": 3,
         "title": "Délais et conditions",
+=======
+        "section_id": 4,
+        "title": "Planning et conditions",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 6,
             "content": "Combien de temps à l'avance dois-je vous contacter ?",
+<<<<<<< HEAD
             "component_type": "input",
             "field_type": "text",
             "placeholder": "ex: 3 mois",
             "required": false
+=======
+            "component_type": "select",
+            "options": [
+              "1 mois",
+              "2 mois",
+              "3 mois",
+              "4 mois",
+              "5 mois",
+              "6 mois",
+              "Plus de 6 mois"
+            ],
+            "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 7,
             "content": "Existe-t-il une commande minimum ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Oui", "Non"],
             "required": false
           },
@@ -77,10 +149,37 @@
             "placeholder": "ex: 2-3 semaines",
             "required": false
           },
+=======
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "conditional_field": {
+              "show_when": "Oui",
+              "field": {
+                "content": "Quantité minimum",
+                "component_type": "input",
+                "field_type": "number",
+                "unit": "exemplaires"
+              }
+            },
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 5,
+        "title": "Services additionnels",
+        "questions": [
+>>>>>>> origin/main
           {
             "question_id": 9,
             "content": "Quels autres types de services proposez-vous ?",
             "component_type": "textarea",
+<<<<<<< HEAD
+=======
+            "field_type": "text",
+>>>>>>> origin/main
             "required": false
           }
         ]

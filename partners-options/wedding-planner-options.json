@@ -9,7 +9,30 @@
             "question_id": 1,
             "content": "Quels services proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
             "options": ["Cérémonie", "Restauration", "Décoration", "Animation", "Faire-part", "Carterie", "Accessoires - Cadeaux", "Liste de mariage", "Photographie et vidéo", "Musique et animation", "Location de voitures", "Voyages de noce", "Matériel technique (son, lumière, audiovisuel, etc.)", "Aide vestimentaire mariés", "Aide vestimentaire invités", "Maquillage et coiffure", "Coordinateur de mariage (présent le jour du mariage)", "Autres"],
+=======
+            "options": [
+              "Cérémonie",
+              "Restauration",
+              "Décoration",
+              "Animation",
+              "Faire-part",
+              "Carterie",
+              "Accessoires - Cadeaux",
+              "Liste de mariage",
+              "Photographie et vidéo",
+              "Musique et animation",
+              "Location de voitures",
+              "Voyages de noce",
+              "Matériel technique (son, lumière, audiovisuel, etc.)",
+              "Aide vestimentaire mariés",
+              "Aide vestimentaire invités",
+              "Maquillage et coiffure",
+              "Coordinateur de mariage (présent le jour du mariage)",
+              "Autres"
+            ],
+>>>>>>> origin/main
             "required": true
           }
         ]
@@ -22,13 +45,38 @@
             "question_id": 2,
             "content": "Quels types de cérémonies organisez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
             "options": ["Religieuse", "Civile", "À l'étranger", "En plein air", "Symbolique", "À thème", "Écologique", "Autres"],
             "required": false
           },
+=======
+            "options": [
+              "Religieuse",
+              "Civile",
+              "À l'étranger",
+              "En plein air",
+              "Symbolique",
+              "À thème",
+              "Écologique",
+              "Autres"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 3,
+        "title": "Spécialisation",
+        "questions": [
+>>>>>>> origin/main
           {
             "question_id": 3,
             "content": "Dans quels types de cérémonies vous spécialisez-vous ?",
             "component_type": "textarea",
+<<<<<<< HEAD
+=======
+            "field_type": "text",
+>>>>>>> origin/main
             "required": false
           }
         ]

@@ -9,15 +9,45 @@
             "question_id": 1,
             "content": "Quels services proposez-vous ?",
             "component_type": "checkbox",
+<<<<<<< HEAD
             "options": ["Cocktails", "Jus", "Candy bar", "Crêpes", "Cupcakes", "Foodtruck", "Huîtres", "Pizzas", "Hot dogs", "Sushi", "Cafés", "Glaces", "Burgers", "Brunch", "Autres"],
+=======
+            "options": [
+              "Cocktails",
+              "Jus",
+              "Candy bar",
+              "Crêpes",
+              "Cupcakes",
+              "Foodtruck",
+              "Huîtres",
+              "Pizzas",
+              "Hot dogs",
+              "Sushi",
+              "Cafés",
+              "Glaces",
+              "Burgers",
+              "Brunch",
+              "Autres"
+            ],
+>>>>>>> origin/main
             "required": true
           },
           {
             "question_id": 2,
+<<<<<<< HEAD
             "content": "Proposez vous également les boissons, tireuse à bières ou autres?",
             "component_type": "radio",
             "options": ["Oui", "Non"],
             "required": false
+=======
+            "content": "Proposez-vous également les boissons, tireuse à bières ou autres ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       },
@@ -54,18 +84,40 @@
       },
       {
         "section_id": 3,
+<<<<<<< HEAD
         "title": "Conditions de travail",
+=======
+        "title": "Déplacements et planning",
+>>>>>>> origin/main
         "questions": [
           {
             "question_id": 5,
             "content": "Facturez-vous les déplacements ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Oui", "Non"],
             "required": false
+=======
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "conditional_field": {
+              "show_when": "Oui",
+              "field": {
+                "content": "Tarif des déplacements",
+                "component_type": "input",
+                "field_type": "number",
+                "unit": "€"
+              }
+            },
+            "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 6,
             "content": "Combien de temps à l'avance dois-je vous contacter ?",
+<<<<<<< HEAD
             "component_type": "input",
             "field_type": "text",
             "placeholder": "ex: 1 mois",
@@ -83,11 +135,25 @@
             "content": "Quels types de branchements avez-vous besoin, électricité et eau ?",
             "component_type": "textarea",
             "required": false
+=======
+            "component_type": "select",
+            "options": [
+              "1 mois",
+              "2 mois",
+              "3 mois",
+              "4 mois",
+              "5 mois",
+              "6 mois",
+              "Plus de 6 mois"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       },
       {
         "section_id": 4,
+<<<<<<< HEAD
         "title": "Préparation et équipe",
         "questions": [
           {
@@ -98,19 +164,76 @@
             "placeholder": "ex: 2 heures",
             "required": false
           },
+=======
+        "title": "Conditions techniques",
+        "questions": [
+          {
+            "question_id": 7,
+            "content": "Avez-vous besoin de matériel spécifique ou de conditions particulières pour pouvoir travailler ?",
+            "component_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+          },
+          {
+            "question_id": 8,
+            "content": "Quels types de branchements avez-vous besoin, électricité et eau ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "question_id": 9,
+            "content": "Combien de temps de préparation avez-vous besoin ?",
+            "component_type": "select",
+            "options": [
+              "30 minutes",
+              "1 heure",
+              "2 heures",
+              "3 heures",
+              "4 heures",
+              "Plus de 4 heures"
+            ],
+            "required": true
+          }
+        ]
+      },
+      {
+        "section_id": 5,
+        "title": "Conditions de travail",
+        "questions": [
+>>>>>>> origin/main
           {
             "question_id": 10,
             "content": "Travaillez-vous seul ou en équipe ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Seul", "En équipe"],
             "required": false
+=======
+            "options": [
+              "Seul",
+              "En équipe"
+            ],
+            "required": true
+>>>>>>> origin/main
           },
           {
             "question_id": 11,
             "content": "Acceptez-vous de travailler en plein air ?",
             "component_type": "radio",
+<<<<<<< HEAD
             "options": ["Oui", "Non"],
             "required": false
+=======
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": true
+>>>>>>> origin/main
           }
         ]
       }
