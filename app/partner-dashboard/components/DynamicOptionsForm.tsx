@@ -197,8 +197,8 @@ export function DynamicOptionsForm({
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {field.options?.map((option: string) => (
-                <div key={option} className="flex items-center space-x-2">
+              {field.options?.map((option, index) => (
+                <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
                   <Checkbox
                     id={`${fieldKey}_${option}`}
                     checked={(formData[fieldKey] || []).includes(option)}
@@ -228,15 +228,18 @@ export function DynamicOptionsForm({
               value={formData[fieldKey] || ""}
               onValueChange={(value) => handleRadioChange(field.id, value)}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {field.options?.map((option: string) => (
-                  <div key={option} className="flex items-center space-x-2">
-                    <RadioGroupItem value={option} id={`${fieldKey}_${option}`} />
-                    <Label htmlFor={`${fieldKey}_${option}`} className="text-sm">
-                      {option}
-                    </Label>
-                  </div>
-                ))}
+              {field.options?.map((option, index) => (
+                <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={`${field.question_id}-${option}`} />
+                  <Label htmlFor={`${field.question_id}-${option}`} className="text-sm">
+                    {option}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+            {field.conditional_field && value === field.conditional_field.show_when && (
+              <div className="ml-6 mt-3 p-3 border-l-2 border-primary">
+                {renderField(field.conditional_field.field)}
               </div>
             </RadioGroup>
             {hasError && (
@@ -261,8 +264,8 @@ export function DynamicOptionsForm({
                 <SelectValue placeholder="Sélectionnez une option" />
               </SelectTrigger>
               <SelectContent>
-                {field.options?.map((option: string) => (
-                  <SelectItem key={option} value={option}>
+                {field.options?.map((option, index) => (
+                  <SelectItem key={`${field.question_id}-${option}-${index}`} value={option}>
                     {option}
                   </SelectItem>
                 ))}

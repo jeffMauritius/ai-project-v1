@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
   if (isAuthPage && token) {
     // Rediriger vers la page appropriée en fonction du rôle
     if (token.role === "PARTNER") {
-      return NextResponse.redirect(new URL("/partner-dashboard", request.url));
+      return NextResponse.redirect(new URL("/partner-dashboard/settings", request.url));
     } else if (token.role === "ADMIN") {
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     } else {
@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard/settings", request.url));
     }
     if (token.role === "PARTNER" && (isDashboardPage || isAdminPage)) {
-      return NextResponse.redirect(new URL("/partner-dashboard", request.url));
+      return NextResponse.redirect(new URL("/partner-dashboard/settings", request.url));
     }
     if (token.role === "ADMIN" && (isDashboardPage || isPartnerPage)) {
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));

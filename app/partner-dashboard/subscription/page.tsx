@@ -3,50 +3,82 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Check, CreditCard, Calendar, Building2, ArrowRight } from "lucide-react"
-
-const plans = [
-  {
-    name: "Essentiel",
-    price: "29",
-    description: "L'essentiel pour démarrer",
-    features: [
-      "Profil professionnel",
-      "Messagerie avec les clients",
-      "Jusqu'à 10 photos",
-      "Statistiques de base"
-    ]
-  },
-  {
-    name: "Pro",
-    price: "79",
-    description: "Pour les professionnels établis",
-    features: [
-      "Tout de l'offre Essentiel",
-      "Photos illimitées",
-      "Mise en avant dans les recherches",
-      "Statistiques avancées",
-      "Support prioritaire"
-    ],
-    popular: true
-  },
-  {
-    name: "Premium",
-    price: "149",
-    description: "Pour une visibilité maximale",
-    features: [
-      "Tout de l'offre Pro",
-      "Badge Premium sur votre profil",
-      "Accès aux mariages VIP",
-      "Accompagnement personnalisé",
-      "Formation marketing incluse"
-    ]
-  }
-]
+import { Check, CreditCard, Calendar, Building2, ArrowRight, Loader2 } from "lucide-react"
+import { useSubscription } from '@/hooks/useSubscription'
+import { useToast } from '@/hooks/useToast'
+import { SubscriptionErrorAlert } from '@/components/SubscriptionErrorAlert'
 
 export default function Subscription() {
   const [selectedPlan, setSelectedPlan] = useState<string>('Pro')
-  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly')
+  const [billingInterval, setBillingInterval] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY')
+  const [showErrorAlert, setShowErrorAlert] = useState(false)
+  const [errorAlertProps, setErrorAlertProps] = useState<any>(null)
+  const [showPaymentInfo, setShowPaymentInfo] = useState(false)
+  const { subscription, billingInfo, plans, loading, createSubscription, cancelSubscription } = useSubscription()
+  const { showSuccess, showSubscriptionError, showWarning, showSubscriptionAlert } = useToast()
+
+  const handleCreateSubscription = async (planId: string) => {
+    try {
+      // Pour l'instant, on utilise des données de facturation par défaut
+      const defaultBillingInfo = {
+        billingName: "Château de Vaux-le-Vicomte",
+        billingEmail: "contact@vaux-le-vicomte.com",
+        billingAddress: "77950 Maincy",
+        billingCity: "Maincy",
+        billingPostalCode: "77950",
+        billingCountry: "France",
+        siret: "12345678901234"
+      } as const
+
+      await createSubscription(planId, billingInterval, defaultBillingInfo)
+      showSuccess("Votre abonnement a été créé avec succès. Vous bénéficiez d'un essai gratuit de 14 jours.", {
+        title: "✅ Abonnement créé"
+      })
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur lors de la création de l'abonnement"
+      
+      // Pour l'erreur d'abonnement existant, on peut utiliser l'alerte dialog
+      if (errorMessage.includes("Un abonnement actif existe déjà")) {
+        const alertProps = showSubscriptionAlert({
+          errorType: 'existing_subscription',
+          errorMessage: errorMessage,
+          onAction: () => {
+            setShowErrorAlert(false)
+            // Ici vous pourriez naviguer vers la gestion de l'abonnement
+          },
+          actionLabel: "Gérer mon abonnement"
+        })
+        setErrorAlertProps(alertProps)
+        setShowErrorAlert(true)
+      } else {
+        showSubscriptionError(errorMessage)
+      }
+    }
+  }
+
+  const handleCancelSubscription = async () => {
+    try {
+      await cancelSubscription(true)
+      showSuccess("Votre abonnement sera annulé à la fin de la période actuelle. Vous continuerez à bénéficier de vos services jusqu'à cette date.", {
+        title: "✅ Abonnement annulé"
+      })
+    } catch (error) {
+      showSubscriptionError(error instanceof Error ? error.message : "Erreur lors de l'annulation de l'abonnement")
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+
+
+  // Filtrer les plans selon l'intervalle de facturation
+  const filteredPlans = plans.filter(plan => plan.billingInterval === billingInterval)
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -62,9 +94,9 @@ export default function Subscription() {
         <div className="mt-6 flex justify-center">
           <div className="relative flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
             <button
-              onClick={() => setBillingInterval('monthly')}
+              onClick={() => setBillingInterval('MONTHLY')}
               className={`${
-                billingInterval === 'monthly'
+                billingInterval === 'MONTHLY'
                   ? 'bg-white dark:bg-gray-700 shadow'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-600'
               } px-4 py-2 text-sm font-medium rounded-md transition-colors`}
@@ -72,9 +104,9 @@ export default function Subscription() {
               Mensuel
             </button>
             <button
-              onClick={() => setBillingInterval('yearly')}
+              onClick={() => setBillingInterval('YEARLY')}
               className={`${
-                billingInterval === 'yearly'
+                billingInterval === 'YEARLY'
                   ? 'bg-white dark:bg-gray-700 shadow'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-600'
               } px-4 py-2 text-sm font-medium rounded-md transition-colors`}
@@ -86,17 +118,13 @@ export default function Subscription() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        {plans.map((plan) => {
-          const price = billingInterval === 'yearly' 
-            ? Math.round(parseInt(plan.price) * 0.8)
-            : plan.price
-
+        {filteredPlans.map((plan) => {
           return (
             <Card 
-              key={plan.name}
-              className={`relative ${plan.popular ? 'border-pink-500' : ''}`}
+              key={plan.id}
+              className={`relative ${plan.isPopular ? 'border-pink-500' : ''}`}
             >
-              {plan.popular && (
+              {plan.isPopular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="bg-pink-500 text-white text-sm font-medium px-3 py-1 rounded-full">
                     Populaire
@@ -109,16 +137,16 @@ export default function Subscription() {
                 <CardDescription>{plan.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                    {price}€
+                    {plan.price}€
                   </span>
                   <span className="text-gray-500 dark:text-gray-400 ml-2">
-                    /{billingInterval === 'yearly' ? 'an' : 'mois'}
+                    /{billingInterval === 'YEARLY' ? 'an' : 'mois'}
                   </span>
                 </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4 mb-8">
-                  {plan.features.map((feature) => (
+                  {plan.features.map((feature: string) => (
                     <li key={feature} className="flex items-center">
                       <Check className="h-5 w-5 text-green-500 mr-3" />
                       <span className="text-gray-600 dark:text-gray-300">{feature}</span>
@@ -126,11 +154,12 @@ export default function Subscription() {
                   ))}
                 </ul>
                 <Button
-                  onClick={() => setSelectedPlan(plan.name)}
+                  onClick={() => handleCreateSubscription(plan.id)}
                   className="w-full"
-                  variant={selectedPlan === plan.name ? 'default' : 'outline'}
+                  variant={subscription?.planId === plan.id ? 'default' : 'outline'}
+                  disabled={subscription?.planId === plan.id}
                 >
-                  {selectedPlan === plan.name ? 'Plan actuel' : 'Sélectionner'}
+                  {subscription?.planId === plan.id ? 'Plan actuel' : 'Sélectionner'}
                 </Button>
               </CardContent>
             </Card>
@@ -138,84 +167,147 @@ export default function Subscription() {
         })}
       </div>
 
-      {/* Informations de paiement */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Informations de paiement</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
+      {/* Abonnement actuel */}
+      {subscription && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Votre abonnement actuel</CardTitle>
+            <CardDescription>
+              Statut: {subscription.status === 'TRIAL' ? 'Essai gratuit' : 'Actif'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                  Carte de crédit
+                  Plan actuel
                 </h3>
-                <div className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                  <CreditCard className="h-6 w-6 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      •••• •••• •••• 4242
-                    </p>
-                    <p className="text-sm text-gray-500">Expire le 12/24</p>
-                  </div>
-                  <Button variant="outline" size="sm" className="ml-auto">
-                    Modifier
-                  </Button>
+                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {subscription.plan.name}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {subscription.plan.description}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    {subscription.plan.price}€ / {subscription.plan.billingInterval === 'YEARLY' ? 'an' : 'mois'}
+                  </p>
                 </div>
               </div>
               <div>
                 <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                  Facturation
+                  Période actuelle
                 </h3>
-                <div className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                  <Building2 className="h-6 w-6 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Château de Vaux-le-Vicomte
+                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <p className="text-sm text-gray-500">
+                    Du {new Date(subscription.currentPeriodStart).toLocaleDateString('fr-FR')}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Au {new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR')}
+                  </p>
+                  {subscription.cancelAtPeriodEnd && (
+                    <p className="text-sm text-orange-600 mt-2">
+                      ⚠️ Annulé à la fin de la période
                     </p>
-                    <p className="text-sm text-gray-500">FR 12 345 678 901</p>
-                  </div>
-                  <Button variant="outline" size="sm" className="ml-auto">
-                    Modifier
-                  </Button>
+                  )}
                 </div>
               </div>
             </div>
-            <div>
-              <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                Prochain paiement
-              </h3>
-              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                <div className="flex items-center space-x-4 mb-4">
-                  <Calendar className="h-6 w-6 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      15 février 2024
-                    </p>
-                    <p className="text-sm text-gray-500">Prochain renouvellement</p>
+            {!subscription.cancelAtPeriodEnd && (
+              <div className="mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={handleCancelSubscription}
+                  className="text-red-600 border-red-600 hover:bg-red-50"
+                >
+                  Annuler l&apos;abonnement
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Informations de paiement */}
+      {showPaymentInfo && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Informations de paiement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
+                    Carte de crédit
+                  </h3>
+                  <div className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <CreditCard className="h-6 w-6 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        •••• •••• •••• 4242
+                      </p>
+                      <p className="text-sm text-gray-500">Expire le 12/24</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="ml-auto">
+                      Modifier
+                    </Button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Plan Pro</span>
-                    <span className="text-gray-900 dark:text-white">79,00 €</span>
+                <div>
+                  <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
+                    Facturation
+                  </h3>
+                  <div className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <Building2 className="h-6 w-6 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        Château de Vaux-le-Vicomte
+                      </p>
+                      <p className="text-sm text-gray-500">FR 12 345 678 901</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="ml-auto">
+                      Modifier
+                    </Button>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">TVA (20%)</span>
-                    <span className="text-gray-900 dark:text-white">15,80 €</span>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
+                  Prochain paiement
+                </h3>
+                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <Calendar className="h-6 w-6 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        15 février 2024
+                      </p>
+                      <p className="text-sm text-gray-500">Prochain renouvellement</p>
+                    </div>
                   </div>
-                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex justify-between text-sm font-medium">
-                      <span className="text-gray-900 dark:text-white">Total</span>
-                      <span className="text-gray-900 dark:text-white">94,80 €</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Plan Pro</span>
+                      <span className="text-gray-900 dark:text-white">79,00 €</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">TVA (20%)</span>
+                      <span className="text-gray-900 dark:text-white">15,80 €</span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex justify-between text-sm font-medium">
+                        <span className="text-gray-900 dark:text-white">Total</span>
+                        <span className="text-gray-900 dark:text-white">94,80 €</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Historique des paiements */}
       <Card>
@@ -292,6 +384,15 @@ export default function Subscription() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Alert Dialog pour les erreurs importantes */}
+      {showErrorAlert && errorAlertProps && (
+        <SubscriptionErrorAlert
+          isOpen={showErrorAlert}
+          onClose={() => setShowErrorAlert(false)}
+          {...errorAlertProps}
+        />
+      )}
     </div>
   )
 }

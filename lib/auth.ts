@@ -122,7 +122,7 @@ export const authOptions: NextAuthOptions = {
 
       switch (session.user.role) {
         case 'PARTNER':
-          return `${baseUrl}/partner-dashboard`
+          return `${baseUrl}/partner-dashboard/settings`
         case 'ADMIN':
           return `${baseUrl}/admin/dashboard`
         default:
