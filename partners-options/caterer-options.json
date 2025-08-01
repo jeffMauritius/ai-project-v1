@@ -1,14 +1,15 @@
 {
   "traiteur": {
+    "title": "Traiteur",
     "sections": [
       {
-        "section_id": 1,
-        "title": "Type de cuisine",
-        "questions": [
+        "title": "Cuisine",
+        "fields": [
           {
-            "question_id": 1,
-            "content": "Quel type de cuisine proposez-vous ?",
+            "id": "type_cuisine",
+            "question": "Quel type de cuisine proposez-vous ?",
             "component_type": "select",
+            "field_type": "select",
             "options": [
               "Traditionnelle",
               "Régionale",
@@ -17,18 +18,13 @@
               "Fusion",
               "Autres"
             ],
-            "required": true
-          }
-        ]
-      },
-      {
-        "section_id": 2,
-        "title": "Menus spécifiques",
-        "questions": [
+            "required": false
+          },
           {
-            "question_id": 2,
-            "content": "Proposez-vous des menus spécifiques ?",
-            "component_type": "checkbox",
+            "id": "menus_specifiques",
+            "question": "Proposez-vous des menus spécifiques ?",
+            "component_type": "select",
+            "field_type": "select",
             "options": [
               "Végétariens",
               "Végétaliens",
@@ -42,161 +38,128 @@
               "Autres"
             ],
             "required": false
-          }
-        ]
-      },
-      {
-        "section_id": 3,
-        "title": "Budget et capacité",
-        "questions": [
-          {
-            "question_id": 3,
-            "content": "À partir de quel budget sont vos menus",
-            "component_type": "input",
-            "field_type": "number",
-            "unit": "€",
-            "required": true
           },
           {
-            "question_id": 4,
-            "content": "Combien d'invités pouvez-vous accueillir ?",
-            "component_type": "range",
-            "min_field": {
-              "content": "Minimum",
-              "component_type": "input",
-              "field_type": "number",
-              "required": true
-            },
-            "max_field": {
-              "content": "Maximum",
-              "component_type": "input",
-              "field_type": "number",
-              "required": true
-            }
+            "id": "budget_minimum",
+            "question": "À partir de quel budget sont vos menus",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
           }
         ]
       },
       {
-        "section_id": 4,
-        "title": "Services complémentaires",
-        "questions": [
+        "title": "Capacité",
+        "fields": [
           {
-            "question_id": 5,
-            "content": "Quels services complémentaires proposez-vous ?",
-            "component_type": "checkbox",
+            "id": "invites_minimum",
+            "question": "Combien d'invités pouvez-vous accueillir ? Minimum",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          },
+          {
+            "id": "invites_maximum",
+            "question": "Maximum",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services complémentaires",
+        "fields": [
+          {
+            "id": "services_complementaires",
+            "question": "Quels services complémentaires proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
             "options": [
               "Location de vaisselle et d'ustensiles",
               "Location de mobilier",
-              "Service",
-              "Boisson",
+              "Service Boisson",
               "Dessert",
               "Wedding Cake"
+            ],
+            "required": false
+          },
+          {
+            "id": "cuisine_sur_lieu",
+            "question": "Cuisinez-vous sur le lieu de la réception ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "menus_personnalises",
+            "question": "Proposez-vous des menus personnalisés ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "gateaux_mariage",
+            "question": "Proposez-vous des gâteaux de mariage ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "apporter_gateau",
+            "question": "Puis-je apporter mon propre gâteau de mariage ? Facturez-vous une majoration ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
             ],
             "required": false
           }
         ]
       },
       {
-        "section_id": 5,
-        "title": "Conditions de service",
-        "questions": [
+        "title": "Boissons et conditions",
+        "fields": [
           {
-            "question_id": 6,
-            "content": "Cuisinez-vous sur le lieu de la réception ?",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
-          },
-          {
-            "question_id": 7,
-            "content": "Proposez-vous des menus personnalisés ?",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
-          }
-        ]
-      },
-      {
-        "section_id": 6,
-        "title": "Gâteaux de mariage",
-        "questions": [
-          {
-            "question_id": 8,
-            "content": "Proposez-vous des gâteaux de mariage ?",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "required": true
-          },
-          {
-            "question_id": 9,
-            "content": "Puis-je apporter mon propre gâteau de mariage ? Facturez-vous une majoration ?",
-            "component_type": "radio",
-            "options": [
-              "Oui",
-              "Non"
-            ],
-            "conditional_field": {
-              "show_when": "Oui",
-              "field": {
-                "content": "Montant de la majoration",
-                "component_type": "input",
-                "field_type": "number",
-                "unit": "€"
-              }
-            },
-            "required": true
-          }
-        ]
-      },
-      {
-        "section_id": 7,
-        "title": "Formules et contraintes",
-        "questions": [
-          {
-            "question_id": 10,
-            "content": "Quelles sont les formules boissons ?",
+            "id": "formules_boissons",
+            "question": "Quelles sont les formules boissons ?",
             "component_type": "textarea",
             "field_type": "text",
             "required": false
           },
           {
-            "question_id": 11,
-            "content": "Y a-t-il une limite horaire à respecter pour l'événement ?",
+            "id": "limite_horaire",
+            "question": "Y'a-t-il une limite horaire à respecter pour l'événement ?",
             "component_type": "radio",
+            "field_type": "radio",
             "options": [
               "Oui",
               "Non"
             ],
-            "conditional_field": {
-              "show_when": "Oui",
-              "field": {
-                "content": "Limite horaire",
-                "component_type": "input",
-                "field_type": "text",
-                "placeholder": "ex: 23h00"
-              }
-            },
-            "required": true
+            "required": false
           },
           {
-            "question_id": 12,
-            "content": "Dans le cas d'une réservation inférieure au nombre minimum de menus, à combien s'élève le supplément ?",
+            "id": "supplement_minimum",
+            "question": "Dans le cas d'une réservation inférieure au nombre minimum de menus, à combien s'élève le supplément ?",
             "component_type": "input",
             "field_type": "number",
-            "unit": "€",
             "required": false
           }
         ]
       }
     ]
   }
-} 
+}

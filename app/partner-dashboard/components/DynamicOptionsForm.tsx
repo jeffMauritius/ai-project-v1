@@ -10,71 +10,51 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Info } from "lucide-react";
-
-interface OptionField {
-  question_id: number;
-  content: string;
-  component_type: "input" | "textarea" | "checkbox" | "radio" | "select" | "boolean" | "range";
-  field_type?: "text" | "number" | "email";
-  options?: string[];
-  unit?: string;
-  required?: boolean;
-  placeholder?: string;
-  conditional_field?: {
-    show_when: string;
-    field: OptionField;
-  };
-  min_field?: {
-    content: string;
-    component_type: string;
-    field_type: string;
-    required: boolean;
-  };
-  max_field?: {
-    content: string;
-    component_type: string;
-    field_type: string;
-    required: boolean;
-  };
-}
-
-interface Section {
-  section_id: number;
-  title: string;
-  questions: OptionField[];
-}
-
-interface ProviderOptions {
-  [key: string]: {
-    sections: Section[];
-  };
-}
+import { OptionsService, SERVICE_TYPE_TO_JSON_KEY } from "@/lib/options-service";
+import { ServiceType } from "@prisma/client";
+import { validateFormData, getFieldErrors } from "@/lib/options-validation";
 
 interface DynamicOptionsFormProps {
   providerType: string;
   initialData?: any;
   onSave: (data: any) => void;
   onCancel: () => void;
+  serviceType?: ServiceType;
 }
 
 export function DynamicOptionsForm({ 
   providerType, 
   initialData = {}, 
   onSave, 
-  onCancel 
+  onCancel,
+  serviceType
 }: DynamicOptionsFormProps) {
   const [formData, setFormData] = useState<any>(initialData);
-  const [providerOptions, setProviderOptions] = useState<ProviderOptions | null>(null);
+  const [providerOptions, setProviderOptions] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
+
+  // Synchroniser les données quand initialData change
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   useEffect(() => {
-    // Charger les options du prestataire depuis le fichier JSON
+    // Charger les options du prestataire depuis le service
     const loadProviderOptions = async () => {
+      if (!serviceType) {
+        console.error('ServiceType non défini');
+        setLoading(false);
+        return;
+      }
+
       try {
-        console.log(`[DynamicOptionsForm] Chargement des options pour ${providerType}`);
-        const options = await import(`@/partners-options/${providerType}-options.json`);
-        console.log(`[DynamicOptionsForm] Options chargées:`, options.default);
-        setProviderOptions(options.default);
+        console.log(`[DynamicOptionsForm] Chargement des options pour ${providerType} avec serviceType ${serviceType}`);
+        const options = await OptionsService.loadProviderOptions(serviceType);
+        console.log(`[DynamicOptionsForm] Options chargées:`, options);
+        setProviderOptions(options);
         setLoading(false);
       } catch (error) {
         console.error(`Erreur lors du chargement des options pour ${providerType}:`, error);
@@ -83,115 +63,170 @@ export function DynamicOptionsForm({
     };
 
     loadProviderOptions();
-  }, [providerType]);
+  }, [providerType, serviceType]);
 
-  const handleInputChange = (questionId: number, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      [questionId]: value
-    }));
+  const handleInputChange = (fieldId: string, value: any) => {
+    const fieldKey = getFieldKey(fieldId);
+    const newFormData = {
+      ...formData,
+      [fieldKey]: value
+    };
+    setFormData(newFormData);
+    onSave(newFormData); // Toujours sauvegarder, même si invalide
   };
 
-  const handleCheckboxChange = (questionId: number, option: string, checked: boolean) => {
-    setFormData((prev: any) => {
-      const currentValues = prev[questionId] || [];
-      if (checked) {
-        return {
-          ...prev,
-          [questionId]: [...currentValues, option]
-        };
-      } else {
-        return {
-          ...prev,
-          [questionId]: currentValues.filter((item: string) => item !== option)
-        };
-      }
-    });
+  const handleCheckboxChange = (fieldId: string, option: string, checked: boolean) => {
+    const fieldKey = getFieldKey(fieldId);
+    const currentValues = formData[fieldKey] || [];
+    let newValues;
+    if (checked) {
+      newValues = [...currentValues, option];
+    } else {
+      newValues = currentValues.filter((val: string) => val !== option);
+    }
+    const newFormData = {
+      ...formData,
+      [fieldKey]: newValues
+    };
+    setFormData(newFormData);
+    onSave(newFormData); // Toujours sauvegarder, même si invalide
   };
 
-  const renderField = (field: OptionField) => {
-    const value = formData[field.question_id];
+  const handleRadioChange = (fieldId: string, value: string) => {
+    const fieldKey = getFieldKey(fieldId);
+    const newFormData = {
+      ...formData,
+      [fieldKey]: value
+    };
+    setFormData(newFormData);
+    onSave(newFormData); // Toujours sauvegarder, même si invalide
+  };
 
-    switch (field.component_type) {
-      case "input":
+  const handleSelectChange = (fieldId: string, value: string) => {
+    const fieldKey = getFieldKey(fieldId);
+    const newFormData = {
+      ...formData,
+      [fieldKey]: value
+    };
+    setFormData(newFormData);
+    onSave(newFormData); // Toujours sauvegarder, même si invalide
+  };
+
+  const handleSwitchChange = (fieldId: string, checked: boolean) => {
+    const fieldKey = getFieldKey(fieldId);
+    const newFormData = {
+      ...formData,
+      [fieldKey]: checked
+    };
+    setFormData(newFormData);
+    onSave(newFormData); // Toujours sauvegarder, même si invalide
+  };
+
+  // Mapping des IDs descriptifs vers les clés numériques pour la compatibilité
+  const getFieldKey = (fieldId: string) => {
+    // Si les données existent avec l'ancien format numérique, on les utilise
+    // Sinon, on utilise le nouveau format descriptif
+    const numericKey = Object.keys(initialData).find(key => 
+      key.startsWith('question_') && initialData[key] !== undefined
+    );
+    
+    if (numericKey) {
+      // On utilise un mapping basé sur l'index du champ dans la section
+      const allFields = relevantOptions?.sections?.flatMap((section: any) => section.fields) || [];
+      const fieldIndex = allFields.findIndex((f: any) => f.id === fieldId);
+      return fieldIndex >= 0 ? `question_${fieldIndex + 1}` : `question_${fieldId}`;
+    }
+    
+    return `question_${fieldId}`;
+  };
+
+  const renderField = (field: any) => {
+    const fieldKey = getFieldKey(field.id);
+    const fieldErrors = getFieldErrors(fieldKey, validationErrors);
+    const hasError = fieldErrors.length > 0;
+
+    const renderInput = () => {
+      if (field.component_type === "input") {
         return (
-          <div key={field.question_id} className="space-y-2">
-            <Label htmlFor={`field-${field.question_id}`}>
-              {field.content}
+          <div className="space-y-2">
+            <Label htmlFor={fieldKey}>
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
-            <div className="relative">
-              <Input
-                id={`field-${field.question_id}`}
-                type={field.field_type || "text"}
-                value={value || ""}
-                onChange={(e) => handleInputChange(field.question_id, e.target.value)}
-                placeholder={field.placeholder}
-                required={field.required}
-              />
-              {field.unit && (
-                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                  {field.unit}
-                </span>
-              )}
-            </div>
+            <Input
+              id={fieldKey}
+              type={field.field_type === "number" ? "number" : "text"}
+              value={formData[fieldKey] || ""}
+              onChange={(e) => handleInputChange(field.id, field.field_type === "number" ? Number(e.target.value) : e.target.value)}
+              placeholder={field.placeholder}
+              className={hasError ? "border-red-500" : ""}
+            />
+            {hasError && (
+              <p className="text-sm text-red-500">{fieldErrors[0]}</p>
+            )}
           </div>
         );
+      }
 
-      case "textarea":
+      if (field.component_type === "textarea") {
         return (
-          <div key={field.question_id} className="space-y-2">
-            <Label htmlFor={`field-${field.question_id}`}>
-              {field.content}
+          <div className="space-y-2">
+            <Label htmlFor={fieldKey}>
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <Textarea
-              id={`field-${field.question_id}`}
-              value={value || ""}
-              onChange={(e) => handleInputChange(field.question_id, e.target.value)}
+              id={fieldKey}
+              value={formData[fieldKey] || ""}
+              onChange={(e) => handleInputChange(field.id, e.target.value)}
               placeholder={field.placeholder}
-              required={field.required}
+              className={hasError ? "border-red-500" : ""}
             />
+            {hasError && (
+              <p className="text-sm text-red-500">{fieldErrors[0]}</p>
+            )}
           </div>
         );
+      }
 
-      case "checkbox":
+      if (field.component_type === "checkbox") {
         return (
-          <div key={field.question_id} className="space-y-3">
+          <div className="space-y-2">
             <Label>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {field.options?.map((option, index) => (
                 <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
                   <Checkbox
-                    id={`${field.question_id}-${option}`}
-                    checked={value?.includes(option) || false}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange(field.question_id, option, checked as boolean)
-                    }
+                    id={`${fieldKey}_${option}`}
+                    checked={(formData[fieldKey] || []).includes(option)}
+                    onCheckedChange={(checked) => handleCheckboxChange(field.id, option, !!checked)}
                   />
-                  <Label htmlFor={`${field.question_id}-${option}`} className="text-sm">
+                  <Label htmlFor={`${fieldKey}_${option}`} className="text-sm">
                     {option}
                   </Label>
                 </div>
               ))}
             </div>
+            {hasError && (
+              <p className="text-sm text-red-500">{fieldErrors[0]}</p>
+            )}
           </div>
         );
+      }
 
-      case "radio":
+      if (field.component_type === "radio") {
         return (
-          <div key={field.question_id} className="space-y-3">
+          <div className="space-y-2">
             <Label>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <RadioGroup
-              value={value || ""}
-              onValueChange={(val) => handleInputChange(field.question_id, val)}
-              required={field.required}
+              value={formData[fieldKey] || ""}
+              onValueChange={(value) => handleRadioChange(field.id, value)}
             >
               {field.options?.map((option, index) => (
                 <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
@@ -206,22 +241,26 @@ export function DynamicOptionsForm({
               <div className="ml-6 mt-3 p-3 border-l-2 border-primary">
                 {renderField(field.conditional_field.field)}
               </div>
+            </RadioGroup>
+            {hasError && (
+              <p className="text-sm text-red-500">{fieldErrors[0]}</p>
             )}
           </div>
         );
+      }
 
-      case "select":
+      if (field.component_type === "select") {
         return (
-          <div key={field.question_id} className="space-y-2">
-            <Label htmlFor={`field-${field.question_id}`}>
-              {field.content}
+          <div className="space-y-2">
+            <Label htmlFor={fieldKey}>
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <Select
-              value={value || ""}
-              onValueChange={(val) => handleInputChange(field.question_id, val)}
+              value={formData[fieldKey] || ""}
+              onValueChange={(value) => handleSelectChange(field.id, value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className={hasError ? "border-red-500" : ""}>
                 <SelectValue placeholder="Sélectionnez une option" />
               </SelectTrigger>
               <SelectContent>
@@ -232,69 +271,93 @@ export function DynamicOptionsForm({
                 ))}
               </SelectContent>
             </Select>
+            {hasError && (
+              <p className="text-sm text-red-500">{fieldErrors[0]}</p>
+            )}
           </div>
         );
+      }
 
-      case "boolean":
+      if (field.component_type === "boolean") {
         return (
-          <div key={field.question_id} className="flex items-center justify-between">
-            <Label htmlFor={`field-${field.question_id}`} className="text-sm">
-              {field.content}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            <Switch
-              id={`field-${field.question_id}`}
-              checked={value || false}
-              onCheckedChange={(checked) => handleInputChange(field.question_id, checked)}
-            />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>
+                {field.question}
+                {field.required && <span className="text-red-500 ml-1">*</span>}
+              </Label>
+              <Switch
+                checked={formData[fieldKey] || false}
+                onCheckedChange={(checked) => handleSwitchChange(field.id, checked)}
+              />
+            </div>
+            {hasError && (
+              <p className="text-sm text-red-500">{fieldErrors[0]}</p>
+            )}
           </div>
         );
+      }
 
-      case "range":
+      if (field.component_type === "range") {
         return (
-          <div key={field.question_id} className="space-y-3">
+          <div className="space-y-2">
             <Label>
-              {field.content}
+              {field.question}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor={`field-${field.question_id}-min`}>
-                  {field.min_field?.content}
+                <Label htmlFor={`${fieldKey}_min`} className="text-sm">
+                  {field.min_field?.question}
                 </Label>
                 <Input
-                  id={`field-${field.question_id}-min`}
+                  id={`${fieldKey}_min`}
                   type="number"
-                  value={value?.min || ""}
-                  onChange={(e) => handleInputChange(field.question_id, {
-                    ...value,
-                    min: e.target.value
-                  })}
-                  required={field.min_field?.required}
+                  value={formData[fieldKey]?.min || ""}
+                  onChange={(e) => {
+                    const newRange = {
+                      ...formData[fieldKey],
+                      min: e.target.value // Garder comme string
+                    };
+                    handleInputChange(field.question_id, newRange);
+                  }}
+                  placeholder="Minimum"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`field-${field.question_id}-max`}>
-                  {field.max_field?.content}
+                <Label htmlFor={`${fieldKey}_max`} className="text-sm">
+                  {field.max_field?.question}
                 </Label>
                 <Input
-                  id={`field-${field.question_id}-max`}
+                  id={`${fieldKey}_max`}
                   type="number"
-                  value={value?.max || ""}
-                  onChange={(e) => handleInputChange(field.question_id, {
-                    ...value,
-                    max: e.target.value
-                  })}
-                  required={field.max_field?.required}
+                  value={formData[fieldKey]?.max || ""}
+                  onChange={(e) => {
+                    const newRange = {
+                      ...formData[fieldKey],
+                      max: e.target.value // Garder comme string
+                    };
+                    handleInputChange(field.question_id, newRange);
+                  }}
+                  placeholder="Maximum"
                 />
               </div>
             </div>
+            {hasError && (
+              <p className="text-sm text-red-500">{fieldErrors[0]}</p>
+            )}
           </div>
         );
+      }
 
-      default:
-        return null;
-    }
+      return null;
+    };
+
+    return (
+      <div key={field.question_id} className="space-y-2">
+        {renderInput()}
+      </div>
+    );
   };
 
   if (loading) {
@@ -302,8 +365,7 @@ export function DynamicOptionsForm({
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-2">Chargement des options...</span>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         </CardContent>
       </Card>
@@ -314,7 +376,7 @@ export function DynamicOptionsForm({
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 p-4 border rounded-lg">
+          <div className="flex items-center space-x-2 text-red-500">
             <Info className="h-4 w-4" />
             <span>Aucune option trouvée pour ce type de prestataire.</span>
           </div>
@@ -323,47 +385,36 @@ export function DynamicOptionsForm({
     );
   }
 
-  // Mapping des providerType vers les clés dans le JSON
-  const providerTypeToJsonKey: Record<string, string> = {
-    "reception-venue": "lieu_reception",
-    "caterer": "traiteur",
-    "invitation": "faire_part",
-    "guest-gifts": "cadeaux_invites",
-    "photographer": "photographe",
-    "music-dj": "musique_dj",
-    "vehicle": "voiture",
-    "decoration": "decoration",
-    "tent": "chapiteau",
-    "animation": "animation",
-    "florist": "fleurs",
-    "wedding-registry": "liste_cadeau_mariage",
-    "wedding-planner": "organisation",
-    "video": "video",
-    "honeymoon-travel": "voyage",
-    "wedding-cake": "wedding_cake",
-    "officiant": "officiants",
-    "food-truck": "food_truck",
-    "wine": "vin",
-    "wedding-dress": "robe_de_mariee",
-    "jewelry": "bijoux",
-    "beauty-hair": "esthetique_coiffure",
-    "groom-suit": "costume_marie"
-  };
+  const providerTypeToJsonKey = SERVICE_TYPE_TO_JSON_KEY[serviceType as keyof typeof SERVICE_TYPE_TO_JSON_KEY];
+  const relevantOptions = providerOptions[providerTypeToJsonKey];
 
-  const jsonKey = providerTypeToJsonKey[providerType] || providerType;
-  const providerData = providerOptions[jsonKey];
+  if (!relevantOptions) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-2 text-red-500">
+            <Info className="h-4 w-4" />
+            <span>Aucune option trouvée pour ce type de prestataire.</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {providerData.sections.map((section) => (
-        <div key={section.section_id}>
-          <h3 className="text-lg font-semibold mb-4">{section.title}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {section.questions.map(renderField)}
-          </div>
-          <div className="border-t my-6"></div>
+    <Card>
+      <CardContent className="p-6">
+        <div className="space-y-6">
+          {relevantOptions.sections.map((section: any, index: number) => (
+            <div key={index} className="space-y-4">
+              <h3 className="text-lg font-semibold">{section.title}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {section.fields.map((field: any) => renderField(field))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      </CardContent>
+    </Card>
   );
 } 

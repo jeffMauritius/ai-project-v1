@@ -133,6 +133,10 @@ model PartnerStorefront {
   interventionType   String @default("all_france")
   interventionRadius Int?   @default(50)
 
+  // Options dynamiques des prestataires
+  options Json? // Stockage des réponses du formulaire dynamique
+  searchableOptions Json? // Données structurées pour la recherche IA
+
   // Relations
   userId String @unique @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])

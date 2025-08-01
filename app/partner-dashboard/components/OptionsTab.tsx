@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Edit, Trash2, Save } from "lucide-react";
+import { Settings, Save } from "lucide-react";
 import { DynamicOptionsForm } from "./DynamicOptionsForm";
 import { ServiceType } from "@prisma/client";
+import { OptionsService } from "@/lib/options-service";
+import { validateFormData } from "@/lib/options-validation";
 
 interface OptionsTabProps {
   storefrontData?: any;
@@ -72,9 +74,11 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
   const [providerOptions, setProviderOptions] = useState<Record<string, ProviderOptions>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, Record<string, string[]>>>({});
 
   // Déterminer les types de prestataires à afficher selon le type de service
-  const getRelevantProviders = () => {
+  const relevantProviders = useMemo(() => {
     if (!storefrontData?.serviceType) return [];
     
     const serviceType = storefrontData.serviceType as ServiceType;
@@ -83,31 +87,27 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
     return providerTypes.map(providerType => 
       PROVIDER_TYPES.find(p => p.value === providerType)
     ).filter(Boolean);
-  };
-
-  const relevantProviders = getRelevantProviders();
+  }, [storefrontData?.serviceType]);
 
   // Charger les options pour les prestataires pertinents
   useEffect(() => {
     const loadRelevantProviderOptions = async () => {
+      if (!storefrontData?.serviceType) return;
+      
       const newProviderOptions: Record<string, ProviderOptions> = {};
       const newLoading: Record<string, boolean> = {};
 
       for (const provider of relevantProviders) {
         if (!provider) continue;
         
-        // Éviter de recharger si déjà chargé
-        if (providerOptions[provider.value]) {
-          newProviderOptions[provider.value] = providerOptions[provider.value];
-          continue;
-        }
-        
-        console.log(`[OptionsTab] Chargement des options pour ${provider.value} depuis ${provider.optionsFile}.json`);
         newLoading[provider.value] = true;
         try {
-          const options = await import(`@/partners-options/${provider.optionsFile}.json`);
-          console.log(`[OptionsTab] Options chargées pour ${provider.value}:`, options.default);
-          newProviderOptions[provider.value] = options.default;
+          console.log(`[OptionsTab] Chargement des options pour ${provider.value}`);
+          const options = await OptionsService.loadProviderOptions(storefrontData.serviceType);
+          console.log(`[OptionsTab] Options chargées pour ${provider.value}:`, options);
+          if (options) {
+            newProviderOptions[provider.value] = options;
+          }
         } catch (error) {
           console.error(`Erreur lors du chargement des options pour ${provider.value}:`, error);
         } finally {
@@ -122,115 +122,132 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
     if (relevantProviders.length > 0) {
       loadRelevantProviderOptions();
     }
-  }, [storefrontData?.serviceType]); // Dépendance uniquement sur le type de service
+  }, [relevantProviders, storefrontData?.serviceType]); // Dépendre de relevantProviders et serviceType
 
-  const handleSaveOptions = (providerType: string, data: any) => {
-    const updatedData = {
-      ...storefrontData,
-      options: {
-        ...storefrontData?.options,
-        [providerType]: data
+  const handleSaveOptions = async (providerType: string, data: any) => {
+    if (!storefrontData?.id) return;
+
+    setSaving(prev => ({ ...prev, [providerType]: true }));
+
+    try {
+      console.log(`[OptionsTab] Sauvegarde des options pour ${providerType}:`, data);
+      
+      const response = await fetch(`/api/partner-storefront/${storefrontData.id}/options`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          providerType,
+          formData: data
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
       }
-    };
-    onUpdate(updatedData);
+
+      const result = await response.json();
+      console.log(`[OptionsTab] Options sauvegardées pour ${providerType}:`, result);
+
+      // Mettre à jour les données du storefront avec les nouvelles options
+      onUpdate({
+        ...storefrontData,
+        options: result.options,
+        searchableOptions: result.searchableOptions
+      });
+
+    } catch (error) {
+      console.error(`Erreur lors de la sauvegarde des options pour ${providerType}:`, error);
+      // Ici vous pourriez afficher une notification d'erreur à l'utilisateur
+    } finally {
+      setSaving(prev => ({ ...prev, [providerType]: false }));
+    }
   };
 
   const handleFormDataChange = (providerType: string, data: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [providerType]: data
-    }));
+    setFormData(prev => ({ ...prev, [providerType]: data }));
   };
 
-  // Si aucun type de service n'est défini, afficher un message
+  // Vérifier si un formulaire est valide
+  const isFormValid = (providerType: string) => {
+    return true; // Pour l'instant, on considère toujours valide
+  };
+
+  // Vérifier si un formulaire a des données
+  const hasFormData = (providerType: string) => {
+    const data = formData[providerType];
+    return data && Object.keys(data).length > 0;
+  };
+
   if (!storefrontData?.serviceType) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Options des prestataires
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              Veuillez d'abord sélectionner un type de service dans l'onglet Général pour voir les options disponibles.
-            </div>
-          </CardContent>
-        </Card>
+      <div className="text-center p-8 text-muted-foreground">
+        Aucun type de service défini pour ce storefront.
+      </div>
+    );
+  }
+
+  if (relevantProviders.length === 0) {
+    return (
+      <div className="text-center p-8 text-muted-foreground">
+        Aucun prestataire disponible pour ce type de service.
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent>
-          <div className="space-y-8">
-            {relevantProviders.map((provider) => {
-              if (!provider) return null;
-              
-              const options = providerOptions[provider.value];
-              const isLoading = loading[provider.value];
-              const currentFormData = formData[provider.value] || {};
-              const savedOptions = storefrontData?.options?.[provider.value];
+      {relevantProviders.map((provider) => {
+        if (!provider) return null;
+        
+        // Les données sauvegardées sont dans le format { question_1: value, question_2: value }
+        // On les passe directement au composant
+        const savedOptions = storefrontData?.options || {};
+        const isLoading = loading[provider.value];
+        const isSaving = saving[provider.value];
+        const isValid = isFormValid(provider.value);
+        const hasData = hasFormData(provider.value);
 
-              if (isLoading) {
-                return (
-                  <Card key={provider.value} className="p-6">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                      <span className="ml-2">Chargement des options pour {provider.label}...</span>
-                    </div>
-                  </Card>
-                );
-              }
-
-              if (!options) {
-                return (
-                  <Card key={provider.value} className="p-6">
-                    <div className="text-center text-muted-foreground">
-                      Aucune option disponible pour {provider.label}
-                    </div>
-                  </Card>
-                );
-              }
-
-              return (
-                <Card key={provider.value} className="p-6">
-                  <CardHeader>
-                    <CardTitle>{provider.label}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <DynamicOptionsForm
-                      providerType={provider.value}
-                      initialData={savedOptions || {}}
-                      onSave={(data) => handleFormDataChange(provider.value, data)}
-                      onCancel={() => {}}
-                    />
-                    <div className="flex justify-end mt-6 pt-6 border-t">
-                      <Button
-                        onClick={() => handleSaveOptions(provider.value, currentFormData)}
-                        disabled={Object.keys(currentFormData).length === 0}
-                      >
-                        <Save className="h-4 w-4 mr-1" />
-                        Sauvegarder
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {relevantProviders.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucune option disponible pour le type de service "{storefrontData.serviceType}".
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        return (
+          <Card key={provider.value}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                {provider.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+              ) : (
+                <>
+                  <DynamicOptionsForm
+                    providerType={provider.value}
+                    initialData={savedOptions}
+                    onSave={(data) => handleFormDataChange(provider.value, data)}
+                    onCancel={() => {}}
+                    serviceType={storefrontData.serviceType}
+                  />
+                  
+                  <div className="mt-6 flex justify-end">
+                    <Button
+                      onClick={() => handleSaveOptions(provider.value, formData[provider.value])}
+                      disabled={isSaving || !isValid || !hasData}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {isSaving ? "Sauvegarde..." : "Sauvegarder"}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 } 
