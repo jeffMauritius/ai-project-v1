@@ -118,7 +118,7 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-4">À propos de {storefront.companyName}</h2>
               <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {storefront.description}
                 </p>
               </div>

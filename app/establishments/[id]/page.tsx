@@ -98,7 +98,7 @@ export default function EstablishmentPage() {
           </div>
 
           <div className="prose max-w-none">
-            <p className="text-gray-600">{establishment.description}</p>
+            <p className="text-gray-600 whitespace-pre-line">{establishment.description}</p>
           </div>
 
           <div className="mt-8 flex justify-end gap-4">
