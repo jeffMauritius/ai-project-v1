@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, MapPin, Star, Users } from "lucide-react";
 import type { Establishment } from "@/app/types/establishment";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 
 export default function EstablishmentPage() {
   const { id } = useParams();
@@ -100,6 +101,21 @@ export default function EstablishmentPage() {
           <div className="prose max-w-none">
             <p className="text-gray-600 whitespace-pre-line">{establishment.description}</p>
           </div>
+
+          {/* Galerie d'images */}
+          {establishment.images && establishment.images.length > 0 && (
+            <div className="mt-8">
+              <ImageLightbox 
+                images={establishment.images.map((url, index) => ({
+                  id: `img-${index}`,
+                  url,
+                  alt: `${establishment.name} - Image ${index + 1}`
+                }))}
+                title="Galerie photos"
+                gridCols={4}
+              />
+            </div>
+          )}
 
           <div className="mt-8 flex justify-end gap-4">
             <Button variant="outline" size="lg">

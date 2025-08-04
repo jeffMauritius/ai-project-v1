@@ -1,15 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, ZoomIn } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Establishment } from "../types/establishment";
+import { useGallery } from "@/components/ui/GlobalImageGallery";
 
 interface EstablishmentCardProps {
   establishment: Establishment;
 }
 
 export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
+  const { openGallery } = useGallery();
+  
   const {
     id,
     name,
@@ -22,6 +25,8 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
     imageUrl,
     images = [],
   } = establishment;
+
+  const allImages = [imageUrl, ...images];
 
   return (
     <Card className="w-full overflow-hidden group">
@@ -50,8 +55,27 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          <div className="absolute bottom-4 left-4 flex gap-2">
-            {images.slice(0, 5).map((_, index) => (
+          {/* Bouton pour ouvrir la galerie */}
+          {allImages.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                openGallery(
+                  allImages.map((url, index) => ({
+                    id: `card-img-${id}-${index}`,
+                    url,
+                    alt: `${name} - Image ${index + 1}`
+                  }))
+                );
+              }}
+              className="absolute left-4 bottom-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10"
+              aria-label="Voir la galerie"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </button>
+          )}
+          <div className="absolute bottom-4 right-4 flex gap-2">
+            {allImages.slice(0, 5).map((_, index) => (
               <div
                 key={index}
                 className={`h-2 w-2 rounded-full ${
@@ -84,6 +108,7 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
           </div>
         </CardContent>
       </Link>
+
     </Card>
   );
 }

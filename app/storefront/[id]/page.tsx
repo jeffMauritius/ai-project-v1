@@ -5,6 +5,7 @@ import ImageGallery from './components/ImageGallery'
 import ImageCarousel from './components/ImageCarousel'
 import ContactCard from './components/ContactCard'
 import ChatCard from './components/ChatCard'
+import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
 
 async function getStorefrontData(id: string) {
@@ -126,7 +127,17 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
 
             {/* Galerie d'images */}
             {galleryImages.length > 0 && (
-              <ImageGallery images={galleryImages} title={storefront.companyName} />
+              <ImageLightbox 
+                images={galleryImages.map((media) => ({
+                  id: media.id,
+                  url: media.url,
+                  title: media.title || undefined,
+                  description: media.description || undefined,
+                  alt: media.title || `${storefront.companyName} - ${media.type}`
+                }))}
+                title="Galerie photos"
+                gridCols={4}
+              />
             )}
           </div>
 

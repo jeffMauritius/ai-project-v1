@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { Providers } from './providers'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import { GalleryProvider } from '@/components/ui/GlobalImageGallery'
 import { headers } from 'next/headers'
 
 const inter = Inter({ subsets: ['latin'] });
@@ -29,9 +30,11 @@ export default async function RootLayout({
     <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          {!isAuthPage && <Navbar />}
-          {children}
-          {!isAuthPage && <Footer />}
+          <GalleryProvider>
+            {!isAuthPage && <Navbar />}
+            {children}
+            {!isAuthPage && <Footer />}
+          </GalleryProvider>
         </Providers>
       </body>
     </html>
