@@ -1,32 +1,174 @@
 import { notFound } from 'next/navigation'
+import { MapPin, Star, Heart, Share2 } from 'lucide-react'
+import { prisma } from '@/lib/prisma'
+import ImageGallery from './components/ImageGallery'
+import ImageCarousel from './components/ImageCarousel'
+import ContactCard from './components/ContactCard'
+import ChatCard from './components/ChatCard'
+import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
+
+async function getStorefrontData(id: string) {
+  const storefront = await prisma.partnerStorefront.findUnique({
+    where: { id },
+    include: {
+      media: {
+        orderBy: { order: 'asc' }
+      },
+      receptionSpaces: true,
+      receptionOptions: true
+    }
+  })
+  return storefront
+}
 
 export default async function StorefrontPublicPage({ params }: { params: { id: string } }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/partner-storefront?id=${params.id}`, { cache: 'no-store' })
-  if (!res.ok) return notFound()
-  const storefront = await res.json()
+  const storefront = await getStorefrontData(params.id)
+  
+  if (!storefront) {
+    return notFound()
+  }
+
+  const allImages = storefront.media
+  const galleryImages = storefront.media.slice(6) // Images pour la galerie (après les 6 premières)
+
+  // Récupérer les options selon le type de service
+  const getOptionsForServiceType = (serviceType: string) => {
+    switch (serviceType) {
+      case 'LIEU':
+        return receptionVenueOptions.lieu_reception.sections
+      default:
+        return []
+    }
+  }
+
+  const serviceOptions = getOptionsForServiceType(storefront.serviceType)
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4">
-      <div className="flex items-center gap-4 mb-8">
-        {storefront.logo && (
-          <img src={storefront.logo} alt="Logo" className="h-20 w-20 rounded-full object-cover border" />
-        )}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{storefront.companyName}</h1>
-          <p className="text-gray-600 dark:text-gray-300">{storefront.serviceType} - {storefront.venueType}</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-0 py-8">
+        {/* Section principale avec carrousel et contact */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Carrousel - 2/3 de la largeur */}
+          <div className="lg:col-span-2">
+            <div className="mb-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{storefront.companyName}</h1>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <MapPin className="w-4 h-4" />
+                    <span>{storefront.venueAddress}</span>
+                  </div>
+                </div>
+                {/* Avis clients à droite du titre */}
+                <div className="text-right">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600 font-medium">4.5/5</span>
+                  </div>
+                  <p className="text-xs text-gray-500">(12 avis)</p>
+                  <button className="text-pink-600 text-xs hover:underline">
+                    Voir tous les avis
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="h-80 md:h-96">
+              <ImageCarousel images={allImages} title={storefront.companyName} />
+            </div>
+            {/* Boutons sous le carrousel */}
+            <div className="mt-4 flex items-center gap-4">
+              <button className="flex items-center gap-2 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
+                <Heart className="w-4 h-4" />
+                Ajouter aux favoris
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <Share2 className="w-4 h-4" />
+                Partager
+              </button>
+            </div>
+          </div>
+
+          {/* Carte de contact - 1/3 de la largeur */}
+          <div className="lg:col-span-1">
+            <div className="mb-4 invisible">
+              {/* Espace invisible pour aligner avec le titre */}
+              <div style={{ height: '5.25rem' }}></div>
+            </div>
+            <div className="h-80 md:h-96 flex flex-col justify-end">
+              <ContactCard
+                companyName={storefront.companyName}
+                venueAddress={storefront.venueAddress || ''}
+                venueType={storefront.venueType || ''}
+                serviceType={storefront.serviceType || ''}
+                interventionType={storefront.interventionType || ''}
+                interventionRadius={storefront.interventionRadius || 0}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="prose dark:prose-invert max-w-none mb-8" dangerouslySetInnerHTML={{ __html: storefront.description }} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h2 className="font-semibold mb-2">Adresse</h2>
-          <p>{storefront.venueAddress}</p>
+
+        {/* Contenu principal */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            {/* Description */}
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold mb-4">À propos de {storefront.companyName}</h2>
+              <div className="prose max-w-none">
+                <p className="text-gray-700 leading-relaxed">
+                  {storefront.description}
+                </p>
+              </div>
+            </section>
+
+            {/* Galerie d'images */}
+            {galleryImages.length > 0 && (
+              <ImageGallery images={galleryImages} title={storefront.companyName} />
+            )}
+          </div>
+
+          {/* Chat en temps réel */}
+          <div className="lg:col-span-1">
+            <div className="h-96">
+              <ChatCard companyName={storefront.companyName} />
+            </div>
+          </div>
         </div>
-        <div>
-          <h2 className="font-semibold mb-2">Contact</h2>
-          <p>SIRET : {storefront.siret}</p>
-          <p>TVA : {storefront.vatNumber}</p>
-        </div>
+
+        {/* Options de réception - Utilise toute la largeur */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Options de réception</h2>
+          <div className="bg-white rounded-lg p-6 border">
+            {serviceOptions.map((section, sectionIndex) => (
+              <div key={sectionIndex} className="mb-8 last:mb-0">
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">{section.title}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  {section.fields.map((field, fieldIndex) => {
+                    // Récupérer la valeur depuis les options du storefront
+                    const optionsData = storefront.options as Record<string, any> || {}
+                    const receptionData = storefront.receptionOptions as Record<string, any> || {}
+                    const fieldValue = optionsData[field.id] || receptionData[field.id]
+                    
+                    return (
+                      <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                        <span className="text-sm text-gray-600">{field.question} :</span>
+                        <span className="font-semibold text-sm">
+                          {fieldValue !== undefined && fieldValue !== null && fieldValue !== '' 
+                            ? String(fieldValue)
+                            : 'Non renseigné'
+                          }
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   )
