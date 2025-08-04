@@ -241,7 +241,7 @@ export function DynamicOptionsForm({
               <div className="ml-6 mt-3 p-3 border-l-2 border-primary">
                 {renderField(field.conditional_field.field)}
               </div>
-            </RadioGroup>
+            )}
             {hasError && (
               <p className="text-sm text-red-500">{fieldErrors[0]}</p>
             )}
