@@ -9,6 +9,7 @@ import { MapPin, Star, Users } from "lucide-react";
 import type { Establishment } from "@/app/types/establishment";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { ShareButton } from "@/components/ui/ShareButton";
 
 export default function EstablishmentPage() {
   const { id } = useParams();
@@ -120,6 +121,13 @@ export default function EstablishmentPage() {
           )}
 
           <div className="mt-8 flex justify-end gap-4">
+            <ShareButton
+              url={`${typeof window !== 'undefined' ? window.location.href : ''}`}
+              title={`${establishment.name} - ${establishment.location}`}
+              showText={true}
+              variant="outline"
+              size="lg"
+            />
             <Button variant="outline" size="lg">
               Demander une visite
             </Button>
