@@ -10,9 +10,12 @@ import type { Establishment } from "@/app/types/establishment";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { ShareButton } from "@/components/ui/ShareButton";
+import { QuoteRequestForm } from "@/components/ui/QuoteRequestForm";
+import { useState } from "react";
 
 export default function EstablishmentPage() {
   const { id } = useParams();
+  const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false);
 
   const { data: establishment, isLoading } = useQuery<Establishment>({
     queryKey: ["establishment", id],
@@ -128,13 +131,25 @@ export default function EstablishmentPage() {
               variant="outline"
               size="lg"
             />
-            <Button variant="outline" size="lg">
-              Demander une visite
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => setIsQuoteFormOpen(true)}
+            >
+              Demander un devis
             </Button>
             <Button variant="default" size="lg">
               Nous contacter
             </Button>
           </div>
+
+          {/* Quote Request Form Modal */}
+          <QuoteRequestForm
+            storefrontId={establishment.id}
+            storefrontName={establishment.name}
+            isOpen={isQuoteFormOpen}
+            onClose={() => setIsQuoteFormOpen(false)}
+          />
         </CardContent>
       </Card>
     </div>

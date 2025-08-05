@@ -107,6 +107,7 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             </div>
             <div className="h-80 md:h-96 flex flex-col justify-end">
               <ContactCard
+                storefrontId={storefront.id}
                 companyName={storefront.companyName}
                 venueAddress={storefront.venueAddress || ''}
                 venueType={storefront.venueType || ''}
