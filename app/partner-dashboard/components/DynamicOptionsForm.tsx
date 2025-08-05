@@ -122,22 +122,9 @@ export function DynamicOptionsForm({
     onSave(newFormData); // Toujours sauvegarder, même si invalide
   };
 
-  // Mapping des IDs descriptifs vers les clés numériques pour la compatibilité
+  // Utiliser directement l'ID du champ pour la compatibilité
   const getFieldKey = (fieldId: string) => {
-    // Si les données existent avec l'ancien format numérique, on les utilise
-    // Sinon, on utilise le nouveau format descriptif
-    const numericKey = Object.keys(initialData).find(key => 
-      key.startsWith('question_') && initialData[key] !== undefined
-    );
-    
-    if (numericKey) {
-      // On utilise un mapping basé sur l'index du champ dans la section
-      const allFields = relevantOptions?.sections?.flatMap((section: any) => section.fields) || [];
-      const fieldIndex = allFields.findIndex((f: any) => f.id === fieldId);
-      return fieldIndex >= 0 ? `question_${fieldIndex + 1}` : `question_${fieldId}`;
-    }
-    
-    return `question_${fieldId}`;
+    return fieldId;
   };
 
   const renderField = (field: any) => {
@@ -197,7 +184,7 @@ export function DynamicOptionsForm({
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {field.options?.map((option, index) => (
+              {field.options?.map((option: string, index: number) => (
                 <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
                   <Checkbox
                     id={`${fieldKey}_${option}`}
@@ -228,7 +215,7 @@ export function DynamicOptionsForm({
               value={formData[fieldKey] || ""}
               onValueChange={(value) => handleRadioChange(field.id, value)}
             >
-              {field.options?.map((option, index) => (
+              {field.options?.map((option: string, index: number) => (
                 <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
                   <RadioGroupItem value={option} id={`${field.question_id}-${option}`} />
                   <Label htmlFor={`${field.question_id}-${option}`} className="text-sm">
@@ -236,7 +223,7 @@ export function DynamicOptionsForm({
                   </Label>
                 </div>
               ))}
-            {field.conditional_field && value === field.conditional_field.show_when && (
+            {field.conditional_field && formData[fieldKey] === field.conditional_field.show_when && (
               <div className="ml-6 mt-3 p-3 border-l-2 border-primary">
                 {renderField(field.conditional_field.field)}
               </div>
@@ -264,7 +251,7 @@ export function DynamicOptionsForm({
                 <SelectValue placeholder="Sélectionnez une option" />
               </SelectTrigger>
               <SelectContent>
-                {field.options?.map((option, index) => (
+                {field.options?.map((option: string, index: number) => (
                   <SelectItem key={`${field.question_id}-${option}-${index}`} value={option}>
                     {option}
                   </SelectItem>
