@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation'
-import { MapPin, Star, Heart, Share2 } from 'lucide-react'
+import { MapPin, Star, Share2 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import ImageGallery from './components/ImageGallery'
 import ImageCarousel from './components/ImageCarousel'
 import ContactCard from './components/ContactCard'
 import ChatCard from './components/ChatCard'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
+import { FavoriteButton } from '@/components/ui/FavoriteButton'
 import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
 
 async function getStorefrontData(id: string) {
@@ -82,10 +83,12 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             </div>
             {/* Boutons sous le carrousel */}
             <div className="mt-4 flex items-center gap-4">
-              <button className="flex items-center gap-2 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
-                <Heart className="w-4 h-4" />
-                Ajouter aux favoris
-              </button>
+              <FavoriteButton
+                url={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/storefront/${storefront.id}`}
+                title={`${storefront.companyName} - ${storefront.venueAddress}`}
+                showText={true}
+                className="bg-pink-600 text-white hover:bg-pink-700"
+              />
               <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 <Share2 className="w-4 h-4" />
                 Partager

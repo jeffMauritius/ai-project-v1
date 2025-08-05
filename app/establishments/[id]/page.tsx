@@ -5,9 +5,10 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, MapPin, Star, Users } from "lucide-react";
+import { MapPin, Star, Users } from "lucide-react";
 import type { Establishment } from "@/app/types/establishment";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 
 export default function EstablishmentPage() {
   const { id } = useParams();
@@ -43,13 +44,14 @@ export default function EstablishmentPage() {
     <div className="container mx-auto py-8">
       <Card className="overflow-hidden">
         <div className="relative h-[400px] w-full">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 z-10 rounded-full bg-white/80 hover:bg-white/90"
-          >
-            <Heart className="h-6 w-6" />
-          </Button>
+          <div className="absolute right-4 top-4 z-10">
+            <FavoriteButton
+              url={`${typeof window !== 'undefined' ? window.location.href : ''}`}
+              title={`${establishment.name} - ${establishment.location}`}
+              className="rounded-full bg-white/80 hover:bg-white/90"
+              size="icon"
+            />
+          </div>
           <Image
             src={establishment.imageUrl}
             alt={establishment.name}
