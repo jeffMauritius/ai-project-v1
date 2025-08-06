@@ -1,10 +1,13 @@
 import { notFound } from 'next/navigation'
-import { MapPin, Star, Heart, Share2 } from 'lucide-react'
+import { MapPin, Star } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import ImageGallery from './components/ImageGallery'
 import ImageCarousel from './components/ImageCarousel'
 import ContactCard from './components/ContactCard'
 import ChatCard from './components/ChatCard'
+import { ImageLightbox } from '@/components/ui/ImageLightbox'
+import { FavoriteButton } from '@/components/ui/FavoriteButton'
+import { ShareButton } from '@/components/ui/ShareButton'
 import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
 
 async function getStorefrontData(id: string) {
@@ -32,16 +35,76 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
   const galleryImages = storefront.media.slice(6) // Images pour la galerie (après les 6 premières)
 
   // Récupérer les options selon le type de service
-  const getOptionsForServiceType = (serviceType: string) => {
-    switch (serviceType) {
-      case 'LIEU':
-        return receptionVenueOptions.lieu_reception.sections
-      default:
-        return []
+  const getOptionsForServiceType = async (serviceType: string) => {
+    try {
+      switch (serviceType) {
+        case 'LIEU':
+          return receptionVenueOptions.lieu_reception.sections
+        case 'TRAITEUR':
+          const catererOptions = await import('../../../partners-options/caterer-options.json')
+          return (catererOptions.default as any).traiteur.sections
+        case 'PHOTOGRAPHE':
+          const photographerOptions = await import('../../../partners-options/photographer-options.json')
+          return (photographerOptions.default as any).photographe.sections
+        case 'MUSIQUE':
+          const musicOptions = await import('../../../partners-options/music-dj-options.json')
+          return (musicOptions.default as any).musique_dj.sections
+        case 'VOITURE':
+        case 'BUS':
+          const vehicleOptions = await import('../../../partners-options/vehicle-options.json')
+          return (vehicleOptions.default as any).voiture.sections
+        case 'DECORATION':
+          const decorationOptions = await import('../../../partners-options/decoration-options.json')
+          return (decorationOptions.default as any).decoration.sections
+        case 'CHAPITEAU':
+          const tentOptions = await import('../../../partners-options/tent-options.json')
+          return (tentOptions.default as any).chapiteau.sections
+        case 'ANIMATION':
+          const animationOptions = await import('../../../partners-options/animation-options.json')
+          return (animationOptions.default as any).animation.sections
+        case 'FLORISTE':
+          const floristOptions = await import('../../../partners-options/florist-options.json')
+          return (floristOptions.default as any).fleurs.sections
+        case 'LISTE':
+          const registryOptions = await import('../../../partners-options/wedding-registry-options.json')
+          return (registryOptions.default as any).liste_cadeau_mariage.sections
+        case 'ORGANISATION':
+          const plannerOptions = await import('../../../partners-options/wedding-planner-options.json')
+          return (plannerOptions.default as any).organisation.sections
+        case 'VIDEO':
+          const videoOptions = await import('../../../partners-options/video-options.json')
+          return (videoOptions.default as any).video.sections
+        case 'LUNE_DE_MIEL':
+          const travelOptions = await import('../../../partners-options/honeymoon-travel-options.json')
+          return (travelOptions.default as any).voyage.sections
+        case 'WEDDING_CAKE':
+          const cakeOptions = await import('../../../partners-options/wedding-cake-options.json')
+          return (cakeOptions.default as any).wedding_cake.sections
+        case 'OFFICIANT':
+          const officiantOptions = await import('../../../partners-options/officiant-options.json')
+          return (officiantOptions.default as any).officiants.sections
+        case 'FOOD_TRUCK':
+          const foodTruckOptions = await import('../../../partners-options/food-truck-options.json')
+          return (foodTruckOptions.default as any).food_truck.sections
+        case 'VIN':
+          const wineOptions = await import('../../../partners-options/wine-options.json')
+          return (wineOptions.default as any).vin.sections
+        case 'FAIRE_PART':
+          const invitationOptions = await import('../../../partners-options/invitation-options.json')
+          return (invitationOptions.default as any).faire_part.sections
+        case 'CADEAUX_INVITES':
+          const giftsOptions = await import('../../../partners-options/guest-gifts-options.json')
+          return (giftsOptions.default as any).cadeaux_invites.sections
+        default:
+          return []
+      }
+    } catch (error) {
+      console.error(`Erreur lors du chargement des options pour ${serviceType}:`, error)
+      return []
     }
   }
 
-  const serviceOptions = getOptionsForServiceType(storefront.serviceType)
+  const serviceOptions = await getOptionsForServiceType(storefront.serviceType)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,14 +144,18 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             </div>
             {/* Boutons sous le carrousel */}
             <div className="mt-4 flex items-center gap-4">
-              <button className="flex items-center gap-2 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
-                <Heart className="w-4 h-4" />
-                Ajouter aux favoris
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                <Share2 className="w-4 h-4" />
-                Partager
-              </button>
+              <FavoriteButton
+                url={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/storefront/${storefront.id}`}
+                title={`${storefront.companyName} - ${storefront.venueAddress}`}
+                showText={true}
+                className="bg-pink-600 text-white hover:bg-pink-700"
+              />
+              <ShareButton
+                url={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/storefront/${storefront.id}`}
+                title={`${storefront.companyName} - ${storefront.venueAddress}`}
+                showText={true}
+                className="border border-gray-300 hover:bg-gray-50"
+              />
             </div>
           </div>
 
@@ -100,6 +167,7 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             </div>
             <div className="h-80 md:h-96 flex flex-col justify-end">
               <ContactCard
+                storefrontId={storefront.id}
                 companyName={storefront.companyName}
                 venueAddress={storefront.venueAddress || ''}
                 venueType={storefront.venueType || ''}
@@ -118,7 +186,7 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-4">À propos de {storefront.companyName}</h2>
               <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {storefront.description}
                 </p>
               </div>
@@ -126,7 +194,17 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
 
             {/* Galerie d'images */}
             {galleryImages.length > 0 && (
-              <ImageGallery images={galleryImages} title={storefront.companyName} />
+              <ImageLightbox 
+                images={galleryImages.map((media) => ({
+                  id: media.id,
+                  url: media.url,
+                  title: media.title || undefined,
+                  description: media.description || undefined,
+                  alt: media.title || `${storefront.companyName} - ${media.type}`
+                }))}
+                title="Galerie photos"
+                gridCols={4}
+              />
             )}
           </div>
 
@@ -142,31 +220,42 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Options de réception</h2>
           <div className="bg-white rounded-lg p-6 border">
-            {serviceOptions.map((section, sectionIndex) => (
-              <div key={sectionIndex} className="mb-8 last:mb-0">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">{section.title}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  {section.fields.map((field, fieldIndex) => {
-                    // Récupérer la valeur depuis les options du storefront
-                    const optionsData = storefront.options as Record<string, any> || {}
-                    const receptionData = storefront.receptionOptions as Record<string, any> || {}
-                    const fieldValue = optionsData[field.id] || receptionData[field.id]
-                    
-                    return (
-                      <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                        <span className="text-sm text-gray-600">{field.question} :</span>
-                        <span className="font-semibold text-sm">
-                          {fieldValue !== undefined && fieldValue !== null && fieldValue !== '' 
-                            ? String(fieldValue)
-                            : 'Non renseigné'
-                          }
-                        </span>
-                      </div>
-                    )
-                  })}
+            {serviceOptions.length > 0 ? (
+              serviceOptions.map((section: any, sectionIndex: number) => (
+                <div key={sectionIndex} className="mb-8 last:mb-0">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-800">{section.title}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    {section.fields.map((field: any, fieldIndex: number) => {
+                      // Récupérer la valeur depuis les options du storefront
+                      const optionsData = storefront.options as Record<string, any> || {}
+                      const receptionData = storefront.receptionOptions as Record<string, any> || {}
+                      // Chercher directement avec l'id du champ
+                      const fieldValue = optionsData[field.id] || receptionData[field.id]
+                      
+                      return (
+                        <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                          <span className="text-sm text-gray-600">{field.question} :</span>
+                          <span className="font-semibold text-sm">
+                            {fieldValue !== undefined && fieldValue !== null && fieldValue !== '' 
+                              ? Array.isArray(fieldValue) 
+                                ? fieldValue.join(', ')
+                                : typeof fieldValue === 'boolean'
+                                  ? fieldValue ? 'Oui' : 'Non'
+                                  : String(fieldValue)
+                              : 'Non renseigné'
+                            }
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                Aucune option configurée pour ce type de service.
               </div>
-            ))}
+            )}
           </div>
         </section>
       </div>

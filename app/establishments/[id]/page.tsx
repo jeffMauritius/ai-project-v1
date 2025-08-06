@@ -5,11 +5,17 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, MapPin, Star, Users } from "lucide-react";
+import { MapPin, Star, Users } from "lucide-react";
 import type { Establishment } from "@/app/types/establishment";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { ShareButton } from "@/components/ui/ShareButton";
+import { QuoteRequestForm } from "@/components/ui/QuoteRequestForm";
+import { useState } from "react";
 
 export default function EstablishmentPage() {
   const { id } = useParams();
+  const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false);
 
   const { data: establishment, isLoading } = useQuery<Establishment>({
     queryKey: ["establishment", id],
@@ -42,13 +48,14 @@ export default function EstablishmentPage() {
     <div className="container mx-auto py-8">
       <Card className="overflow-hidden">
         <div className="relative h-[400px] w-full">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 z-10 rounded-full bg-white/80 hover:bg-white/90"
-          >
-            <Heart className="h-6 w-6" />
-          </Button>
+          <div className="absolute right-4 top-4 z-10">
+            <FavoriteButton
+              url={`${typeof window !== 'undefined' ? window.location.href : ''}`}
+              title={`${establishment.name} - ${establishment.location}`}
+              className="rounded-full bg-white/80 hover:bg-white/90"
+              size="icon"
+            />
+          </div>
           <Image
             src={establishment.imageUrl}
             alt={establishment.name}
@@ -98,17 +105,51 @@ export default function EstablishmentPage() {
           </div>
 
           <div className="prose max-w-none">
-            <p className="text-gray-600">{establishment.description}</p>
+            <p className="text-gray-600 whitespace-pre-line">{establishment.description}</p>
           </div>
 
+          {/* Galerie d'images */}
+          {establishment.images && establishment.images.length > 0 && (
+            <div className="mt-8">
+              <ImageLightbox 
+                images={establishment.images.map((url, index) => ({
+                  id: `img-${index}`,
+                  url,
+                  alt: `${establishment.name} - Image ${index + 1}`
+                }))}
+                title="Galerie photos"
+                gridCols={4}
+              />
+            </div>
+          )}
+
           <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" size="lg">
-              Demander une visite
+            <ShareButton
+              url={`${typeof window !== 'undefined' ? window.location.href : ''}`}
+              title={`${establishment.name} - ${establishment.location}`}
+              showText={true}
+              variant="outline"
+              size="lg"
+            />
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => setIsQuoteFormOpen(true)}
+            >
+              Demander un devis
             </Button>
             <Button variant="default" size="lg">
               Nous contacter
             </Button>
           </div>
+
+          {/* Quote Request Form Modal */}
+          <QuoteRequestForm
+            storefrontId={establishment.id}
+            storefrontName={establishment.name}
+            isOpen={isQuoteFormOpen}
+            onClose={() => setIsQuoteFormOpen(false)}
+          />
         </CardContent>
       </Card>
     </div>

@@ -143,6 +143,7 @@ model PartnerStorefront {
   media  Media[]
   receptionSpaces    ReceptionSpace[]
   receptionOptions   ReceptionOptions?
+  quoteRequests      QuoteRequest[]
 
   @@map("partner_storefronts")
 }
@@ -335,4 +336,39 @@ model Payment {
   subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+}
+
+enum QuoteRequestStatus {
+  PENDING
+  CONTACTED
+  QUOTED
+  ACCEPTED
+  DECLINED
+}
+
+model QuoteRequest {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  // Customer information
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+
+  // Event details
+  eventDate     DateTime
+  guestCount    String
+  eventType     String
+  venueLocation String?
+  budget        String?
+  message       String?
+
+  // Status and relations
+  status        QuoteRequestStatus @default(PENDING)
+  storefrontId  String             @db.ObjectId
+  storefront    PartnerStorefront  @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
+
+  @@map("quote_requests")
 }

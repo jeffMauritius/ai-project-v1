@@ -1,6 +1,11 @@
+'use client';
+
 import { MapPin, Phone, Mail } from 'lucide-react'
+import { useState } from 'react'
+import { QuoteRequestForm } from '@/components/ui/QuoteRequestForm'
 
 interface ContactCardProps {
+  storefrontId: string
   companyName: string
   venueAddress: string
   venueType: string
@@ -10,6 +15,7 @@ interface ContactCardProps {
 }
 
 export default function ContactCard({
+  storefrontId,
   companyName,
   venueAddress,
   venueType,
@@ -17,6 +23,7 @@ export default function ContactCard({
   interventionType,
   interventionRadius
 }: ContactCardProps) {
+  const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false);
   return (
     <div className="w-full flex flex-col space-y-4">
       {/* Carte de contact */}
@@ -36,10 +43,21 @@ export default function ContactCard({
             <span className="text-gray-700 text-sm">Demander un devis</span>
           </div>
         </div>
-        <button className="w-full mt-4 bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition-colors font-medium">
+        <button 
+          onClick={() => setIsQuoteFormOpen(true)}
+          className="w-full mt-4 bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition-colors font-medium"
+        >
           Demander un devis
         </button>
       </div>
+
+      {/* Quote Request Form Modal */}
+      <QuoteRequestForm
+        storefrontId={storefrontId}
+        storefrontName={companyName}
+        isOpen={isQuoteFormOpen}
+        onClose={() => setIsQuoteFormOpen(false)}
+      />
 
       {/* Informations pratiques */}
       <div className="bg-white rounded-lg p-6 shadow-sm border">
