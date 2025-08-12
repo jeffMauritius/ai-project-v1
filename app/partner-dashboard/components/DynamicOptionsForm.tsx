@@ -36,10 +36,9 @@ export function DynamicOptionsForm({
 
   // Synchroniser les données quand initialData change
   useEffect(() => {
-    if (initialData && Object.keys(initialData).length > 0) {
-      setFormData(initialData);
-    }
-  }, [initialData]);
+    console.log(`[DynamicOptionsForm] initialData reçu pour ${providerType}:`, initialData);
+    setFormData(initialData || {});
+  }, [initialData, providerType]);
 
   useEffect(() => {
     // Charger les options du prestataire depuis le service
@@ -52,8 +51,9 @@ export function DynamicOptionsForm({
 
       try {
         console.log(`[DynamicOptionsForm] Chargement des options pour ${providerType} avec serviceType ${serviceType}`);
-        const options = await OptionsService.loadProviderOptions(serviceType);
+        const options = await OptionsService.loadProviderOptionsByType(providerType);
         console.log(`[DynamicOptionsForm] Options chargées:`, options);
+        console.log(`[DynamicOptionsForm] Options[${providerType}]:`, options?.[providerType]);
         setProviderOptions(options);
         setLoading(false);
       } catch (error) {
@@ -185,7 +185,7 @@ export function DynamicOptionsForm({
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {field.options?.map((option: string, index: number) => (
-                <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
+                <div key={`${field.id}-${option}-${index}`} className="flex items-center space-x-2">
                   <Checkbox
                     id={`${fieldKey}_${option}`}
                     checked={(formData[fieldKey] || []).includes(option)}
@@ -216,9 +216,9 @@ export function DynamicOptionsForm({
               onValueChange={(value) => handleRadioChange(field.id, value)}
             >
               {field.options?.map((option: string, index: number) => (
-                <div key={`${field.question_id}-${option}-${index}`} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option} id={`${field.question_id}-${option}`} />
-                  <Label htmlFor={`${field.question_id}-${option}`} className="text-sm">
+                <div key={`${field.id}-${option}-${index}`} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={`${field.id}-${option}`} />
+                  <Label htmlFor={`${field.id}-${option}`} className="text-sm">
                     {option}
                   </Label>
                 </div>
@@ -252,7 +252,7 @@ export function DynamicOptionsForm({
               </SelectTrigger>
               <SelectContent>
                 {field.options?.map((option: string, index: number) => (
-                  <SelectItem key={`${field.question_id}-${option}-${index}`} value={option}>
+                  <SelectItem key={`${field.id}-${option}-${index}`} value={option}>
                     {option}
                   </SelectItem>
                 ))}
@@ -306,7 +306,7 @@ export function DynamicOptionsForm({
                       ...formData[fieldKey],
                       min: e.target.value // Garder comme string
                     };
-                    handleInputChange(field.question_id, newRange);
+                    handleInputChange(field.id, newRange);
                   }}
                   placeholder="Minimum"
                 />
@@ -324,7 +324,7 @@ export function DynamicOptionsForm({
                       ...formData[fieldKey],
                       max: e.target.value // Garder comme string
                     };
-                    handleInputChange(field.question_id, newRange);
+                    handleInputChange(field.id, newRange);
                   }}
                   placeholder="Maximum"
                 />
@@ -341,7 +341,7 @@ export function DynamicOptionsForm({
     };
 
     return (
-      <div key={field.question_id} className="space-y-2">
+      <div key={field.id} className="space-y-2">
         {renderInput()}
       </div>
     );
@@ -372,10 +372,11 @@ export function DynamicOptionsForm({
     );
   }
 
-  const providerTypeToJsonKey = SERVICE_TYPE_TO_JSON_KEY[serviceType as keyof typeof SERVICE_TYPE_TO_JSON_KEY];
-  const relevantOptions = providerOptions[providerTypeToJsonKey];
+  // Les données sont maintenant structurées comme { "reception-venue": { sections: [...] } }
+  const relevantOptions = providerOptions[providerType];
 
   if (!relevantOptions) {
+    console.log(`[DynamicOptionsForm] Aucune option trouvée pour ${providerType} dans:`, Object.keys(providerOptions));
     return (
       <Card>
         <CardContent className="p-6">
@@ -396,7 +397,7 @@ export function DynamicOptionsForm({
             <div key={index} className="space-y-4">
               <h3 className="text-lg font-semibold">{section.title}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.fields.map((field: any) => renderField(field))}
+                              {section.fields.map((field: any) => renderField(field))}
               </div>
             </div>
           ))}

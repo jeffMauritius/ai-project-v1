@@ -24,6 +24,60 @@ export const SERVICE_TYPE_TO_JSON_FILE: Record<ServiceType, string> = {
   VIN: 'wine-options.json'
 };
 
+// Mapping des types de prestataires vers les fichiers JSON
+export const PROVIDER_TYPE_TO_JSON_FILE: Record<string, string> = {
+  'reception-venue': 'reception-venue-options.json',
+  'caterer': 'caterer-options.json',
+  'invitation': 'invitation-options.json',
+  'guest-gifts': 'guest-gifts-options.json',
+  'photographer': 'photographer-options.json',
+  'music-dj': 'music-dj-options.json',
+  'vehicle': 'vehicle-options.json',
+  'decoration': 'decoration-options.json',
+  'tent': 'tent-options.json',
+  'animation': 'animation-options.json',
+  'florist': 'florist-options.json',
+  'wedding-registry': 'wedding-registry-options.json',
+  'wedding-planner': 'wedding-planner-options.json',
+  'video': 'video-options.json',
+  'honeymoon-travel': 'honeymoon-travel-options.json',
+  'wedding-cake': 'wedding-cake-options.json',
+  'officiant': 'officiant-options.json',
+  'food-truck': 'food-truck-options.json',
+  'wine': 'wine-options.json',
+  'wedding-dress': 'wedding-dress-options.json',
+  'jewelry': 'jewelry-options.json',
+  'beauty-hair': 'beauty-hair-options.json',
+  'groom-suit': 'groom-suit-options.json'
+};
+
+// Mapping des types de prestataires vers les clés JSON internes
+export const PROVIDER_TYPE_TO_JSON_KEY: Record<string, string> = {
+  'reception-venue': 'lieu_reception',
+  'caterer': 'traiteur',
+  'invitation': 'faire_part',
+  'guest-gifts': 'cadeaux_invites',
+  'photographer': 'photographe',
+  'music-dj': 'musique_dj',
+  'vehicle': 'voiture',
+  'decoration': 'decoration',
+  'tent': 'chapiteau',
+  'animation': 'animation',
+  'florist': 'fleurs',
+  'wedding-registry': 'liste_cadeau_mariage',
+  'wedding-planner': 'organisation',
+  'video': 'video',
+  'honeymoon-travel': 'voyage',
+  'wedding-cake': 'wedding_cake',
+  'officiant': 'officiants',
+  'food-truck': 'food_truck',
+  'wine': 'vin',
+  'wedding-dress': 'wedding_dress',
+  'jewelry': 'jewelry',
+  'beauty-hair': 'beauty_hair',
+  'groom-suit': 'groom_suit'
+};
+
 // Mapping des ServiceType vers les clés JSON internes
 export const SERVICE_TYPE_TO_JSON_KEY: Record<ServiceType, string> = {
   LIEU: 'lieu_reception',
@@ -110,10 +164,96 @@ export class OptionsService {
         return null;
       }
 
-      const options = await import(`../partners-options/${fileName}`);
-      return options.default || options;
+      // Utiliser fetch pour charger le fichier JSON côté client
+      if (typeof window !== 'undefined') {
+        const response = await fetch(`/partners-options/${fileName}`);
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        const options = await response.json();
+        return options;
+      } else {
+        // Côté serveur, utiliser fs
+        const fs = require('fs');
+        const path = require('path');
+        const filePath = path.join(process.cwd(), 'partners-options', fileName);
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const options = JSON.parse(fileContent);
+        return options;
+      }
     } catch (error) {
       console.error(`Erreur lors du chargement des options pour ${serviceType}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Charge les options JSON pour un type de prestataire donné
+   */
+  static async loadProviderOptionsByType(providerType: string): Promise<ProviderOptions | null> {
+    try {
+      console.log(`[OptionsService] Chargement des options pour ${providerType}`);
+      
+      const fileName = PROVIDER_TYPE_TO_JSON_FILE[providerType];
+      if (!fileName) {
+        console.error(`[OptionsService] Aucun fichier JSON trouvé pour le providerType: ${providerType}`);
+        return null;
+      }
+      
+      console.log(`[OptionsService] Fichier à charger: ${fileName}`);
+
+      // Utiliser fetch pour charger le fichier JSON côté client
+      if (typeof window !== 'undefined') {
+        console.log(`[OptionsService] Côté client - fetch de /partners-options/${fileName}`);
+        const response = await fetch(`/partners-options/${fileName}`);
+        console.log(`[OptionsService] Réponse fetch:`, response.status, response.ok);
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const options = await response.json();
+        console.log(`[OptionsService] Options brutes reçues (client):`, options);
+        const jsonKey = PROVIDER_TYPE_TO_JSON_KEY[providerType];
+        console.log(`[OptionsService] Clé JSON pour ${providerType}:`, jsonKey);
+        console.log(`[OptionsService] Contenu de options[jsonKey] (client):`, options[jsonKey]);
+
+        if (jsonKey && options[jsonKey]) {
+          const result = {
+            [providerType]: options[jsonKey]
+          };
+          console.log(`[OptionsService] Options transformées pour ${providerType}:`, result);
+          console.log(`[OptionsService] Vérification result[${providerType}]:`, result[providerType]);
+          return result;
+        }
+        
+        console.log(`[OptionsService] Clé JSON non trouvée, retour des options brutes`);
+        return { [providerType]: options };
+      } else {
+        // Côté serveur, utiliser fs
+        console.log(`[OptionsService] Côté serveur - lecture du fichier`);
+        const fs = require('fs');
+        const path = require('path');
+        const filePath = path.join(process.cwd(), 'partners-options', fileName);
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const options = JSON.parse(fileContent);
+        console.log(`[OptionsService] Options brutes reçues (serveur):`, options);
+        const jsonKey = PROVIDER_TYPE_TO_JSON_KEY[providerType];
+        console.log(`[OptionsService] Clé JSON pour ${providerType}:`, jsonKey);
+        console.log(`[OptionsService] Contenu de options[jsonKey] (serveur):`, options[jsonKey]);
+
+        if (jsonKey && options[jsonKey]) {
+          const result = {
+            [providerType]: options[jsonKey]
+          };
+          console.log(`[OptionsService] Options transformées pour ${providerType} (serveur):`, result);
+          console.log(`[OptionsService] Vérification result[${providerType}] (serveur):`, result[providerType]);
+          return result;
+        }
+        return { [providerType]: options };
+      }
+    } catch (error) {
+      console.error(`[OptionsService] Erreur lors du chargement des options pour ${providerType}:`, error);
       return null;
     }
   }

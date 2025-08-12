@@ -227,19 +227,48 @@ export async function POST(request: NextRequest) {
       console.log(`👨‍💼 ${partnersWithStorefronts.length} partenaires avec PartnerStorefront trouvés`)
 
       results.push(...partnersWithStorefronts.map(partner => {
-        const storefront = partner.storefronts[0]
+        // Choisir le meilleur storefront : actif avec contenu ou le plus récent
+        let bestStorefront = partner.storefronts[0]
+        
+        // Priorité 1: Storefront actif avec contenu
+        const activeWithContent = partner.storefronts.find(s => 
+          s.isActive && 
+          partner.options && 
+          typeof partner.options === 'object' &&
+          Object.keys(partner.options as Record<string, any>).some(key => {
+            const optionValue = (partner.options as Record<string, any>)[key]
+            return optionValue && 
+              typeof optionValue === 'object' && 
+              Object.keys(optionValue).length > 0
+          })
+        )
+        
+        if (activeWithContent) {
+          bestStorefront = activeWithContent
+        } else {
+          // Priorité 2: Storefront actif
+          const activeStorefront = partner.storefronts.find(s => s.isActive)
+          if (activeStorefront) {
+            bestStorefront = activeStorefront
+          } else {
+            // Priorité 3: Storefront le plus récent
+            bestStorefront = partner.storefronts.sort((a, b) => 
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            )[0]
+          }
+        }
         
         // Récupérer la première image du storefront
         let imageUrl = undefined
-        if (storefront.media && storefront.media.length > 0) {
-          const firstImage = storefront.media.find(media => media.type === 'IMAGE')
+        if (bestStorefront.media && bestStorefront.media.length > 0) {
+          const firstImage = bestStorefront.media.find(media => media.type === 'IMAGE')
           if (firstImage) {
             imageUrl = firstImage.url
           }
         }
         
         return {
-          id: storefront.id, // ID du PartnerStorefront au lieu du Partner
+          id: bestStorefront.id, // ID du meilleur PartnerStorefront
           type: 'PARTNER' as const,
           name: partner.companyName,
           serviceType: partner.serviceType,

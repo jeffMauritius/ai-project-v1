@@ -67,56 +67,40 @@ export default function PartnerStorefrontPage() {
   // Valeurs par défaut pour StorefrontForm
   const defaultStorefront = useMemo(() => ({
     id: '',
-    companyName: partnerData?.user?.name || session?.user?.name || '',
+    companyName: session?.user?.name || '',
     description: '',
     logo: null,
     isActive: false,
-    serviceType: storefront?.serviceType || ServiceType.LIEU,
+    serviceType: ServiceType.LIEU,
     venueType: VenueType.UNKNOWN,
     billingStreet: '',
     billingCity: '',
     billingPostalCode: '',
     billingCountry: 'France',
-    siret: partnerData?.storefront?.siret || '',
+    siret: '',
     vatNumber: '',
     venueAddress: null,
     venueLatitude: 48.8566,
     venueLongitude: 2.3522,
     interventionType: 'all_france' as "all_france" | "radius",
     interventionRadius: 50,
-    receptionSpaces: [],
-    receptionOptions: {},
+    options: {},
+    searchableOptions: {},
     createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: session?.user?.id || ''
-  }), [session?.user?.id, session?.user?.name, partnerData, storefront?.serviceType])
+    updatedAt: new Date()
+  }), [session?.user?.name])
 
-  // Fusionne les données de la BDD avec les valeurs par défaut
+  // Utiliser directement les données du storefront si disponibles
   const storefrontFormData = useMemo(() => {
-    return storefront
-      ? {
-          ...defaultStorefront,
-          ...storefront,
-          venueLatitude: 'venueLatitude' in storefront && storefront.venueLatitude !== null ? storefront.venueLatitude : 48.8566,
-          venueLongitude: 'venueLongitude' in storefront && storefront.venueLongitude !== null ? storefront.venueLongitude : 2.3522,
-          interventionRadius: 'interventionRadius' in storefront && storefront.interventionRadius !== null ? storefront.interventionRadius : 50,
-          receptionSpaces: 'receptionSpaces' in storefront ? (storefront as any).receptionSpaces : [],
-          receptionOptions: 'receptionOptions' in storefront ? (storefront as any).receptionOptions : {},
-        }
-      : defaultStorefront;
+    return storefront || defaultStorefront;
   }, [storefront, defaultStorefront]);
 
   useEffect(() => {
     const fetchStorefrontData = async () => {
       try {
-        // Récupérer les données du partenaire
-        const partnerResponse = await fetch("/api/user/partner-data")
-        if (partnerResponse.ok) {
-          const partnerDataResult = await partnerResponse.json()
-          setPartnerData(partnerDataResult)
-        }
-
-        // Récupérer les données de la vitrine
+        console.log('[Page] Chargement des données du storefront...')
+        
+        // Récupérer les données de la vitrine (inclut les données du partenaire)
         const response = await fetch("/api/partner-storefront")
         if (response.ok) {
           const data = await response.json()
@@ -124,6 +108,13 @@ export default function PartnerStorefrontPage() {
             console.log('[Page] Données reçues:', data)
             setStorefront(data)
           }
+        } else {
+          console.error('[Page] Erreur API:', response.status)
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les données de la vitrine.",
+            variant: "destructive",
+          })
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error)
@@ -351,16 +342,8 @@ export default function PartnerStorefrontPage() {
   }
 
   const handleStorefrontUpdate = (updatedData: any) => {
-    console.log('Données mises à jour:', updatedData)
+    console.log('[Page] Données mises à jour:', updatedData)
     setStorefront(updatedData)
-    
-    // Rafraîchir les données du partenaire si nécessaire
-    if (updatedData && !partnerData?.storefront) {
-      fetch("/api/user/partner-data")
-        .then(response => response.json())
-        .then(data => setPartnerData(data))
-        .catch(error => console.error("Erreur lors du rafraîchissement des données:", error))
-    }
   }
 
   if (isLoading) {
@@ -524,7 +507,7 @@ export default function PartnerStorefrontPage() {
                         console.log("Envoi des données de localisation:", dataToSend)
 
                         const response = await fetch("/api/partner-storefront", {
-                          method: storefront?.id ? "PUT" : "POST",
+                          method: "PUT",
                           headers: {
                             "Content-Type": "application/json",
                           },
@@ -572,7 +555,7 @@ export default function PartnerStorefrontPage() {
                 <CardTitle>Médias</CardTitle>
               </CardHeader>
               <CardContent>
-                <MediaManager />
+                <MediaManager storefrontId={storefrontFormData.id} />
               </CardContent>
             </Card>
           </TabsContent>

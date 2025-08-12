@@ -19,7 +19,19 @@ async function getStorefrontData(id: string) {
           orderBy: { order: 'asc' }
         },
         establishment: true,
-        partner: true
+        partner: {
+          select: {
+            id: true,
+            companyName: true,
+            description: true,
+            serviceType: true,
+            billingCity: true,
+            basePrice: true,
+            maxCapacity: true,
+            options: true,
+            searchableOptions: true
+          }
+        }
       }
     })
     
@@ -32,7 +44,8 @@ async function getStorefrontData(id: string) {
       type: storefront.type,
       hasEstablishment: !!storefront.establishment,
       hasPartner: !!storefront.partner,
-      mediaCount: storefront.media.length
+      mediaCount: storefront.media.length,
+      partnerOptions: storefront.partner?.options ? 'OUI' : 'NON'
     })
     
     return storefront
@@ -240,9 +253,10 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-4">À propos de {companyName}</h2>
               <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {description}
-                </p>
+                <div 
+                  className="text-gray-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
               </div>
             </section>
 
@@ -279,14 +293,104 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                 <div key={sectionIndex} className="mb-8 last:mb-0">
                   <h3 className="text-lg font-semibold mb-4 text-gray-800">{section.title}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {section.fields?.map((field: any, fieldIndex: number) => (
-                      <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                        <span className="text-sm text-gray-600">{field.question} :</span>
-                        <span className="font-semibold text-sm">
-                          Non renseigné
-                        </span>
-                      </div>
-                    ))}
+                    {section.fields?.map((field: any, fieldIndex: number) => {
+                      // Récupérer la valeur sauvegardée pour ce champ
+                      let savedValue = null;
+                      
+                      if (storefront.partner?.options) {
+                        // Déterminer le type de prestataire selon le serviceType
+                        let providerType = '';
+                        switch (serviceType) {
+                          case 'LIEU':
+                            providerType = 'reception-venue';
+                            break;
+                          case 'PHOTOGRAPHE':
+                            providerType = 'photographer';
+                            break;
+                          case 'TRAITEUR':
+                            providerType = 'caterer';
+                            break;
+                          case 'MUSIQUE':
+                            providerType = 'music-dj';
+                            break;
+                          case 'VOITURE':
+                          case 'BUS':
+                            providerType = 'vehicle';
+                            break;
+                          case 'DECORATION':
+                            providerType = 'decoration';
+                            break;
+                          case 'CHAPITEAU':
+                            providerType = 'tent';
+                            break;
+                          case 'ANIMATION':
+                            providerType = 'animation';
+                            break;
+                          case 'FLORISTE':
+                            providerType = 'florist';
+                            break;
+                          case 'LISTE':
+                            providerType = 'wedding-registry';
+                            break;
+                          case 'ORGANISATION':
+                            providerType = 'wedding-planner';
+                            break;
+                          case 'VIDEO':
+                            providerType = 'video';
+                            break;
+                          case 'LUNE_DE_MIEL':
+                            providerType = 'honeymoon-travel';
+                            break;
+                          case 'WEDDING_CAKE':
+                            providerType = 'wedding-cake';
+                            break;
+                          case 'OFFICIANT':
+                            providerType = 'officiant';
+                            break;
+                          case 'FOOD_TRUCK':
+                            providerType = 'food-truck';
+                            break;
+                          case 'VIN':
+                            providerType = 'wine';
+                            break;
+                          case 'FAIRE_PART':
+                            providerType = 'invitation';
+                            break;
+                          case 'CADEAUX_INVITES':
+                            providerType = 'guest-gifts';
+                            break;
+                          default:
+                            providerType = '';
+                        }
+                        
+                        // Récupérer les options pour ce type de prestataire
+                        const providerOptions = storefront.partner.options[providerType];
+                        if (providerOptions && providerOptions[field.id]) {
+                          savedValue = providerOptions[field.id];
+                        }
+                      }
+                      
+                      // Formater la valeur pour l'affichage
+                      let displayValue = 'Non renseigné';
+                      if (savedValue !== null && savedValue !== undefined && savedValue !== '') {
+                        if (typeof savedValue === 'boolean') {
+                          displayValue = savedValue ? 'Oui' : 'Non';
+                        } else if (Array.isArray(savedValue)) {
+                          displayValue = savedValue.join(', ');
+                        } else {
+                          displayValue = String(savedValue);
+                        }
+                      }
+                      
+                      return (
+                        <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                          <span className="text-sm text-gray-600">{field.question} :</span>
+                          <span className="font-semibold text-sm">
+                            {displayValue}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))

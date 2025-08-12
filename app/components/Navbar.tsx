@@ -74,6 +74,7 @@ export default function Navbar() {
                 href={`/storefront/${storefrontId}`}
                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Voir ma vitrine publique"
+                title={`Voir ma vitrine (ID: ${storefrontId})`}
               >
                 <BuildingStorefrontIcon className="h-5 w-5" />
               </Link>

@@ -1,0 +1,183 @@
+{
+  "photographe": {
+    "title": "Photographe",
+    "sections": [
+      {
+        "title": "Style et techniques",
+        "fields": [
+          {
+            "id": "styles_photos",
+            "question": "Quels styles de photos réalisez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Traditionnel",
+              "Artistique",
+              "Photojournalisme",
+              "D'auteur",
+              "Reportage",
+              "Posé",
+              "Documentaire",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "techniques",
+            "question": "Quelles techniques proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Numérique",
+              "Argentique",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "materiel",
+            "question": "Quel type de matériel utilisez-vous ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services complémentaires",
+        "fields": [
+          {
+            "id": "services_complementaires",
+            "question": "Quels services complémentaires proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Photographie",
+              "Vidéo",
+              "Séance d'engagement",
+              "Après le mariage",
+              "Drone",
+              "Streaming vidéo en direct",
+              "Remise du matériel en format numérique",
+              "Matériel sur clé USB",
+              "Album",
+              "Mini album",
+              "Album digital",
+              "Photos en haute résolution",
+              "Négatifs",
+              "Blu-ray ou DVD avec toutes les photographies",
+              "Photocall",
+              "Photomaton",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "plateforme_partage",
+            "question": "Disposez-vous d'une plateforme pour partager les photos en ligne ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "temps_livraison",
+            "question": "Quel est le temps approximatif de livraison du reportage final ?",
+            "component_type": "input",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "id": "services_inclus",
+            "question": "Quels sont les services inclus dans le forfait mariage ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "id": "prix_minimum",
+            "question": "À partir de quel prix puis-je profiter de vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "deplacement",
+            "question": "Pouvez-vous vous déplacer ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "facture_deplacement",
+            "question": "Facturez-vous les déplacements ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "facturation",
+            "question": "Facturez-vous par heure ou par événement ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Heure",
+              "Événement"
+            ],
+            "required": false
+          },
+          {
+            "id": "heures_supplementaires",
+            "question": "Si besoin est, accepteriez-vous de faire des heures supplémentaires ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "tarif_heures_supp",
+            "question": "Quel est le tarif des heures supplémentaires ?",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          },
+          {
+            "id": "remplacant",
+            "question": "Avez-vous un remplaçant en cas d'empêchement ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}

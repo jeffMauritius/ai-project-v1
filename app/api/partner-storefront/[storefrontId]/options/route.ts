@@ -40,7 +40,11 @@ export async function GET(
       type: storefront.type,
       isActive: storefront.isActive,
       logo: storefront.logo,
-      partner: storefront.partner
+      partner: {
+        ...storefront.partner,
+        options: storefront.partner?.options || {},
+        searchableOptions: storefront.partner?.searchableOptions || {}
+      }
     })
 
   } catch (error) {
@@ -65,7 +69,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { options, searchableOptions } = body
+    const { options, searchableOptions, providerType } = body
 
     // Vérifier que l'utilisateur possède ce storefront
     const storefront = await prisma.partnerStorefront.findFirst({
@@ -84,12 +88,27 @@ export async function PUT(
       return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
 
+    // Récupérer les options existantes
+    const existingOptions = storefront.partner!.options as any || {}
+    const existingSearchableOptions = storefront.partner!.searchableOptions as any || {}
+    
+    // Mettre à jour les options pour le type de prestataire spécifique
+    const updatedOptions = {
+      ...existingOptions,
+      [providerType]: options
+    }
+    
+    const updatedSearchableOptions = {
+      ...existingSearchableOptions,
+      [providerType]: searchableOptions
+    }
+    
     // Mettre à jour le partenaire avec les nouvelles options
     const updatedPartner = await prisma.partner.update({
       where: { id: storefront.partner!.id },
       data: {
-        options: options,
-        searchableOptions: searchableOptions
+        options: updatedOptions,
+        searchableOptions: updatedSearchableOptions
       }
     })
 

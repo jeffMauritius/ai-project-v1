@@ -1,0 +1,118 @@
+{
+  "voiture": {
+    "title": "Location de véhicules",
+    "sections": [
+      {
+        "title": "Types de véhicules",
+        "fields": [
+          {
+            "id": "types_vehicules",
+            "question": "Types de véhicule",
+            "component_type": "select",
+            "field_type": "select",
+            "options": ["Voiture haut de gamme", "Voiture de collection", "Limousine", "Calèche", "Voiture sportive", "Van", "Voiture rétro", "Motos et side-car", "Autres"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarifs",
+        "fields": [
+          {
+            "id": "prix_min",
+            "question": "À partir de quel prix puis-je profiter de vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services inclus",
+        "fields": [
+          {
+            "id": "services_inclus",
+            "question": "Quels sont les services inclus dans le forfait mariage ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "id": "kilometres_inclus",
+            "question": "Quel est le nombre de kilomètres peut on faire?",
+            "component_type": "input",
+            "field_type": "number",
+            "required": false
+          },
+          {
+            "id": "assurance_incluse",
+            "question": "L'assurance est elle incluse",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Chauffeur",
+        "fields": [
+          {
+            "id": "avec_chauffeur",
+            "question": "La location inclut-elle les services d'un chauffeur ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Avec chauffeur", "Sans chauffeur"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Durée",
+        "fields": [
+          {
+            "id": "duree_min",
+            "question": "Y a-t-il une durée minimum de location ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          },
+          {
+            "id": "duree_max",
+            "question": "Y a-t-il une durée maximum de location ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Facturation",
+        "fields": [
+          {
+            "id": "facturation_type",
+            "question": "Facturez-vous par heure ou par événement ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Heure", "Événement"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services additionnels",
+        "fields": [
+          {
+            "id": "services_additionnels",
+            "question": "Services additionnels",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+} 

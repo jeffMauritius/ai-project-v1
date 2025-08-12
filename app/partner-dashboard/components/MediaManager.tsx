@@ -20,7 +20,11 @@ interface Media {
   order: number
 }
 
-export default function MediaManager() {
+interface MediaManagerProps {
+  storefrontId?: string;
+}
+
+export default function MediaManager({ storefrontId }: MediaManagerProps) {
   const { data: session } = useSession()
   const { toast } = useToast()
   const [media, setMedia] = useState<Media[]>([])
@@ -31,15 +35,20 @@ export default function MediaManager() {
 
   // Charger les médias existants
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user && storefrontId) {
       fetchMedia()
     }
-  }, [session])
+  }, [session, storefrontId])
 
   const fetchMedia = async () => {
+    if (!storefrontId) {
+      console.log("[MediaManager] Pas de storefrontId, impossible de charger les médias")
+      return
+    }
+    
     try {
-      console.log("[MediaManager] Chargement des médias")
-      const response = await fetch("/api/partner-storefront/media", {
+      console.log("[MediaManager] Chargement des médias pour storefront:", storefrontId)
+      const response = await fetch(`/api/partner-storefront/${storefrontId}/media`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -110,9 +119,18 @@ export default function MediaManager() {
     formData.append("title", title)
     formData.append("description", description)
 
+    if (!storefrontId) {
+      toast({
+        title: "Erreur",
+        description: "Storefront non trouvé.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       console.log("[MediaManager] Début de l'upload")
-      const response = await fetch("/api/partner-storefront/media", {
+      const response = await fetch(`/api/partner-storefront/${storefrontId}/media`, {
         method: "POST",
         body: formData,
       })
@@ -146,9 +164,18 @@ export default function MediaManager() {
   }
 
   const handleDelete = async (mediaId: string) => {
+    if (!storefrontId) {
+      toast({
+        title: "Erreur",
+        description: "Storefront non trouvé.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       console.log("[MediaManager] Suppression du média:", mediaId)
-      const response = await fetch(`/api/partner-storefront/media/${mediaId}`, {
+      const response = await fetch(`/api/partner-storefront/${storefrontId}/media/${mediaId}`, {
         method: "DELETE",
       })
 

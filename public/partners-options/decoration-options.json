@@ -1,0 +1,71 @@
+{
+  "decoration": {
+    "title": "Décoration",
+    "sections": [
+      {
+        "title": "Services",
+        "fields": [
+          {
+            "id": "services_proposes",
+            "question": "Quels services proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": ["Location de mobilier", "Location de vaisselle", "Décoration", "Organisation de mariages et d'événements", "Ustensiles de cuisine", "Montage", "Location équipement d'illumination"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Matériel",
+        "fields": [
+          {
+            "id": "materiel_location",
+            "question": "Matériel à louer",
+            "component_type": "select",
+            "field_type": "select",
+            "options": ["Autel", "Chapiteau", "Tonnelle", "Tables", "Chaises", "Vaisselle", "Estrade", "Illuminations", "Meubles", "Arche"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Prix",
+        "fields": [
+          {
+            "id": "services_inclus_prix",
+            "question": "Vos prix incluent",
+            "component_type": "select",
+            "field_type": "select",
+            "options": ["Transport", "Livraison du matériel", "Montage", "Démontage", "Rangement", "Autres"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Délais",
+        "fields": [
+          {
+            "id": "delai_commande",
+            "question": "Combien de temps à l'avance dois-je vous contacter ?",
+            "component_type": "input",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Showroom",
+        "fields": [
+          {
+            "id": "showroom",
+            "question": "Disposez-vous d'un showroom ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Oui", "Non"],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+} 

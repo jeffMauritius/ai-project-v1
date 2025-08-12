@@ -1,0 +1,65 @@
+{
+  "cadeaux_invites": {
+    "title": "Cadeaux d'invités",
+    "sections": [
+      {
+        "title": "Types d'articles",
+        "fields": [
+          {
+            "id": "types_articles",
+            "question": "Quel type d'articles proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": ["Savons aromatisés", "Produits cosmétiques", "Mémoires USB", "Ballerines", "Bracelets et boucles d'oreilles", "Cartes, stylos et portes-clés", "Fioles miniatures", "Parfums", "Bougies", "Cadeaux solidaires", "Produits alimentaires", "Plantes", "Autres"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Catalogue",
+        "fields": [
+          {
+            "id": "type_commande",
+            "question": "Disposez-vous d'un catalogue fixe ou est-il possible de commander un cadeau sur-mesure ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": ["Catalogue", "Sur mesure"],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Délais",
+        "fields": [
+          {
+            "id": "delai_commande",
+            "question": "Combien de temps à l'avance dois-je vous contacter ?",
+            "component_type": "input",
+            "field_type": "text",
+            "required": false
+          },
+          {
+            "id": "delais_livraison",
+            "question": "Quels sont les délais de livraison ?",
+            "component_type": "input",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services complémentaires",
+        "fields": [
+          {
+            "id": "autres_services",
+            "question": "Quels autres types de services proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": ["Faire-part de mariage", "Services d'impression", "Designs personnalisés", "Autres"],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+} 

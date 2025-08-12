@@ -21,16 +21,12 @@ const storefrontFormSchema = z.object({
   serviceType: z.nativeEnum(ServiceType, {
     errorMap: () => ({ message: "Veuillez sélectionner un type de service valide" })
   }),
-  venueType: z.nativeEnum(VenueType).nullable(),
   billingStreet: z.string().min(1, "L'adresse de facturation est requise").max(200, "L'adresse de facturation ne peut pas dépasser 200 caractères"),
   billingCity: z.string().min(1, "La ville est requise").max(100, "La ville ne peut pas dépasser 100 caractères"),
   billingPostalCode: z.string().min(1, "Le code postal est requis").regex(/^\d{5}$/, "Le code postal doit contenir 5 chiffres"),
   billingCountry: z.string().min(1, "Le pays est requis").max(100, "Le pays ne peut pas dépasser 100 caractères"),
   siret: z.string().min(1, "Le numéro SIRET est requis").regex(/^\d{14}$/, "Le numéro SIRET doit contenir exactement 14 chiffres"),
   vatNumber: z.string().min(1, "Le numéro de TVA est requis").regex(/^[A-Z]{2}[0-9A-Z]+$/, "Le numéro de TVA doit commencer par 2 lettres majuscules suivies de chiffres et lettres"),
-  venueAddress: z.string().nullable(),
-  venueLatitude: z.number().min(-90).max(90),
-  venueLongitude: z.number().min(-180).max(180),
   interventionType: z.string().min(1, "Le type d'intervention est requis"),
   interventionRadius: z.number().min(1, "Le rayon d'intervention doit être supérieur à 0").max(1000, "Le rayon d'intervention ne peut pas dépasser 1000 km"),
   isActive: z.boolean(),
@@ -50,12 +46,8 @@ export function StorefrontForm({ storefront, onUpdate }: StorefrontFormProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState<StorefrontFormData>({
     ...storefront,
-    venueLatitude: storefront.venueLatitude || 48.8566,
-    venueLongitude: storefront.venueLongitude || 2.3522,
     interventionRadius: storefront.interventionRadius || 50,
     interventionType: storefront.interventionType || 'all_france',
-    venueType: storefront.venueType || VenueType.UNKNOWN,
-    venueAddress: storefront.venueAddress || '',
     isActive: storefront.isActive || false,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -138,16 +130,12 @@ export function StorefrontForm({ storefront, onUpdate }: StorefrontFormProps) {
         companyName: formData.companyName,
         description: formData.description,
         serviceType: formData.serviceType as ServiceType,
-        venueType: formData.serviceType !== ServiceType.LIEU ? VenueType.UNKNOWN : formData.venueType as VenueType,
         billingStreet: formData.billingStreet,
         billingCity: formData.billingCity,
         billingPostalCode: formData.billingPostalCode,
         billingCountry: formData.billingCountry,
         siret: formData.siret,
         vatNumber: formData.vatNumber,
-        venueAddress: formData.venueAddress || '',
-        venueLatitude: Number(formData.venueLatitude),
-        venueLongitude: Number(formData.venueLongitude),
         interventionType: formData.interventionType,
         interventionRadius: Number(formData.interventionRadius),
         logo: formData.logo || '',
@@ -159,7 +147,7 @@ export function StorefrontForm({ storefront, onUpdate }: StorefrontFormProps) {
       console.log("Méthode:", storefront.id ? "PUT" : "POST")
 
       const response = await fetch("/api/partner-storefront", {
-        method: storefront.id ? "PUT" : "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
