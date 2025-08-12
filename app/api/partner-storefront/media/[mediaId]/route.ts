@@ -1,47 +1,55 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { mediaId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ mediaId: string }> }
 ) {
   try {
+    const { mediaId } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return new NextResponse("Non autorisé", { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const mediaId = params.mediaId
-
-    // Vérifier que le média appartient bien à la vitrine du partenaire
+    // Récupérer le média avec le storefront et le partenaire
     const media = await prisma.media.findUnique({
-      where: {
-        id: mediaId,
-      },
+      where: { id: mediaId },
       include: {
-        storefront: true,
-      },
+        storefront: {
+          include: {
+            partner: true
+          }
+        }
+      }
     })
 
-    if (!media || media.storefront.userId !== session.user.id) {
-      return new NextResponse("Média non trouvé ou non autorisé", { status: 404 })
+    if (!media) {
+      return NextResponse.json({ error: 'Média non trouvé' }, { status: 404 })
     }
 
-    // TODO: Supprimer le fichier du service de stockage
-    // Pour l'instant, on supprime juste l'entrée dans la base de données
+    // Vérifier que l'utilisateur possède ce storefront via le partenaire
+    if (media.storefront.partner && media.storefront.partner.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+    }
 
+    // Supprimer le média
     await prisma.media.delete({
-      where: {
-        id: mediaId,
-      },
+      where: { id: mediaId }
     })
 
-    return new NextResponse(null, { status: 204 })
+    return NextResponse.json({ success: true })
+
   } catch (error) {
-    console.error("[PARTNER_STOREFRONT_MEDIA_DELETE]", error)
-    return new NextResponse("Erreur interne", { status: 500 })
+    console.error('Erreur lors de la suppression du média:', error)
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
   }
 } 

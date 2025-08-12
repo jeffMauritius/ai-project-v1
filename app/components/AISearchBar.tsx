@@ -1,32 +1,120 @@
 'use client'
 
-import { Mic, Send, Upload } from 'lucide-react'
+import { Mic, Send, Upload, MicOff, Loader2 } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { motion, useAnimationControls } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition'
+import { useToast } from '@/hooks/useToast'
 
 export default function AISearchBar() {
   const router = useRouter()
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [animatingTag, setAnimatingTag] = useState<{ text: string, rect: DOMRect } | null>(null)
   const [mounted, setMounted] = useState(false)
+  
+  const { toast } = useToast()
+  const {
+    isListening,
+    transcript,
+    isSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+    error
+  } = useSpeechRecognition()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Mettre à jour la requête quand la transcription change
+  useEffect(() => {
+    if (transcript) {
+      setSearchQuery(transcript)
+    }
+  }, [transcript])
+
+  // Afficher les erreurs de reconnaissance vocale
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erreur de reconnaissance vocale",
+        description: error,
+        variant: "destructive"
+      })
+    }
+  }, [error, toast])
+
   if (!mounted) {
     return null
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/results?q=${encodeURIComponent(searchQuery)}`)
+      setIsSearching(true)
+      
+      try {
+        // Effectuer la recherche IA
+        const response = await fetch('/api/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: searchQuery,
+            filters: {}
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Erreur lors de la recherche')
+        }
+
+        const data = await response.json()
+        
+        console.log('📱 Données reçues côté client:', {
+          total: data.total,
+          resultsCount: data.results?.length || 0,
+          criteria: data.criteria,
+          firstResult: data.results?.[0] ? {
+            id: data.results[0].id,
+            companyName: data.results[0].companyName,
+            serviceType: data.results[0].serviceType
+          } : 'Aucun résultat'
+        })
+        
+        // Stocker les résultats dans sessionStorage au lieu de les passer dans l'URL
+        sessionStorage.setItem('searchResults', JSON.stringify(data.results))
+        sessionStorage.setItem('searchCriteria', JSON.stringify(data.criteria))
+        
+        // Rediriger vers les résultats avec seulement la requête
+        router.push(`/results?q=${encodeURIComponent(searchQuery)}`)
+      } catch (error) {
+        console.error('Erreur de recherche:', error)
+        toast({
+          title: "Erreur de recherche",
+          description: "Impossible d'effectuer la recherche. Veuillez réessayer.",
+          variant: "destructive"
+        })
+      } finally {
+        setIsSearching(false)
+      }
+    }
+  }
+
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening()
+      resetTranscript()
+    } else {
+      startListening()
     }
   }
 
@@ -85,8 +173,19 @@ export default function AISearchBar() {
             size="icon"
             type="button"
             aria-label="Commande vocale"
+            onClick={handleVoiceInput}
+            disabled={!isSupported}
+            className={`transition-all duration-200 ${
+              isListening 
+                ? 'bg-red-500 text-white hover:bg-red-600 animate-pulse' 
+                : 'hover:bg-pink-50 dark:hover:bg-pink-900/20'
+            }`}
           >
-            <Mic className="h-5 w-5" />
+            {isListening ? (
+              <MicOff className="h-5 w-5" />
+            ) : (
+              <Mic className="h-5 w-5" />
+            )}
           </Button>
           <Button
             variant="ghost"
@@ -102,10 +201,28 @@ export default function AISearchBar() {
           size="icon"
           type="submit" 
           className="absolute right-4"
+          disabled={isSearching || !searchQuery.trim()}
         >
-          <Send className="h-5 w-5" />
+          {isSearching ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Send className="h-5 w-5" />
+          )}
         </Button>
       </form>
+      
+      {/* Indicateur de reconnaissance vocale */}
+      {isListening && (
+        <div className="mt-2 flex items-center gap-2 text-sm text-pink-600 dark:text-pink-400">
+          <div className="flex space-x-1">
+            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          </div>
+          <span>Écoute en cours...</span>
+        </div>
+      )}
+
       {pathname === '/' && <div className="mt-6 flex items-center gap-2 text-sm text-gray-400">
         <div className="flex flex-wrap gap-2 pb-2">
           {[

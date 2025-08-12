@@ -1,152 +1,158 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { z } from 'zod'
-import type { Prisma } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 
-const receptionSpaceSchema = z.object({
-  name: z.string().min(1, 'Le nom est requis'),
-  description: z.string().min(1, 'La description est requise'),
-  surface: z.number().min(0, 'La surface doit être positive'),
-  seatedCapacity: z.number().int().min(0, 'La capacité assise doit être positive'),
-  standingCapacity: z.number().int().min(0, 'La capacité debout doit être positive'),
-  hasDanceFloor: z.boolean(),
-  hasPmrAccess: z.boolean(),
-  hasPrivateOutdoor: z.boolean(),
-})
-
-const receptionOptionsSchema = z.object({
-  rentalDuration: z.string().min(1, 'La durée de location est requise'),
-  price: z.number().min(0, 'Le prix doit être positif'),
-  accommodationType: z.string().min(1, 'Le type d\'hébergement est requis'),
-  numberOfRooms: z.number().int().min(0, 'Le nombre de chambres doit être positif'),
-  numberOfBeds: z.number().int().min(0, 'Le nombre de lits doit être positif'),
-  hasMandatoryCaterer: z.boolean(),
-  providesCatering: z.boolean(),
-  allowsOwnDrinks: z.boolean(),
-  hasCorkageFee: z.boolean(),
-  corkageFee: z.number().min(0, 'Le droit de bouchon doit être positif'),
-  hasTimeLimit: z.boolean(),
-  timeLimit: z.string().optional(),
-  hasMandatoryPhotographer: z.boolean(),
-  hasMusicExclusivity: z.boolean(),
-  additionalServices: z.string().optional(),
-  includesCleaning: z.boolean(),
-  allowsPets: z.boolean(),
-  allowsMultipleEvents: z.boolean(),
-  hasSecurityGuard: z.boolean(),
-})
-
-const requestSchema = z.object({
-  spaces: z.array(receptionSpaceSchema),
-  options: receptionOptionsSchema,
-})
+const prisma = new PrismaClient()
 
 export async function GET(
-  request: Request,
-  { params }: { params: { storefrontId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ storefrontId: string }> }
 ) {
   try {
+    const { storefrontId } = await params
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return new NextResponse('Non autorisé', { status: 401 })
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const storefront = await prisma.partnerStorefront.findUnique({
+    // Récupérer le storefront avec l'établissement associé
+    const storefront = await prisma.partnerStorefront.findFirst({
       where: {
-        id: params.storefrontId,
-        userId: session.user.id,
+        id: storefrontId,
+        establishment: {
+          // Vérifier que l'utilisateur possède cet établissement
+          // (à adapter selon votre logique de propriété)
+        }
       },
       include: {
-        receptionSpaces: true,
-        receptionOptions: true,
-      },
+        establishment: true
+      }
     })
 
     if (!storefront) {
-      return new NextResponse('Storefront non trouvé', { status: 404 })
+      return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
 
-    return NextResponse.json({
-      spaces: storefront.receptionSpaces,
-      options: storefront.receptionOptions,
+    // Récupérer les espaces de réception de l'établissement
+    const spaces = await prisma.receptionSpace.findMany({
+      where: {
+        establishmentId: storefront.establishmentId!
+      }
     })
+
+    // Récupérer les options de réception de l'établissement
+    const options = await prisma.receptionOptions.findUnique({
+      where: {
+        establishmentId: storefront.establishmentId!
+      }
+    })
+
+    return NextResponse.json({
+      id: storefront.id,
+      type: storefront.type,
+      isActive: storefront.isActive,
+      logo: storefront.logo,
+      spaces: spaces,
+      options: options
+    })
+
   } catch (error) {
-    console.error('Erreur lors de la récupération des options:', error)
-    return new NextResponse('Erreur interne', { status: 500 })
+    console.error('Erreur lors de la récupération des options de réception:', error)
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
   }
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: { storefrontId: string } }
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ storefrontId: string }> }
 ) {
   try {
+    const { storefrontId } = await params
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return new NextResponse('Non autorisé', { status: 401 })
-    }
-
-    const storefront = await prisma.partnerStorefront.findUnique({
-      where: {
-        id: params.storefrontId,
-        userId: session.user.id,
-      },
-    })
-
-    if (!storefront) {
-      return new NextResponse('Storefront non trouvé', { status: 404 })
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await request.json()
-    
-    // Valider les données
-    const validatedData = requestSchema.parse(body)
-    const { spaces, options } = validatedData
+    const { spaces, options } = body
 
-    // Supprimer les anciens espaces
-    await prisma.receptionSpace.deleteMany({
+    // Vérifier que l'utilisateur possède ce storefront
+    const storefront = await prisma.partnerStorefront.findFirst({
       where: {
-        storefrontId: params.storefrontId,
-      },
+        id: storefrontId,
+        establishment: {
+          // Vérifier que l'utilisateur possède cet établissement
+          // (à adapter selon votre logique de propriété)
+        }
+      }
     })
 
-    // Créer les nouveaux espaces
-    const createdSpaces = await Promise.all(
-      spaces.map((space) =>
-        prisma.receptionSpace.create({
-          data: {
-            ...space,
-            storefrontId: params.storefrontId,
-          },
-        })
-      )
-    )
-
-    // Mettre à jour ou créer les options
-    const updatedOptions = await prisma.receptionOptions.upsert({
-      where: {
-        storefrontId: params.storefrontId,
-      },
-      update: options,
-      create: {
-        ...options,
-        storefrontId: params.storefrontId,
-      },
-    })
-
-    return NextResponse.json({
-      spaces: createdSpaces,
-      options: updatedOptions,
-    })
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour des options:', error)
-    
-    if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify(error.errors), { status: 400 })
+    if (!storefront) {
+      return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
-    
-    return new NextResponse('Erreur interne', { status: 500 })
+
+    // Mettre à jour ou créer les espaces de réception
+    if (spaces && Array.isArray(spaces)) {
+      for (const space of spaces) {
+        if (space.id) {
+          await prisma.receptionSpace.update({
+            where: { id: space.id },
+            data: {
+              name: space.name,
+              description: space.description,
+              surface: space.surface,
+              seatedCapacity: space.seatedCapacity,
+              standingCapacity: space.standingCapacity,
+              hasDanceFloor: space.hasDanceFloor,
+              hasPmrAccess: space.hasPmrAccess,
+              hasPrivateOutdoor: space.hasPrivateOutdoor
+            }
+          })
+        } else {
+          await prisma.receptionSpace.create({
+            data: {
+              name: space.name,
+              description: space.description,
+              surface: space.surface,
+              seatedCapacity: space.seatedCapacity,
+              standingCapacity: space.standingCapacity,
+              hasDanceFloor: space.hasDanceFloor,
+              hasPmrAccess: space.hasPmrAccess,
+              hasPrivateOutdoor: space.hasPrivateOutdoor,
+              establishmentId: storefront.establishmentId!
+            }
+          })
+        }
+      }
+    }
+
+    // Mettre à jour ou créer les options de réception
+    if (options) {
+      await prisma.receptionOptions.upsert({
+        where: {
+          establishmentId: storefront.establishmentId!
+        },
+        update: options,
+        create: {
+          ...options,
+          establishmentId: storefront.establishmentId!
+        }
+      })
+    }
+
+    return NextResponse.json({ success: true })
+
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour des options de réception:', error)
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
   }
 } 

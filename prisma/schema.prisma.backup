@@ -45,178 +45,6 @@ enum VenueType {
   UNKNOWN
 }
 
-enum StorefrontType {
-  VENUE
-  PARTNER
-}
-
-enum Role {
-  USER
-  PARTNER
-  ADMIN
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  PAST_DUE
-  UNPAID
-  TRIAL
-}
-
-enum BillingInterval {
-  MONTHLY
-  YEARLY
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
-enum QuoteRequestStatus {
-  PENDING
-  CONTACTED
-  QUOTED
-  ACCEPTED
-  DECLINED
-}
-
-// ===== MODÈLE ESTABLISHMENT (LIEUX DE RÉCEPTION) =====
-model Establishment {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now())
-  
-  // Informations de base
-  name          String
-  description   String
-  type          String   @default("Domaine mariage")
-  
-  // Adresse et localisation
-  address       String
-  city          String
-  region        String
-  country       String   @default("France")
-  postalCode    String
-  latitude      Float?
-  longitude     Float?
-  
-  // Capacités et caractéristiques
-  maxCapacity   Int
-  minCapacity   Int?
-  surface       Float?   // Surface en m²
-  
-  // Tarifs
-  startingPrice Float
-  currency      String   @default("EUR")
-  
-  // Évaluations
-  rating        Float    @default(0)
-  reviewCount   Int      @default(0)
-  
-  // Images
-  imageUrl      String?
-  images        String[] @default([])
-  
-  // Caractéristiques spécifiques aux lieux
-  venueType     VenueType
-  hasParking    Boolean  @default(false)
-  hasGarden     Boolean  @default(false)
-  hasTerrace    Boolean  @default(false)
-  hasKitchen    Boolean  @default(false)
-  hasAccommodation Boolean @default(false)
-  
-  // Relations
-  storefronts   PartnerStorefront[]
-  receptionSpaces    ReceptionSpace[]
-  receptionOptions   ReceptionOptions?
-  Images        Image[]
-  
-  @@map("establishments")
-}
-
-// ===== MODÈLE PARTNER (PRESTATAIRES DE SERVICES) =====
-model Partner {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  
-  // Informations de base
-  companyName String
-  description String
-  
-  // Type de service
-  serviceType ServiceType
-  
-  // Informations de facturation
-  billingStreet     String
-  billingCity       String
-  billingPostalCode String
-  billingCountry    String
-  siret             String
-  vatNumber         String
-  
-  // Zone d'intervention
-  interventionType   String @default("all_france")
-  interventionRadius Int?   @default(50)
-  interventionCities String[] @default([]) // Villes spécifiques d'intervention
-  
-  // Coordonnées géographiques (pour calcul de distance)
-  latitude          Float?  // Latitude de la ville de facturation
-  longitude         Float?  // Longitude de la ville de facturation
-  
-  // Services et tarifs
-  basePrice         Float?
-  priceRange        Json?   // {min: 100, max: 1000}
-  services          String[] // Liste des services proposés
-  
-  // Capacités (pour certains types comme traiteurs)
-  maxCapacity       Int?
-  minCapacity       Int?
-  
-  // Options dynamiques
-  options           Json? // Stockage des réponses du formulaire dynamique
-  searchableOptions Json? // Données structurées pour la recherche IA
-  
-  // Relations
-  userId            String @db.ObjectId
-  user              User   @relation(fields: [userId], references: [id])
-  storefronts       PartnerStorefront[]
-  
-  @@map("partners")
-}
-
-// ===== MODÈLE PARTNERSTOREFRONT (VITRINES PUBLIQUES) =====
-model PartnerStorefront {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  
-  // Type de vitrine
-  type StorefrontType
-  
-  // Informations publiques
-  isActive    Boolean @default(false)
-  logo        String?
-  
-  // Relations (soit vers un lieu, soit vers un partenaire)
-  establishmentId String? @db.ObjectId
-  establishment   Establishment? @relation(fields: [establishmentId], references: [id])
-  
-  partnerId       String? @db.ObjectId
-  partner         Partner? @relation(fields: [partnerId], references: [id])
-  
-  // Relations
-  media           Media[]
-  quoteRequests   QuoteRequest[]
-  
-  @@map("partner_storefronts")
-}
-
-// ===== MODÈLE MEDIA =====
 model Media {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   url         String
@@ -226,15 +54,12 @@ model Media {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  // Relations
   storefront  PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
   storefrontId String @db.ObjectId
 
   @@index([storefrontId])
 }
 
-// ===== MODÈLE RECEPTIONSPACE =====
 model ReceptionSpace {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   name            String
@@ -245,16 +70,12 @@ model ReceptionSpace {
   hasDanceFloor   Boolean  @default(false)
   hasPmrAccess    Boolean  @default(false)
   hasPrivateOutdoor Boolean @default(false)
-  
-  // Relations
-  establishmentId String @db.ObjectId
-  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
-  
+  storefrontId    String   @db.ObjectId
+  storefront      PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
-// ===== MODÈLE RECEPTIONOPTIONS =====
 model ReceptionOptions {
   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
   rentalDuration         String
@@ -276,20 +97,61 @@ model ReceptionOptions {
   allowsPets             Boolean  @default(false)
   allowsMultipleEvents   Boolean  @default(false)
   hasSecurityGuard       Boolean  @default(false)
-  
-  // Relations
-  establishmentId String @unique @db.ObjectId
-  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
-  
+  storefrontId           String   @unique @db.ObjectId
+  storefront             PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
   createdAt              DateTime @default(now())
-  updatedAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
-// ===== MODÈLE USER =====
+model PartnerStorefront {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Informations de l'entreprise
+  companyName String
+  description String
+  logo        String?
+  isActive    Boolean @default(false)
+  serviceType ServiceType
+  venueType   VenueType? @default(UNKNOWN)
+
+  // Informations de facturation
+  billingStreet     String
+  billingCity       String
+  billingPostalCode String
+  billingCountry    String
+  siret             String
+  vatNumber         String
+
+  // Adresse du lieu
+  venueAddress   String?
+  venueLatitude  Float?
+  venueLongitude Float?
+
+  // Zone d'intervention
+  interventionType   String @default("all_france")
+  interventionRadius Int?   @default(50)
+
+  // Options dynamiques des prestataires
+  options Json? // Stockage des réponses du formulaire dynamique
+  searchableOptions Json? // Données structurées pour la recherche IA
+
+  // Relations
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  media  Media[]
+  receptionSpaces    ReceptionSpace[]
+  receptionOptions   ReceptionOptions?
+  quoteRequests      QuoteRequest[]
+
+  @@map("partner_storefronts")
+}
+
 model User {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   name          String?
   email         String?   @unique
@@ -299,19 +161,18 @@ model User {
   role          String    @default("USER")
   
   // Relations
-  partners      Partner[]
+  storefront    PartnerStorefront?
   profile       Profile?
   billingInfo   BillingInfo?
   subscriptions Subscription[]
 
-  @@map("users")
+  @@map("User")
 }
 
-// ===== MODÈLE PROFILE =====
 model Profile {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   
   avatar      String?
   phone       String?
@@ -321,26 +182,74 @@ model Profile {
   bio         String?
   
   // Relations
-  userId      String @unique @db.ObjectId
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @unique @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profiles")
 }
 
-// ===== MODÈLE IMAGE =====
+enum Role {
+  USER
+  PARTNER
+  ADMIN
+}
+
 model Image {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   url             String
   order           Int      @default(0)
-  
-  // Relations
-  establishmentId String @db.ObjectId
+  establishmentId String   @db.ObjectId
   establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
 
-  @@map("images")
+  @@map("Image")
 }
 
-// ===== MODÈLES POUR LE SYSTÈME D'ABONNEMENT =====
+model Establishment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime @default("2025-04-06T03:35:25.436+00:00")
+  updatedAt     DateTime @default("2025-04-06T03:35:25.436+00:00")
+  type          String   @default("Domaine mariage")
+  name          String   @default("Domaine de la Maison de Colette")
+  description   String   @default("Face à la mer, sans voisins ni vis à vis, au centre d'un Domaine de se...")
+  startingPrice Float    @default(25)
+  currency      String   @default("EUR")
+  city          String   @default(". Saint-Coulomb")
+  region        String   @default("Ille et Vilaine")
+  country       String   @default("France")
+  maxCapacity   Int      @default(20)
+  rating        Float    @default(5)
+  reviewCount   Int      @default(0)
+  imageUrl      String   @default("/placeholder-venue.jpg")
+  images        String[] @default([])
+  featureIds    String[] @default([]) @db.ObjectId
+  amenityIds    String[] @default([]) @db.ObjectId
+  // Relation avec les images
+  Images        Image[]
+
+  @@map("Establishment")
+}
+
+// Modèles pour le système d'abonnement
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+  TRIAL
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
 
 model SubscriptionPlan {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -354,7 +263,7 @@ model SubscriptionPlan {
   isPopular   Boolean  @default(false)
   maxPhotos   Int?     // Limite de photos pour ce plan
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   subscriptions Subscription[]
@@ -379,11 +288,11 @@ model BillingInfo {
   stripeCustomerId String? // ID client Stripe
   stripePaymentMethodId String? // ID méthode de paiement Stripe
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relations
-  userId          String @unique @db.ObjectId
-  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String   @unique @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("billing_info")
 }
@@ -398,12 +307,12 @@ model Subscription {
   trialEnd          DateTime?
   stripeSubscriptionId String? // ID abonnement Stripe
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Relations
-  userId            String @unique @db.ObjectId
-  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  planId            String @db.ObjectId
+  userId            String   @unique @db.ObjectId
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId            String   @db.ObjectId
   plan              SubscriptionPlan @relation(fields: [planId], references: [id])
   payments          Payment[]
 
@@ -420,19 +329,27 @@ model Payment {
   description       String
   paidAt            DateTime?
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Relations
-  subscriptionId    String @db.ObjectId
+  subscriptionId    String   @db.ObjectId
   subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }
 
+enum QuoteRequestStatus {
+  PENDING
+  CONTACTED
+  QUOTED
+  ACCEPTED
+  DECLINED
+}
+
 model QuoteRequest {
   id            String            @id @default(auto()) @map("_id") @db.ObjectId
   createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   // Customer information
   firstName     String
