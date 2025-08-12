@@ -1,102 +1,119 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { OptionsService } from '@/lib/options-service'
-import { z } from 'zod'
+import { PrismaClient } from '@prisma/client'
 
-const optionsRequestSchema = z.object({
-  providerType: z.string(),
-  formData: z.record(z.any()),
-})
+const prisma = new PrismaClient()
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ storefrontId: string }> }
 ) {
   try {
+    const { storefrontId } = await params
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return new NextResponse('Non autorisé', { status: 401 })
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const { storefrontId } = await params;
-    const storefront = await prisma.partnerStorefront.findUnique({
+    // Récupérer le storefront avec le partenaire associé
+    const storefront = await prisma.partnerStorefront.findFirst({
       where: {
         id: storefrontId,
-        userId: session.user.id,
+        partner: {
+          userId: session.user.id
+        }
       },
+      include: {
+        partner: true
+      }
     })
 
     if (!storefront) {
-      return new NextResponse('Storefront non trouvé', { status: 404 })
+      return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
 
+    // Retourner les options du partenaire
     return NextResponse.json({
-      options: storefront.options,
-      searchableOptions: storefront.searchableOptions,
+      id: storefront.id,
+      type: storefront.type,
+      isActive: storefront.isActive,
+      logo: storefront.logo,
+      partner: storefront.partner
     })
+
   } catch (error) {
     console.error('Erreur lors de la récupération des options:', error)
-    return new NextResponse('Erreur interne', { status: 500 })
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
   }
 }
 
-export async function POST(
-  request: Request,
+export async function PUT(
+  request: NextRequest,
   { params }: { params: Promise<{ storefrontId: string }> }
 ) {
   try {
+    const { storefrontId } = await params
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return new NextResponse('Non autorisé', { status: 401 })
-    }
-
-    const { storefrontId } = await params;
-    const storefront = await prisma.partnerStorefront.findUnique({
-      where: {
-        id: storefrontId,
-        userId: session.user.id,
-      },
-    })
-
-    if (!storefront) {
-      return new NextResponse('Storefront non trouvé', { status: 404 })
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await request.json()
-    const validatedData = optionsRequestSchema.parse(body)
-    const { providerType, formData } = validatedData
+    const { options, searchableOptions } = body
 
-    // Sauvegarder les options avec génération automatique des searchableOptions
-    const { options, searchableOptions } = await OptionsService.saveOptions(
-      storefrontId,
-      storefront.serviceType,
-      formData
-    )
-
-    // Mettre à jour le storefront avec les nouvelles options
-    const updatedStorefront = await prisma.partnerStorefront.update({
+    // Vérifier que l'utilisateur possède ce storefront
+    const storefront = await prisma.partnerStorefront.findFirst({
       where: {
         id: storefrontId,
+        partner: {
+          userId: session.user.id
+        }
       },
+      include: {
+        partner: true
+      }
+    })
+
+    if (!storefront) {
+      return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
+    }
+
+    // Mettre à jour le partenaire avec les nouvelles options
+    const updatedPartner = await prisma.partner.update({
+      where: { id: storefront.partner!.id },
       data: {
         options: options,
-        searchableOptions: searchableOptions,
-      },
+        searchableOptions: searchableOptions
+      }
+    })
+
+    // Mettre à jour le storefront
+    const updatedStorefront = await prisma.partnerStorefront.update({
+      where: { id: storefrontId },
+      data: {
+        isActive: true
+      }
     })
 
     return NextResponse.json({
-      options: updatedStorefront.options,
-      searchableOptions: updatedStorefront.searchableOptions,
+      id: updatedStorefront.id,
+      type: updatedStorefront.type,
+      isActive: updatedStorefront.isActive,
+      logo: updatedStorefront.logo,
+      partner: updatedPartner
     })
+
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde des options:', error)
-    
-    if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify(error.errors), { status: 400 })
-    }
-    
-    return new NextResponse('Erreur interne', { status: 500 })
+    console.error('Erreur lors de la mise à jour des options:', error)
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
   }
 } 

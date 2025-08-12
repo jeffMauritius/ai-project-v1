@@ -11,21 +11,40 @@ import { ShareButton } from '@/components/ui/ShareButton'
 import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
 
 async function getStorefrontData(id: string) {
-  const storefront = await prisma.partnerStorefront.findUnique({
-    where: { id },
-    include: {
-      media: {
-        orderBy: { order: 'asc' }
-      },
-      receptionSpaces: true,
-      receptionOptions: true
+  try {
+    const storefront = await prisma.partnerStorefront.findUnique({
+      where: { id },
+      include: {
+        media: {
+          orderBy: { order: 'asc' }
+        },
+        establishment: true,
+        partner: true
+      }
+    })
+    
+    if (!storefront) {
+      console.log(`[STOREFRONT] Storefront ${id} non trouvé`)
+      return null
     }
-  })
-  return storefront
+    
+    console.log(`[STOREFRONT] Storefront ${id} trouvé:`, {
+      type: storefront.type,
+      hasEstablishment: !!storefront.establishment,
+      hasPartner: !!storefront.partner,
+      mediaCount: storefront.media.length
+    })
+    
+    return storefront
+  } catch (error) {
+    console.error(`[STOREFRONT] Erreur lors de la récupération:`, error)
+    return null
+  }
 }
 
-export default async function StorefrontPublicPage({ params }: { params: { id: string } }) {
-  const storefront = await getStorefrontData(params.id)
+export default async function StorefrontPublicPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const storefront = await getStorefrontData(id)
   
   if (!storefront) {
     return notFound()
@@ -33,6 +52,41 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
 
   const allImages = storefront.media
   const galleryImages = storefront.media.slice(6) // Images pour la galerie (après les 6 premières)
+
+  // Déterminer le type de prestataire et ses informations
+  const isVenue = storefront.type === 'VENUE'
+  const isPartner = storefront.type === 'PARTNER'
+  
+  let serviceType = ''
+  let companyName = ''
+  let description = ''
+  let venueAddress = ''
+  let venueType = ''
+  let rating = 0
+  let price = 0
+  let capacity = 0
+
+  if (isVenue && storefront.establishment) {
+    const establishment = storefront.establishment
+    serviceType = 'LIEU'
+    companyName = establishment.name
+    description = establishment.description || ''
+    venueAddress = `${establishment.city}, ${establishment.region}`
+    venueType = establishment.venueType || ''
+    rating = establishment.rating || 0
+    price = establishment.startingPrice || 0
+    capacity = establishment.maxCapacity || 0
+  } else if (isPartner && storefront.partner) {
+    const partner = storefront.partner
+    serviceType = partner.serviceType
+    companyName = partner.companyName
+    description = partner.description || ''
+    venueAddress = `${partner.billingCity}, France`
+    venueType = partner.serviceType
+    rating = 4.5 // Note par défaut pour les partenaires
+    price = partner.basePrice || 0
+    capacity = partner.maxCapacity || 0
+  }
 
   // Récupérer les options selon le type de service
   const getOptionsForServiceType = async (serviceType: string) => {
@@ -99,12 +153,12 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
           return []
       }
     } catch (error) {
-      console.error(`Erreur lors du chargement des options pour ${serviceType}:`, error)
+      console.error('Erreur lors du chargement des options:', error)
       return []
     }
   }
 
-  const serviceOptions = await getOptionsForServiceType(storefront.serviceType)
+  const serviceOptions = await getOptionsForServiceType(serviceType)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -116,10 +170,10 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             <div className="mb-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{storefront.companyName}</h1>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{companyName}</h1>
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="w-4 h-4" />
-                    <span>{storefront.venueAddress}</span>
+                    <span>{venueAddress}</span>
                   </div>
                 </div>
                 {/* Avis clients à droite du titre */}
@@ -127,10 +181,10 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
                   <div className="flex items-center gap-2 mb-1">
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-4 h-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                        <Star key={i} className={`w-4 h-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">4.5/5</span>
+                    <span className="text-sm text-gray-600 font-medium">{rating}/5</span>
                   </div>
                   <p className="text-xs text-gray-500">(12 avis)</p>
                   <button className="text-pink-600 text-xs hover:underline">
@@ -140,19 +194,19 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
               </div>
             </div>
             <div className="h-80 md:h-96">
-              <ImageCarousel images={allImages} title={storefront.companyName} />
+              <ImageCarousel images={allImages} title={companyName} />
             </div>
             {/* Boutons sous le carrousel */}
             <div className="mt-4 flex items-center gap-4">
               <FavoriteButton
                 url={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/storefront/${storefront.id}`}
-                title={`${storefront.companyName} - ${storefront.venueAddress}`}
+                title={`${companyName} - ${venueAddress}`}
                 showText={true}
                 className="bg-pink-600 text-white hover:bg-pink-700"
               />
               <ShareButton
                 url={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/storefront/${storefront.id}`}
-                title={`${storefront.companyName} - ${storefront.venueAddress}`}
+                title={`${companyName} - ${venueAddress}`}
                 showText={true}
                 className="border border-gray-300 hover:bg-gray-50"
               />
@@ -168,12 +222,12 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
             <div className="h-80 md:h-96 flex flex-col justify-end">
               <ContactCard
                 storefrontId={storefront.id}
-                companyName={storefront.companyName}
-                venueAddress={storefront.venueAddress || ''}
-                venueType={storefront.venueType || ''}
-                serviceType={storefront.serviceType || ''}
-                interventionType={storefront.interventionType || ''}
-                interventionRadius={storefront.interventionRadius || 0}
+                companyName={companyName}
+                venueAddress={venueAddress}
+                venueType={venueType}
+                serviceType={serviceType}
+                interventionType={venueType}
+                interventionRadius={50}
               />
             </div>
           </div>
@@ -184,10 +238,10 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
           <div className="lg:col-span-2">
             {/* Description */}
             <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">À propos de {storefront.companyName}</h2>
+              <h2 className="text-2xl font-bold mb-4">À propos de {companyName}</h2>
               <div className="prose max-w-none">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {storefront.description}
+                  {description}
                 </p>
               </div>
             </section>
@@ -200,7 +254,7 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
                   url: media.url,
                   title: media.title || undefined,
                   description: media.description || undefined,
-                  alt: media.title || `${storefront.companyName} - ${media.type}`
+                  alt: media.title || `${companyName} - ${media.type}`
                 }))}
                 title="Galerie photos"
                 gridCols={4}
@@ -211,7 +265,7 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
           {/* Chat en temps réel */}
           <div className="lg:col-span-1">
             <div className="h-96">
-              <ChatCard companyName={storefront.companyName} />
+              <ChatCard companyName={companyName} />
             </div>
           </div>
         </div>
@@ -225,29 +279,14 @@ export default async function StorefrontPublicPage({ params }: { params: { id: s
                 <div key={sectionIndex} className="mb-8 last:mb-0">
                   <h3 className="text-lg font-semibold mb-4 text-gray-800">{section.title}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {section.fields.map((field: any, fieldIndex: number) => {
-                      // Récupérer la valeur depuis les options du storefront
-                      const optionsData = storefront.options as Record<string, any> || {}
-                      const receptionData = storefront.receptionOptions as Record<string, any> || {}
-                      // Chercher directement avec l'id du champ
-                      const fieldValue = optionsData[field.id] || receptionData[field.id]
-                      
-                      return (
-                        <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                          <span className="text-sm text-gray-600">{field.question} :</span>
-                          <span className="font-semibold text-sm">
-                            {fieldValue !== undefined && fieldValue !== null && fieldValue !== '' 
-                              ? Array.isArray(fieldValue) 
-                                ? fieldValue.join(', ')
-                                : typeof fieldValue === 'boolean'
-                                  ? fieldValue ? 'Oui' : 'Non'
-                                  : String(fieldValue)
-                              : 'Non renseigné'
-                            }
-                          </span>
-                        </div>
-                      )
-                    })}
+                    {section.fields?.map((field: any, fieldIndex: number) => (
+                      <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                        <span className="text-sm text-gray-600">{field.question} :</span>
+                        <span className="font-semibold text-sm">
+                          Non renseigné
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))

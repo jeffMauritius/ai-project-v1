@@ -1,141 +1,98 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { put } from '@vercel/blob'
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { PrismaClient } from '@prisma/client'
 
-export async function GET() {
+const prisma = new PrismaClient()
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ storefrontId: string }> }
+) {
   try {
+    const { storefrontId } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return new NextResponse("Non autorisé", { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const storefront = await prisma.partnerStorefront.findUnique({
+    // Récupérer le storefront avec le partenaire
+    const storefront = await prisma.partnerStorefront.findFirst({
       where: {
-        userId: session.user.id,
+        id: storefrontId,
+        partner: {
+          userId: session.user.id
+        }
       },
       include: {
-        media: {
-          orderBy: {
-            order: 'asc'
-          }
-        }
+        media: true
       }
     })
 
     if (!storefront) {
-      return new NextResponse("Vitrine non trouvée", { status: 404 })
+      return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
 
     return NextResponse.json(storefront.media)
+
   } catch (error) {
-    console.error("[PARTNER_STOREFRONT_MEDIA_GET]", error)
-    return new NextResponse("Erreur interne", { status: 500 })
+    console.error('Erreur lors de la récupération des médias:', error)
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ storefrontId: string }> }
+) {
   try {
+    const { storefrontId } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      console.log("[PARTNER_STOREFRONT_MEDIA_POST] Utilisateur non authentifié")
-      return new NextResponse("Non autorisé", { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Début de l'upload")
-    const formData = await request.formData()
-    const file = formData.get("file") as File
-    const title = formData.get("title") as string
-    const description = formData.get("description") as string
+    const body = await request.json()
+    const { url, type, title, description, order } = body
 
-    if (!file) {
-      console.log("[PARTNER_STOREFRONT_MEDIA_POST] Fichier manquant")
-      return new NextResponse("Fichier manquant", { status: 400 })
-    }
-
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Type de fichier:", file.type)
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Taille du fichier:", file.size)
-
-    // Vérifier la taille du fichier (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      console.log("[PARTNER_STOREFRONT_MEDIA_POST] Fichier trop volumineux")
-      return new NextResponse("Fichier trop volumineux", { status: 400 })
-    }
-
-    // Vérifier le type de fichier
-    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
-      console.log("[PARTNER_STOREFRONT_MEDIA_POST] Type de fichier non supporté")
-      return new NextResponse("Type de fichier non supporté", { status: 400 })
-    }
-
-    // Convertir le fichier en buffer
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Conversion du fichier en buffer")
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Déterminer le type de fichier
-    const fileType = file.type.startsWith("image/") ? "IMAGE" : "VIDEO"
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Type de média:", fileType)
-
-    // Upload du fichier vers le Blob Store de Vercel
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Upload vers le Blob Store")
-    const blob = await put(file.name, buffer, {
-      access: 'public',
-      addRandomSuffix: true,
-      contentType: file.type,
-    })
-
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Fichier uploadé avec succès:", blob.url)
-
-    // Rechercher la vitrine
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Recherche de la vitrine")
-    const storefront = await prisma.partnerStorefront.findUnique({
+    // Vérifier que l'utilisateur possède ce storefront
+    const storefront = await prisma.partnerStorefront.findFirst({
       where: {
-        userId: session.user.id,
+        id: storefrontId,
+        partner: {
+          userId: session.user.id
+        }
       }
     })
 
     if (!storefront) {
-      console.log("[PARTNER_STOREFRONT_MEDIA_POST] Vitrine non trouvée")
-      return new NextResponse("Vitrine non trouvée", { status: 404 })
+      return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
 
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Création du média dans la base de données")
-    console.log("[PARTNER_STOREFRONT_MEDIA_POST] Données du média:", {
-      url: blob.url,
-      type: fileType,
-      title: title || null,
-      description: description || null,
-      storefrontId: storefront.id,
-      order: 0
+    // Créer le nouveau média
+    const media = await prisma.media.create({
+      data: {
+        url,
+        type,
+        title: title || '',
+        description: description || '',
+        order: order || 0,
+        storefrontId: storefrontId
+      }
     })
 
-    try {
-      // Créer le média avec le bon type pour MongoDB
-      const media = await prisma.media.create({
-        data: {
-          url: blob.url,
-          type: fileType,
-          title: title || null,
-          description: description || null,
-          storefrontId: storefront.id,
-          order: 0 // Par défaut, on met l'ordre à 0
-        }
-      })
+    return NextResponse.json(media)
 
-      console.log("[PARTNER_STOREFRONT_MEDIA_POST] Média créé avec succès:", media)
-      return NextResponse.json(media)
-    } catch (dbError: any) {
-      console.error("[PARTNER_STOREFRONT_MEDIA_POST] Erreur lors de la création du média:", dbError)
-      console.error("[PARTNER_STOREFRONT_MEDIA_POST] Stack trace:", dbError.stack)
-      return new NextResponse(`Erreur lors de la création du média: ${dbError.message || 'Erreur inconnue'}`, { status: 500 })
-    }
-  } catch (error: any) {
-    console.error("[PARTNER_STOREFRONT_MEDIA_POST] Erreur détaillée:", error)
-    console.error("[PARTNER_STOREFRONT_MEDIA_POST] Stack trace:", error.stack)
-    return new NextResponse(`Erreur interne: ${error.message || 'Erreur inconnue'}`, { status: 500 })
+  } catch (error) {
+    console.error('Erreur lors de la création du média:', error)
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
   }
 } 

@@ -1,1 +1,92 @@
-{"placeholder": "structure"}
+{
+  "food_truck": {
+    "sections": [
+      {
+        "title": "Services proposés",
+        "fields": [
+          {
+            "type": "checkbox",
+            "name": "services",
+            "label": "Types de cuisine",
+            "options": [
+              "Cuisine française",
+              "Cuisine italienne",
+              "Cuisine asiatique",
+              "Cuisine mexicaine",
+              "Cuisine américaine",
+              "Cuisine méditerranéenne",
+              "Cuisine végétarienne",
+              "Cuisine végane",
+              "Cuisine sans gluten"
+            ]
+          },
+          {
+            "type": "checkbox",
+            "name": "specialites",
+            "label": "Spécialités",
+            "options": [
+              "Burgers gourmets",
+              "Tacos",
+              "Pizzas",
+              "Sushis",
+              "Tapas",
+              "Desserts",
+              "Boissons artisanales"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Capacités et tarifs",
+        "fields": [
+          {
+            "type": "range",
+            "name": "maxCapacity",
+            "label": "Capacité maximale (personnes)",
+            "min": 10,
+            "max": 200,
+            "step": 10
+          },
+          {
+            "type": "range",
+            "name": "basePrice",
+            "label": "Prix de base par personne (€)",
+            "min": 15,
+            "max": 80,
+            "step": 5
+          }
+        ]
+      },
+      {
+        "title": "Zone d'intervention",
+        "fields": [
+          {
+            "type": "checkbox",
+            "name": "interventionCities",
+            "label": "Villes d'intervention",
+            "options": [
+              "Marseille",
+              "Nice",
+              "Toulon",
+              "Avignon",
+              "Aix-en-Provence",
+              "Toulouse",
+              "Montpellier",
+              "Perpignan",
+              "Nîmes",
+              "Bordeaux"
+            ]
+          },
+          {
+            "type": "range",
+            "name": "interventionRadius",
+            "label": "Rayon d'intervention (km)",
+            "min": 10,
+            "max": 100,
+            "step": 10
+          }
+        ]
+      }
+    ]
+  }
+}
