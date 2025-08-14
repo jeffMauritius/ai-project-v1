@@ -144,10 +144,11 @@ export function StorefrontForm({ storefront, onUpdate }: StorefrontFormProps) {
       }
 
       console.log("Données envoyées:", dataToSend)
-      console.log("Méthode:", storefront.id ? "PUT" : "POST")
+      const method = storefront.id ? "PUT" : "POST"
+      console.log("Méthode:", method)
 
       const response = await fetch("/api/partner-storefront", {
-        method: "PUT",
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },

@@ -92,7 +92,7 @@ export async function GET(request: Request) {
     if (!partner) {
       console.log("[PARTNER_STOREFRONT_GET] Aucun partenaire trouvé pour l'utilisateur, création automatique...")
       
-      // Créer automatiquement le partenaire
+      // Créer automatiquement le partenaire avec des données par défaut
       partner = await prisma.partner.create({
         data: {
           companyName: user.name || 'Nouveau Partenaire',
@@ -106,7 +106,17 @@ export async function GET(request: Request) {
           vatNumber: 'FR00000000000',
           interventionType: 'all_france',
           interventionRadius: 50,
-          userId: user.id
+          userId: user.id,
+          latitude: null,
+          longitude: null,
+          basePrice: null,
+          priceRange: null,
+          services: [],
+          maxCapacity: null,
+          minCapacity: null,
+          options: {},
+          searchableOptions: {},
+          interventionCities: [],
         }
       })
       
@@ -114,7 +124,7 @@ export async function GET(request: Request) {
     }
 
     console.log("[PARTNER_STOREFRONT_GET] Recherche du storefront pour le partenaire:", partner.id)
-    const storefront = await prisma.partnerStorefront.findFirst({
+    let storefront = await prisma.partnerStorefront.findFirst({
       where: { partnerId: partner.id },
       include: {
         media: true,
@@ -130,7 +140,7 @@ export async function GET(request: Request) {
       storefront = await prisma.partnerStorefront.create({
         data: {
           type: 'PARTNER',
-          isActive: true,
+          isActive: false,
           partnerId: partner.id
         },
         include: {
@@ -225,22 +235,36 @@ export async function POST(request: Request) {
       where: { partnerId: partner.id },
     })
 
+    let storefront
     if (existingStorefront) {
-      console.log("[PARTNER_STOREFRONT_POST] Vitrine existante trouvée")
-      return new NextResponse("Une vitrine existe déjà pour ce partenaire", { status: 400 })
+      console.log("[PARTNER_STOREFRONT_POST] Vitrine existante trouvée, mise à jour...")
+      
+      // Mettre à jour la vitrine existante
+      storefront = await prisma.partnerStorefront.update({
+        where: { id: existingStorefront.id },
+        data: {
+          ...validatedData,
+        },
+        include: {
+          media: true,
+          partner: true,
+        },
+      })
+    } else {
+      console.log("[PARTNER_STOREFRONT_POST] Création d'une nouvelle vitrine...")
+      
+      // Créer la nouvelle vitrine
+      storefront = await prisma.partnerStorefront.create({
+        data: {
+          ...validatedData,
+          partnerId: partner.id,
+        },
+        include: {
+          media: true,
+          partner: true,
+        },
+      })
     }
-
-    // Créer la nouvelle vitrine
-    const storefront = await prisma.partnerStorefront.create({
-      data: {
-        ...validatedData,
-        partnerId: partner.id,
-      },
-      include: {
-        media: true,
-        partner: true,
-      },
-    })
 
     console.log("[PARTNER_STOREFRONT_POST] Vitrine créée:", storefront)
     return NextResponse.json(storefront)
