@@ -28,7 +28,10 @@ export default async function RootLayout({
 
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <Providers>
           <GalleryProvider>
             {!isAuthPage && <Navbar />}
