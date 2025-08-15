@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Mic, Send, Upload } from "lucide-react"
+import { Mic, Send, Upload, Calendar, Users, MapPin, DollarSign, MessageSquare, Mail } from "lucide-react"
+import { useToast } from '@/hooks/useToast'
 
 type Message = {
   id: number
@@ -15,8 +16,21 @@ type Message = {
   read: boolean
 }
 
+type QuoteRequest = {
+  id: string
+  status: string
+  eventDate: string
+  guestCount: string
+  eventType: string
+  venueLocation: string
+  budget: string
+  message: string | null
+  customerEmail: string
+  customerName: string
+}
+
 type Conversation = {
-  id: number
+  id: string
   client: {
     name: string
     avatar: string
@@ -26,77 +40,46 @@ type Conversation = {
   lastMessage: string
   date: string
   unread: boolean
+  quoteRequest: QuoteRequest
 }
 
-const mockConversations: Conversation[] = [
-  {
-    id: 1,
-    client: {
-      name: "Sophie Martin",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80",
-      type: "Mariage Juillet 2024"
-    },
-    messages: [
-      {
-        id: 1,
-        sender: 'client',
-        content: 'Bonjour, je souhaiterais avoir plus d\'informations sur vos prestations.',
-        date: '2024-01-15T10:30:00',
-        read: true
-      },
-      {
-        id: 2,
-        sender: 'partner',
-        content: 'Bonjour Sophie ! Je serai ravi de vous renseigner. Quel type de prestation recherchez-vous ?',
-        date: '2024-01-15T10:35:00',
-        read: true
-      },
-      {
-        id: 3,
-        sender: 'client',
-        content: 'Nous organisons notre mariage pour juillet 2024 avec environ 150 invités.',
-        date: '2024-01-15T10:40:00',
-        read: false
-      }
-    ],
-    lastMessage: 'Nous organisons notre mariage pour juillet 2024...',
-    date: '2024-01-15T10:40:00',
-    unread: true
-  },
-  {
-    id: 2,
-    client: {
-      name: "Pierre Dubois",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80",
-      type: "Mariage Septembre 2024"
-    },
-    messages: [
-      {
-        id: 1,
-        sender: 'client',
-        content: 'Êtes-vous disponible le 14 septembre 2024 ?',
-        date: '2024-01-14T15:20:00',
-        read: true
-      },
-      {
-        id: 2,
-        sender: 'partner',
-        content: 'Oui, cette date est encore disponible ! Souhaitez-vous organiser un rendez-vous ?',
-        date: '2024-01-14T15:30:00',
-        read: true
-      }
-    ],
-    lastMessage: 'Oui, cette date est encore disponible !',
-    date: '2024-01-14T15:30:00',
-    unread: false
-  }
-]
-
 export default function Messages() {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
+  const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [newMessage, setNewMessage] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
+
+  // Récupérer les demandes de devis
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch('/api/partner-dashboard/messages')
+        if (response.ok) {
+          const data = await response.json()
+          setConversations(data.conversations)
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les messages",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching messages:', error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les messages",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchMessages()
+  }, [toast])
 
   const handleSendMessage = () => {
     if (!selectedConversation || !newMessage.trim()) return
@@ -115,7 +98,8 @@ export default function Messages() {
             ...conv,
             messages: [...conv.messages, message],
             lastMessage: newMessage,
-            date: message.date
+            date: message.date,
+            unread: false
           }
         : conv
     ))
@@ -127,6 +111,20 @@ export default function Messages() {
     conv.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conv.client.type.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto h-[calc(100vh-9rem)]">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Messages</h1>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Chargement des messages...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-9rem)]">
@@ -145,39 +143,51 @@ export default function Messages() {
               />
             </div>
             <div className="flex-1 overflow-y-auto">
-              {filteredConversations.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  onClick={() => setSelectedConversation(conversation)}
-                  className={`w-full p-4 flex items-start space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                    selectedConversation?.id === conversation.id ? 'bg-pink-50 dark:bg-pink-900/20' : ''
-                  }`}
-                >
-                  <Avatar>
-                    <AvatarImage src={conversation.client.avatar} />
-                    <AvatarFallback>{conversation.client.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-baseline">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {conversation.client.name}
+              {filteredConversations.length === 0 ? (
+                <div className="p-8 text-center">
+                  <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Aucune demande de devis
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Les demandes de devis apparaîtront ici
+                  </p>
+                </div>
+              ) : (
+                filteredConversations.map((conversation) => (
+                  <button
+                    key={conversation.id}
+                    onClick={() => setSelectedConversation(conversation)}
+                    className={`w-full p-4 flex items-start space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                      selectedConversation?.id === conversation.id ? 'bg-pink-50 dark:bg-pink-900/20' : ''
+                    }`}
+                  >
+                    <Avatar>
+                      <AvatarImage src={conversation.client.avatar} />
+                      <AvatarFallback>{conversation.client.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-baseline">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {conversation.client.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(conversation.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                        {conversation.lastMessage}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(conversation.date).toLocaleDateString()}
+                      <p className="text-xs text-pink-600 dark:text-pink-400 mt-1">
+                        {conversation.client.type}
                       </p>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      {conversation.lastMessage}
-                    </p>
-                    <p className="text-xs text-pink-600 dark:text-pink-400 mt-1">
-                      {conversation.client.type}
-                    </p>
-                  </div>
-                  {conversation.unread && (
-                    <span className="h-2 w-2 bg-pink-600 rounded-full"></span>
-                  )}
-                </button>
-              ))}
+                    {conversation.unread && (
+                      <span className="h-2 w-2 bg-pink-600 rounded-full"></span>
+                    )}
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -202,6 +212,43 @@ export default function Messages() {
               </div>
             </div>
             
+            {/* Détails de la demande de devis */}
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Détails de la demande</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {new Date(selectedConversation.quoteRequest.eventDate).toLocaleDateString('fr-FR')}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {selectedConversation.quoteRequest.guestCount}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {selectedConversation.quoteRequest.venueLocation || 'Non spécifié'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {selectedConversation.quoteRequest.budget || 'Non spécifié'}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 flex items-center space-x-2">
+                <Mail className="h-4 w-4 text-gray-500" />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {selectedConversation.quoteRequest.customerEmail}
+                </span>
+              </div>
+            </div>
+            
             <div className="flex-1 overflow-y-auto p-4">
               <div className="space-y-4">
                 {selectedConversation.messages.map((message) => (
@@ -216,7 +263,7 @@ export default function Messages() {
                           : 'bg-gray-100 dark:bg-gray-700'
                       }`}
                     >
-                      <p className="text-sm text-gray-900 dark:text-white">
+                      <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
                         {message.content}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

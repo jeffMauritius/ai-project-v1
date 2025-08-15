@@ -13,7 +13,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Calendar, Users, MapPin, Mail, Phone, User, MessageSquare } from 'lucide-react';
+import { Calendar, Users, MapPin, Mail, Phone, User, MessageSquare, AlertCircle } from 'lucide-react';
+import { z } from 'zod';
+import { useToast } from '@/hooks/useToast';
 
 interface QuoteRequestFormProps {
   storefrontId: string;
@@ -23,18 +25,17 @@ interface QuoteRequestFormProps {
   onClose: () => void;
 }
 
-interface FormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  eventDate: string;
-  guestCount: string;
-  eventType: string;
-  venueLocation: string;
-  budget: string;
-  message: string;
-}
+// Schéma de validation Zod
+const quoteRequestSchema = z.object({
+  eventDate: z.string().min(1, "La date de l'événement est requise"),
+  guestCount: z.string().min(1, "Le nombre d'invités est requis"),
+  eventType: z.string().min(1, "Le type d'événement est requis"),
+  venueLocation: z.string().min(1, "Le lieu de l'événement est requis"),
+  budget: z.string().min(1, "Le budget estimé est requis"),
+  message: z.string().optional(),
+});
+
+type FormData = z.infer<typeof quoteRequestSchema>;
 
 export function QuoteRequestForm({
   storefrontId,
@@ -44,10 +45,6 @@ export function QuoteRequestForm({
   onClose,
 }: QuoteRequestFormProps) {
   const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
     eventDate: '',
     guestCount: '',
     eventType: '',
@@ -55,18 +52,56 @@ export function QuoteRequestForm({
     budget: '',
     message: '',
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+    
+    // Effacer l'erreur du champ modifié
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    try {
+      quoteRequestSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Partial<Record<keyof FormData, string>> = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0] as keyof FormData;
+          newErrors[field] = err.message;
+        });
+        setErrors(newErrors);
+      }
+      return false;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez corriger les erreurs dans le formulaire",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -85,14 +120,14 @@ export function QuoteRequestForm({
 
       if (response.ok) {
         setIsSubmitted(true);
+        toast({
+          title: "Demande envoyée !",
+          description: `${storefrontName} vous contactera dans les plus brefs délais.`,
+        });
         // Reset form after successful submission
         setTimeout(() => {
           setIsSubmitted(false);
           setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
             eventDate: '',
             guestCount: '',
             eventType: '',
@@ -100,14 +135,29 @@ export function QuoteRequestForm({
             budget: '',
             message: '',
           });
+          setErrors({});
           onClose();
         }, 3000);
+      } else if (response.status === 401) {
+        // Utilisateur non connecté
+        toast({
+          title: "Connexion requise",
+          description: "Vous devez être connecté pour envoyer une demande de devis.",
+          variant: "destructive",
+        });
+        // Rediriger vers la page de connexion
+        window.location.href = '/auth/login';
       } else {
-        throw new Error('Erreur lors de l\'envoi');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de l\'envoi');
       }
     } catch (error) {
       console.error('Error submitting quote request:', error);
-      alert('Une erreur est survenue lors de l\'envoi. Veuillez réessayer.');
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'envoi. Veuillez réessayer.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -132,6 +182,21 @@ export function QuoteRequestForm({
           </DialogDescription>
         </DialogHeader>
 
+        {/* Mention pour créer un compte */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                Créez un compte gratuitement pour demander un devis
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                Vous devez être connecté pour envoyer une demande de devis. C'est rapide et gratuit !
+              </p>
+            </div>
+          </div>
+        </div>
+
         {isSubmitted ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -144,59 +209,6 @@ export function QuoteRequestForm({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Personal Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <User className="h-5 w-5 text-pink-600" />
-                Informations personnelles
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">Prénom *</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    required
-                    placeholder="Votre prénom"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lastName">Nom *</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    required
-                    placeholder="Votre nom"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    required
-                    placeholder="votre@email.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Téléphone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="06 12 34 56 78"
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Event Details */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -211,14 +223,17 @@ export function QuoteRequestForm({
                     type="date"
                     value={formData.eventDate}
                     onChange={(e) => handleInputChange('eventDate', e.target.value)}
-                    required
                     min={new Date().toISOString().split('T')[0]}
+                    className={errors.eventDate ? 'border-red-500' : ''}
                   />
+                  {errors.eventDate && (
+                    <p className="text-sm text-red-500 mt-1">{errors.eventDate}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="guestCount">Nombre d'invités *</Label>
                   <Select value={formData.guestCount} onValueChange={(value) => handleInputChange('guestCount', value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className={errors.guestCount ? 'border-red-500' : ''}>
                       <SelectValue placeholder="Sélectionnez" />
                     </SelectTrigger>
                     <SelectContent>
@@ -229,12 +244,15 @@ export function QuoteRequestForm({
                       <SelectItem value="500+">Plus de 500 personnes</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.guestCount && (
+                    <p className="text-sm text-red-500 mt-1">{errors.guestCount}</p>
+                  )}
                 </div>
               </div>
               <div>
                 <Label htmlFor="eventType">Type d'événement *</Label>
                 <Select value={formData.eventType} onValueChange={(value) => handleInputChange('eventType', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.eventType ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Sélectionnez le type d'événement" />
                   </SelectTrigger>
                   <SelectContent>
@@ -246,6 +264,9 @@ export function QuoteRequestForm({
                     <SelectItem value="autre">Autre</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.eventType && (
+                  <p className="text-sm text-red-500 mt-1">{errors.eventType}</p>
+                )}
               </div>
             </div>
 
@@ -257,18 +278,22 @@ export function QuoteRequestForm({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="venueLocation">Lieu de l'événement</Label>
+                  <Label htmlFor="venueLocation">Lieu de l'événement *</Label>
                   <Input
                     id="venueLocation"
                     value={formData.venueLocation}
                     onChange={(e) => handleInputChange('venueLocation', e.target.value)}
                     placeholder="Adresse ou nom du lieu"
+                    className={errors.venueLocation ? 'border-red-500' : ''}
                   />
+                  {errors.venueLocation && (
+                    <p className="text-sm text-red-500 mt-1">{errors.venueLocation}</p>
+                  )}
                 </div>
                 <div>
-                  <Label htmlFor="budget">Budget estimé</Label>
+                  <Label htmlFor="budget">Budget estimé *</Label>
                   <Select value={formData.budget} onValueChange={(value) => handleInputChange('budget', value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className={errors.budget ? 'border-red-500' : ''}>
                       <SelectValue placeholder="Sélectionnez" />
                     </SelectTrigger>
                     <SelectContent>
@@ -280,6 +305,9 @@ export function QuoteRequestForm({
                       <SelectItem value="non-defini">Non défini</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.budget && (
+                    <p className="text-sm text-red-500 mt-1">{errors.budget}</p>
+                  )}
                 </div>
               </div>
             </div>
