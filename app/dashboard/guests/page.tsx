@@ -2,24 +2,32 @@
 
 import { useState } from 'react'
 import { PlusIcon, PencilIcon, TrashIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import { z } from 'zod'
+import { useGuests, type GuestGroup, type Guest } from '@/hooks/useGuests'
 
-type GuestGroup = {
-  id: number
-  name: string
-  type: string
-  count: number
-  confirmed: boolean
-  notes: string
-}
+// Schémas de validation Zod
+const guestGroupSchema = z.object({
+  name: z.string().min(1, 'Le nom du groupe est requis').max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+  type: z.enum(['family', 'friends', 'colleagues', 'other'], {
+    required_error: 'Veuillez sélectionner un type'
+  }),
+  count: z.number().min(1, 'Le nombre doit être au moins 1').max(100, 'Le nombre ne peut pas dépasser 100'),
+  confirmed: z.boolean(),
+  notes: z.string().max(500, 'Les notes ne peuvent pas dépasser 500 caractères').default('')
+})
 
-type Guest = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  status: 'pending' | 'confirmed' | 'declined'
-  groupId: number
-}
+const individualGuestSchema = z.object({
+  firstName: z.string().min(1, 'Le prénom est requis').max(50, 'Le prénom ne peut pas dépasser 50 caractères'),
+  lastName: z.string().min(1, 'Le nom est requis').max(50, 'Le nom ne peut pas dépasser 50 caractères'),
+  email: z.string().email('Veuillez entrer une adresse email valide'),
+  groupId: z.string().min(1, 'Veuillez sélectionner un groupe'),
+  status: z.enum(['pending', 'confirmed', 'declined'], {
+    required_error: 'Veuillez sélectionner un statut'
+  })
+})
+
+type GuestGroupFormData = z.infer<typeof guestGroupSchema>
+type IndividualGuestFormData = z.infer<typeof individualGuestSchema>
 
 const guestTypes = [
   { id: 'family', name: 'Famille' },
@@ -28,45 +36,28 @@ const guestTypes = [
   { id: 'other', name: 'Autres' }
 ]
 
+const statusOptions = [
+  { id: 'pending', name: 'En attente' },
+  { id: 'confirmed', name: 'Confirmé' },
+  { id: 'declined', name: 'Décliné' }
+]
+
 export default function Guests() {
-  const [guests, setGuests] = useState<GuestGroup[]>([
-    { id: 1, name: 'Famille de la mariée', type: 'family', count: 12, confirmed: true, notes: 'Inclut les grands-parents et cousins' },
-    { id: 2, name: 'Amis d\'enfance', type: 'friends', count: 8, confirmed: false, notes: 'Groupe de l\'école' },
-    { id: 3, name: 'Équipe marketing', type: 'colleagues', count: 6, confirmed: true, notes: 'Équipe actuelle' }
-  ])
+  const {
+    guestGroups,
+    individualGuests,
+    loading,
+    saving,
+    createGuestGroup,
+    updateGuestGroup,
+    deleteGuestGroup,
+    createIndividualGuest,
+    updateIndividualGuest,
+    deleteIndividualGuest
+  } = useGuests()
 
-  const [individualGuests, setIndividualGuests] = useState<Guest[]>([
-    {
-      id: 1,
-      firstName: 'Marie',
-      lastName: 'Martin',
-      email: 'marie.martin@email.com',
-      status: 'confirmed',
-      groupId: 1
-    },
-    {
-      id: 2,
-      firstName: 'Pierre',
-      lastName: 'Dubois',
-      email: 'pierre.dubois@email.com',
-      status: 'pending',
-      groupId: 2
-    },
-    {
-      id: 3,
-      firstName: 'Sophie',
-      lastName: 'Leroy',
-      email: 'sophie.leroy@email.com',
-      status: 'declined',
-      groupId: 3
-    }
-  ])
-
-  const [isAddingGuest, setIsAddingGuest] = useState(false)
-  const [editingGuest, setEditingGuest] = useState<GuestGroup | null>(null)
-  const [isAddingIndividualGuest, setIsAddingIndividualGuest] = useState(false)
-  const [editingIndividualGuest, setEditingIndividualGuest] = useState<Guest | null>(null)
-  const [newGuest, setNewGuest] = useState<Omit<GuestGroup, 'id'>>({
+  // États pour les formulaires
+  const [newGuest, setNewGuest] = useState<Omit<GuestGroup, 'id' | 'createdAt' | 'updatedAt' | 'guests'>>({
     name: '',
     type: 'family',
     count: 1,
@@ -74,12 +65,26 @@ export default function Guests() {
     notes: ''
   })
 
-  const handleAddGuest = () => {
-    const guestToAdd = {
-      id: Math.max(0, ...guests.map(g => g.id)) + 1,
-      ...newGuest
-    }
-    setGuests([...guests, guestToAdd])
+  const [newIndividualGuest, setNewIndividualGuest] = useState<Omit<Guest, 'id' | 'createdAt' | 'updatedAt' | 'group'>>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    status: 'pending',
+    groupId: ''
+  })
+
+  // États pour la validation
+  const [groupErrors, setGroupErrors] = useState<Record<string, string>>({})
+  const [individualErrors, setIndividualErrors] = useState<Record<string, string>>({})
+
+  // États pour les modales
+  const [isAddingGuest, setIsAddingGuest] = useState(false)
+  const [editingGuest, setEditingGuest] = useState<GuestGroup | null>(null)
+  const [isAddingIndividualGuest, setIsAddingIndividualGuest] = useState(false)
+  const [editingIndividualGuest, setEditingIndividualGuest] = useState<Guest | null>(null)
+
+  // Fonction pour réinitialiser le formulaire de groupe
+  const resetGroupForm = () => {
     setNewGuest({
       name: '',
       type: 'family',
@@ -87,21 +92,139 @@ export default function Guests() {
       confirmed: false,
       notes: ''
     })
-    setIsAddingGuest(false)
+    setGroupErrors({})
   }
 
-  const handleUpdateGuest = () => {
-    if (!editingGuest) return
-    setGuests(guests.map(g => g.id === editingGuest.id ? editingGuest : g))
-    setEditingGuest(null)
+  // Fonction pour réinitialiser le formulaire d'invité individuel
+  const resetIndividualForm = () => {
+    setNewIndividualGuest({
+      firstName: '',
+      lastName: '',
+      email: '',
+      status: 'pending',
+      groupId: ''
+    })
+    setIndividualErrors({})
   }
 
-  const handleDeleteGuest = (id: number) => {
-    setGuests(guests.filter(g => g.id !== id))
+  // Gestionnaire de soumission du formulaire de groupe
+  const handleGroupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const validatedData = guestGroupSchema.parse(newGuest)
+      
+      if (editingGuest) {
+        await updateGuestGroup(editingGuest.id, validatedData)
+        setEditingGuest(null)
+      } else {
+        await createGuestGroup(validatedData)
+      }
+      
+      setIsAddingGuest(false)
+      resetGroupForm()
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Record<string, string> = {}
+        error.errors.forEach(err => {
+          if (err.path) {
+            errors[err.path[0]] = err.message
+          }
+        })
+        setGroupErrors(errors)
+      }
+    }
   }
 
-  const totalGuests = guests.reduce((sum, guest) => sum + guest.count, 0)
-  const confirmedGuests = guests.reduce((sum, guest) => guest.confirmed ? sum + guest.count : sum, 0)
+  // Gestionnaire de soumission du formulaire d'invité individuel
+  const handleIndividualSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const validatedData = individualGuestSchema.parse(newIndividualGuest)
+      
+      if (editingIndividualGuest) {
+        await updateIndividualGuest(editingIndividualGuest.id, validatedData)
+        setEditingIndividualGuest(null)
+      } else {
+        await createIndividualGuest(validatedData)
+      }
+      
+      setIsAddingIndividualGuest(false)
+      resetIndividualForm()
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Record<string, string> = {}
+        error.errors.forEach(err => {
+          if (err.path) {
+            errors[err.path[0]] = err.message
+          }
+        })
+        setIndividualErrors(errors)
+      }
+    }
+  }
+
+  // Fonction pour éditer un groupe
+  const handleEditGroup = (guest: GuestGroup) => {
+    setEditingGuest(guest)
+    setNewGuest({
+      name: guest.name,
+      type: guest.type,
+      count: guest.count,
+      confirmed: guest.confirmed,
+      notes: guest.notes
+    })
+    setIsAddingGuest(true)
+  }
+
+  // Fonction pour éditer un invité individuel
+  const handleEditIndividual = (guest: Guest) => {
+    setEditingIndividualGuest(guest)
+    setNewIndividualGuest({
+      firstName: guest.firstName,
+      lastName: guest.lastName,
+      email: guest.email,
+      status: guest.status,
+      groupId: guest.groupId
+    })
+    setIsAddingIndividualGuest(true)
+  }
+
+  // Fonction pour supprimer un groupe
+  const handleDeleteGroup = async (id: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce groupe ?')) {
+      await deleteGuestGroup(id)
+    }
+  }
+
+  // Fonction pour supprimer un invité individuel
+  const handleDeleteIndividual = async (id: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet invité ?')) {
+      await deleteIndividualGuest(id)
+    }
+  }
+
+  // Fonction pour obtenir le nom du groupe
+  const getGroupName = (groupId: string) => {
+    const group = guestGroups.find(g => g.id === groupId)
+    return group ? group.name : 'Groupe inconnu'
+  }
+
+  // Calculs pour les statistiques
+  const totalGuests = guestGroups.reduce((sum, guest) => sum + guest.count, 0)
+  const confirmedGuests = guestGroups.reduce((sum, guest) => guest.confirmed ? sum + guest.count : sum, 0)
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Invités</h1>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -114,15 +237,25 @@ export default function Guests() {
         </div>
         <div className="flex gap-4">
           <button
-            onClick={() => setIsAddingGuest(true)}
+            onClick={() => {
+              resetGroupForm()
+              setEditingGuest(null)
+              setIsAddingGuest(true)
+            }}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500"
+            disabled={saving}
           >
             <PlusIcon className="h-5 w-5 mr-2" />
             Ajouter un groupe
           </button>
           <button
-            onClick={() => setIsAddingIndividualGuest(true)}
+            onClick={() => {
+              resetIndividualForm()
+              setEditingIndividualGuest(null)
+              setIsAddingIndividualGuest(true)
+            }}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500"
+            disabled={saving}
           >
             <UserPlusIcon className="h-5 w-5 mr-2" />
             Ajouter un invité
@@ -133,7 +266,7 @@ export default function Guests() {
       {/* Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {guestTypes.map(type => {
-          const typeGuests = guests.filter(g => g.type === type.id)
+          const typeGuests = guestGroups.filter(g => g.type === type.id)
           const typeCount = typeGuests.reduce((sum, g) => sum + g.count, 0)
           const typeConfirmed = typeGuests.reduce((sum, g) => g.confirmed ? sum + g.count : sum, 0)
           
@@ -175,7 +308,7 @@ export default function Guests() {
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {guests.map((guest) => (
+            {guestGroups.map((guest) => (
               <tr key={guest.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                   {guest.name}
@@ -200,14 +333,16 @@ export default function Guests() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => setEditingGuest(guest)}
+                    onClick={() => handleEditGroup(guest)}
                     className="text-pink-600 hover:text-pink-900 dark:hover:text-pink-400 mr-3"
+                    disabled={saving}
                   >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => handleDeleteGuest(guest.id)}
+                    onClick={() => handleDeleteGroup(guest.id)}
                     className="text-red-600 hover:text-red-900 dark:hover:text-red-400"
+                    disabled={saving}
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -217,118 +352,6 @@ export default function Guests() {
           </tbody>
         </table>
       </div>
-
-      {/* Modal d'ajout/modification */}
-      {(isAddingGuest || editingGuest) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              {isAddingGuest ? 'Ajouter un groupe' : 'Modifier le groupe'}
-            </h3>
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              isAddingGuest ? handleAddGuest() : handleUpdateGuest()
-            }}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Nom du groupe
-                  </label>
-                  <input
-                    type="text"
-                    value={isAddingGuest ? newGuest.name : editingGuest?.name}
-                    onChange={(e) => isAddingGuest
-                      ? setNewGuest({ ...newGuest, name: e.target.value })
-                      : setEditingGuest(prev => prev ? { ...prev, name: e.target.value } : null)
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Type
-                  </label>
-                  <select
-                    value={isAddingGuest ? newGuest.type : editingGuest?.type}
-                    onChange={(e) => isAddingGuest
-                      ? setNewGuest({ ...newGuest, type: e.target.value })
-                      : setEditingGuest(prev => prev ? { ...prev, type: e.target.value } : null)
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  >
-                    {guestTypes.map(type => (
-                      <option key={type.id} value={type.id}>{type.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Nombre de personnes
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={isAddingGuest ? newGuest.count : editingGuest?.count}
-                    onChange={(e) => isAddingGuest
-                      ? setNewGuest({ ...newGuest, count: parseInt(e.target.value) })
-                      : setEditingGuest(prev => prev ? { ...prev, count: parseInt(e.target.value) } : null)
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Notes
-                  </label>
-                  <textarea
-                    value={isAddingGuest ? newGuest.notes : editingGuest?.notes}
-                    onChange={(e) => isAddingGuest
-                      ? setNewGuest({ ...newGuest, notes: e.target.value })
-                      : setEditingGuest(prev => prev ? { ...prev, notes: e.target.value } : null)
-                    }
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={isAddingGuest ? newGuest.confirmed : editingGuest?.confirmed}
-                    onChange={(e) => isAddingGuest
-                      ? setNewGuest({ ...newGuest, confirmed: e.target.checked })
-                      : setEditingGuest(prev => prev ? { ...prev, confirmed: e.target.checked } : null)
-                    }
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
-                  />
-                  <label className="ml-2 block text-sm text-gray-900 dark:text-white">
-                    Présence confirmée
-                  </label>
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAddingGuest(false)
-                    setEditingGuest(null)
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md"
-                >
-                  {isAddingGuest ? 'Ajouter' : 'Mettre à jour'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Liste des invités individuels */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden mt-8">
@@ -365,7 +388,7 @@ export default function Guests() {
                   {guest.email}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {guests.find(g => g.id === guest.groupId)?.name}
+                  {getGroupName(guest.groupId)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -375,19 +398,21 @@ export default function Guests() {
                       ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                       : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                   }`}>
-                    {guest.status === 'confirmed' ? 'Confirmé' : guest.status === 'declined' ? 'Refusé' : 'En attente'}
+                    {statusOptions.find(s => s.id === guest.status)?.name}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => setEditingIndividualGuest(guest)}
+                    onClick={() => handleEditIndividual(guest)}
                     className="text-pink-600 hover:text-pink-900 dark:hover:text-pink-400 mr-3"
+                    disabled={saving}
                   >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => {/* Handle delete */}}
+                    onClick={() => handleDeleteIndividual(guest.id)}
                     className="text-red-600 hover:text-red-900 dark:hover:text-red-400"
+                    disabled={saving}
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -398,87 +423,257 @@ export default function Guests() {
         </table>
       </div>
 
-      {/* Modal d'ajout/modification d'invité individuel */}
-      {(isAddingIndividualGuest || editingIndividualGuest) && (
+      {/* Modal Ajout/Édition Groupe */}
+      {isAddingGuest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              {isAddingIndividualGuest ? 'Ajouter un invité' : 'Modifier l\'invité'}
+              {editingGuest ? 'Modifier le groupe' : 'Ajouter un groupe'}
             </h3>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Prénom
-                </label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  required
-                />
+            
+            <form onSubmit={handleGroupSubmit} noValidate>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Nom du groupe
+                  </label>
+                  <input
+                    type="text"
+                    value={newGuest.name}
+                    onChange={(e) => setNewGuest({ ...newGuest, name: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      groupErrors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    placeholder="Ex: Famille Martin"
+                  />
+                  {groupErrors.name && (
+                    <p className="text-red-500 text-sm mt-1">{groupErrors.name}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Type
+                  </label>
+                  <select
+                    value={newGuest.type}
+                    onChange={(e) => setNewGuest({ ...newGuest, type: e.target.value as any })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      groupErrors.type ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    {guestTypes.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.name}
+                      </option>
+                    ))}
+                  </select>
+                  {groupErrors.type && (
+                    <p className="text-red-500 text-sm mt-1">{groupErrors.type}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Nombre d'invités
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={newGuest.count}
+                    onChange={(e) => setNewGuest({ ...newGuest, count: parseInt(e.target.value) || 1 })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      groupErrors.count ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                  />
+                  {groupErrors.count && (
+                    <p className="text-red-500 text-sm mt-1">{groupErrors.count}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Notes
+                  </label>
+                  <textarea
+                    value={newGuest.notes}
+                    onChange={(e) => setNewGuest({ ...newGuest, notes: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    rows={3}
+                    placeholder="Notes optionnelles..."
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="confirmed"
+                    checked={newGuest.confirmed}
+                    onChange={(e) => setNewGuest({ ...newGuest, confirmed: e.target.checked })}
+                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="confirmed" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                    Groupe confirmé
+                  </label>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Nom
-                </label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Groupe
-                </label>
-                <select
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  required
-                >
-                  <option value="">Sélectionner un groupe</option>
-                  {guests.map(group => (
-                    <option key={group.id} value={group.id}>{group.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Statut
-                </label>
-                <select
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  required
-                >
-                  <option value="pending">En attente</option>
-                  <option value="confirmed">Confirmé</option>
-                  <option value="declined">Refusé</option>
-                </select>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
+
+              <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
                   onClick={() => {
-                    setIsAddingIndividualGuest(false)
-                    setEditingIndividualGuest(null)
+                    setIsAddingGuest(false)
+                    resetGroupForm()
+                    setEditingGuest(null)
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                  disabled={saving}
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md"
+                  className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50"
+                  disabled={saving}
                 >
-                  {isAddingIndividualGuest ? 'Ajouter' : 'Mettre à jour'}
+                  {saving ? 'Sauvegarde...' : (editingGuest ? 'Modifier' : 'Ajouter')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ajout/Édition Invité Individuel */}
+      {isAddingIndividualGuest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              {editingIndividualGuest ? 'Modifier l\'invité' : 'Ajouter un invité'}
+            </h3>
+            
+            <form onSubmit={handleIndividualSubmit} noValidate>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Prénom
+                  </label>
+                  <input
+                    type="text"
+                    value={newIndividualGuest.firstName}
+                    onChange={(e) => setNewIndividualGuest({ ...newIndividualGuest, firstName: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      individualErrors.firstName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    placeholder="Prénom"
+                  />
+                  {individualErrors.firstName && (
+                    <p className="text-red-500 text-sm mt-1">{individualErrors.firstName}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Nom
+                  </label>
+                  <input
+                    type="text"
+                    value={newIndividualGuest.lastName}
+                    onChange={(e) => setNewIndividualGuest({ ...newIndividualGuest, lastName: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      individualErrors.lastName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    placeholder="Nom"
+                  />
+                  {individualErrors.lastName && (
+                    <p className="text-red-500 text-sm mt-1">{individualErrors.lastName}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={newIndividualGuest.email}
+                    onChange={(e) => setNewIndividualGuest({ ...newIndividualGuest, email: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      individualErrors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    placeholder="email@exemple.com"
+                  />
+                  {individualErrors.email && (
+                    <p className="text-red-500 text-sm mt-1">{individualErrors.email}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Groupe
+                  </label>
+                  <select
+                    value={newIndividualGuest.groupId}
+                    onChange={(e) => setNewIndividualGuest({ ...newIndividualGuest, groupId: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      individualErrors.groupId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    <option value="">Sélectionner un groupe</option>
+                    {guestGroups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                  </select>
+                  {individualErrors.groupId && (
+                    <p className="text-red-500 text-sm mt-1">{individualErrors.groupId}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Statut
+                  </label>
+                  <select
+                    value={newIndividualGuest.status}
+                    onChange={(e) => setNewIndividualGuest({ ...newIndividualGuest, status: e.target.value as any })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                      individualErrors.status ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    {statusOptions.map((status) => (
+                      <option key={status.id} value={status.id}>
+                        {status.name}
+                      </option>
+                    ))}
+                  </select>
+                  {individualErrors.status && (
+                    <p className="text-red-500 text-sm mt-1">{individualErrors.status}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddingIndividualGuest(false)
+                    resetIndividualForm()
+                    setEditingIndividualGuest(null)
+                  }}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                  disabled={saving}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50"
+                  disabled={saving}
+                >
+                  {saving ? 'Sauvegarde...' : (editingIndividualGuest ? 'Modifier' : 'Ajouter')}
                 </button>
               </div>
             </form>
