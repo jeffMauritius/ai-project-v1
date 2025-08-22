@@ -10,7 +10,8 @@ import {
   PhotoIcon,
   UsersIcon, 
   CalendarDaysIcon,
-  GiftIcon
+  GiftIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -18,6 +19,7 @@ const navigation = [
   { name: 'Organisation', href: '/dashboard/planning', icon: CalendarDaysIcon },
   { name: 'Liste & Cagnotte', href: '/dashboard/registry', icon: GiftIcon },
   { name: 'Historique des recherches', href: '/dashboard/search-history', icon: ClockIcon },
+  { name: 'Mes favoris', href: '/dashboard/favorites', icon: HeartIcon },
   { name: 'Messages', href: '/dashboard/messages', icon: ChatBubbleLeftRightIcon },
   { name: 'Invités', href: '/dashboard/guests', icon: UsersIcon },
   { name: 'Plan de table', href: '/dashboard/seating', icon: TableCellsIcon },

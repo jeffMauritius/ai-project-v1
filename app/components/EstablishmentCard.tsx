@@ -8,7 +8,7 @@ import Link from "next/link";
 import type { Establishment } from "../types/establishment";
 import { useGallery } from "@/components/ui/GlobalImageGallery";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface EstablishmentCardProps {
   establishment: Establishment;
@@ -16,7 +16,6 @@ interface EstablishmentCardProps {
 
 export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
   const { openGallery } = useGallery();
-  const [favoriteUrl, setFavoriteUrl] = useState<string>('');
   
   const {
     id,
@@ -33,19 +32,19 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
 
   const allImages = [imageUrl, ...images];
 
-  useEffect(() => {
-    // Set the URL only on client side
-    setFavoriteUrl(`${window.location.origin}/establishments/${id}`);
-  }, [id]);
-
   return (
     <Card className="w-full overflow-hidden group">
       <div className="relative h-[200px] w-full">
         {/* Favorite Button - Outside the Link */}
         <div className="absolute right-2 top-2 z-10">
           <FavoriteButton
-            url={favoriteUrl}
-            title={`${name} - ${location}`}
+            storefrontId={id}
+            name={name}
+            location={location}
+            rating={rating}
+            numberOfReviews={numberOfReviews}
+            description={description}
+            imageUrl={imageUrl}
             className="rounded-full bg-white/80 hover:bg-white/90"
             size="icon"
           />

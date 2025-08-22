@@ -212,8 +212,12 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
             {/* Boutons sous le carrousel */}
             <div className="mt-4 flex items-center gap-4">
               <FavoriteButton
-                url={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/storefront/${storefront.id}`}
-                title={`${companyName} - ${venueAddress}`}
+                storefrontId={storefront.id}
+                name={companyName}
+                location={venueAddress}
+                rating={rating}
+                numberOfReviews={12}
+                description={description}
                 showText={true}
                 className="bg-pink-600 text-white hover:bg-pink-700"
               />
