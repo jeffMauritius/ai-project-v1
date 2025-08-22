@@ -305,6 +305,7 @@ model User {
   billingInfo   BillingInfo?
   subscriptions Subscription[]
   favorites     Favorite[]
+  searchHistory SearchHistory[]
 
   @@map("users")
 }
@@ -481,4 +482,23 @@ model QuoteRequest {
   storefront    PartnerStorefront  @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
 
   @@map("quote_requests")
+}
+
+// ===== MODÈLE SEARCH HISTORY (HISTORIQUE DES RECHERCHES) =====
+model SearchHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  
+  // Informations de la recherche
+  query     String   // Requête de recherche (ex: "Château avec jardin près de Paris")
+  type      String   // Type de recherche: "LIEU", "PRESTATAIRE", etc.
+  
+  // Résultats de la recherche
+  results   Json     // Array des résultats trouvés avec leurs statuts
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("search_history")
 }

@@ -84,6 +84,23 @@ export function FavoriteButton({
         if (response.ok) {
           setIsFavorite(false);
           showNotification('Retiré des favoris !', false);
+          
+          // Mettre à jour l'historique des recherches
+          try {
+            await fetch('/api/search-history/update-status', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                storefrontId,
+                name,
+                action: 'remove'
+              }),
+            });
+          } catch (error) {
+            console.error('Erreur lors de la mise à jour de l\'historique:', error);
+          }
         } else {
           console.error('Erreur lors de la suppression du favori');
         }
@@ -108,6 +125,23 @@ export function FavoriteButton({
         if (response.ok) {
           setIsFavorite(true);
           showNotification('Ajouté aux favoris !', true);
+          
+          // Mettre à jour l'historique des recherches
+          try {
+            await fetch('/api/search-history/update-status', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                storefrontId,
+                name,
+                action: 'add'
+              }),
+            });
+          } catch (error) {
+            console.error('Erreur lors de la mise à jour de l\'historique:', error);
+          }
         } else if (response.status === 409) {
           showNotification('Déjà dans vos favoris !', true);
           setIsFavorite(true);

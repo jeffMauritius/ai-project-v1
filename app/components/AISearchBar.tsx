@@ -90,6 +90,28 @@ export default function AISearchBar() {
           } : 'Aucun résultat'
         })
         
+        // Sauvegarder la recherche dans l'historique
+        try {
+          await fetch('/api/search-history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: searchQuery,
+              type: data.criteria?.type || 'PRESTATAIRE',
+              results: data.results?.slice(0, 5).map((result: any) => ({
+                name: result.companyName || result.name || 'Résultat',
+                status: 'Consulté',
+                storefrontId: result.id || result.storefrontId || null
+              })) || []
+            }),
+          })
+        } catch (error) {
+          console.error('Erreur lors de la sauvegarde de l\'historique:', error)
+          // Ne pas bloquer la recherche si la sauvegarde échoue
+        }
+        
         // Stocker les résultats dans sessionStorage au lieu de les passer dans l'URL
         sessionStorage.setItem('searchResults', JSON.stringify(data.results))
         sessionStorage.setItem('searchCriteria', JSON.stringify(data.criteria))
