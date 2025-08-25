@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, PencilIcon, TrashIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, PencilIcon, TrashIcon, UserPlusIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { z } from 'zod'
 import { useGuests, type GuestGroup, type Guest } from '@/hooks/useGuests'
 
@@ -82,6 +82,26 @@ export default function Guests() {
   const [editingGuest, setEditingGuest] = useState<GuestGroup | null>(null)
   const [isAddingIndividualGuest, setIsAddingIndividualGuest] = useState(false)
   const [editingIndividualGuest, setEditingIndividualGuest] = useState<Guest | null>(null)
+
+  // États pour la modal de confirmation de suppression
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    type: 'group' | 'individual'
+    item: GuestGroup | Guest | null
+    title: string
+    message: string
+    canDelete: boolean
+  }>({
+    isOpen: false,
+    type: 'group',
+    item: null,
+    title: '',
+    message: '',
+    canDelete: true
+  })
+
+  // États pour les animations de suppression
+  const [deletingItems, setDeletingItems] = useState<Set<string>>(new Set())
 
   // Fonction pour réinitialiser le formulaire de groupe
   const resetGroupForm = () => {
@@ -192,17 +212,105 @@ export default function Guests() {
   }
 
   // Fonction pour supprimer un groupe
-  const handleDeleteGroup = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce groupe ?')) {
-      await deleteGuestGroup(id)
+  const handleDeleteGroup = async (group: GuestGroup) => {
+    // Vérifier s'il y a des invités dans ce groupe
+    const guestsInGroup = individualGuests.filter(guest => guest.groupId === group.id)
+    
+    if (guestsInGroup.length > 0) {
+      // Empêcher la suppression et informer l'utilisateur
+      const guestList = guestsInGroup.map(guest => `${guest.firstName} ${guest.lastName}`).join(', ')
+      setDeleteModal({
+        isOpen: true,
+        type: 'group',
+        item: group,
+        title: 'Impossible de supprimer le groupe',
+        message: `Le groupe "${group.name}" contient ${guestsInGroup.length} invité(s) : ${guestList}. Veuillez d'abord supprimer tous les invités de ce groupe avant de pouvoir supprimer le groupe.`,
+        canDelete: false
+      })
+    } else {
+      // Permettre la suppression si aucun invité
+      setDeleteModal({
+        isOpen: true,
+        type: 'group',
+        item: group,
+        title: 'Supprimer le groupe',
+        message: `Êtes-vous sûr de vouloir supprimer le groupe "${group.name}" ?`,
+        canDelete: true
+      })
     }
   }
 
   // Fonction pour supprimer un invité individuel
-  const handleDeleteIndividual = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet invité ?')) {
-      await deleteIndividualGuest(id)
+  const handleDeleteIndividual = async (guest: Guest) => {
+    setDeleteModal({
+      isOpen: true,
+      type: 'individual',
+      item: guest,
+      title: 'Supprimer l\'invité',
+      message: `Êtes-vous sûr de vouloir supprimer ${guest.firstName} ${guest.lastName} ?`,
+      canDelete: true
+    })
+  }
+
+  // Fonction pour confirmer la suppression
+  const confirmDelete = async () => {
+    if (!deleteModal.item) return
+
+    // Si c'est un groupe qui contient des invités, on ne fait rien (juste fermer la modal)
+    if (deleteModal.type === 'group') {
+      const guestsInGroup = individualGuests.filter(guest => guest.groupId === deleteModal.item!.id)
+      if (guestsInGroup.length > 0) {
+        setDeleteModal({ isOpen: false, type: 'group', item: null, title: '', message: '', canDelete: true })
+        return
+      }
     }
+
+    try {
+      // Ajouter l'élément à la liste des éléments en cours de suppression
+      setDeletingItems(prev => new Set(prev).add(deleteModal.item!.id))
+      
+      let success = false
+      
+      if (deleteModal.type === 'group') {
+        const result = await deleteGuestGroup(deleteModal.item.id)
+        success = Boolean(result)
+      } else {
+        const result = await deleteIndividualGuest(deleteModal.item.id)
+        success = Boolean(result)
+      }
+
+      if (success) {
+        setDeleteModal({ isOpen: false, type: 'group', item: null, title: '', message: '', canDelete: true })
+        // Retirer l'élément de la liste après un délai pour l'animation
+        setTimeout(() => {
+          setDeletingItems(prev => {
+            const newSet = new Set(prev)
+            newSet.delete(deleteModal.item!.id)
+            return newSet
+          })
+        }, 300)
+      } else {
+        // En cas d'échec, retirer immédiatement de la liste
+        setDeletingItems(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(deleteModal.item!.id)
+          return newSet
+        })
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error)
+      // En cas d'erreur, retirer immédiatement de la liste
+      setDeletingItems(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(deleteModal.item!.id)
+        return newSet
+      })
+    }
+  }
+
+  // Fonction pour annuler la suppression
+  const cancelDelete = () => {
+    setDeleteModal({ isOpen: false, type: 'group', item: null, title: '', message: '', canDelete: true })
   }
 
   // Fonction pour obtenir le nom du groupe
@@ -309,7 +417,14 @@ export default function Guests() {
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {guestGroups.map((guest) => (
-              <tr key={guest.id}>
+              <tr 
+                key={guest.id}
+                className={`transition-all duration-300 ${
+                  deletingItems.has(guest.id) 
+                    ? 'opacity-0 scale-95 -translate-x-4 bg-red-50 dark:bg-red-900/10' 
+                    : 'opacity-100 scale-100 translate-x-0'
+                }`}
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                   {guest.name}
                 </td>
@@ -334,15 +449,17 @@ export default function Guests() {
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleEditGroup(guest)}
-                    className="text-pink-600 hover:text-pink-900 dark:hover:text-pink-400 mr-3"
+                    className="text-pink-600 hover:text-pink-900 dark:hover:text-pink-400 mr-3 p-2 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all duration-200 hover:scale-110 transform"
                     disabled={saving}
+                    title="Modifier le groupe"
                   >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => handleDeleteGroup(guest.id)}
-                    className="text-red-600 hover:text-red-900 dark:hover:text-red-400"
+                    onClick={() => handleDeleteGroup(guest)}
+                    className="text-red-600 hover:text-red-900 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 hover:scale-110 transform"
                     disabled={saving}
+                    title="Supprimer le groupe"
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -380,7 +497,14 @@ export default function Guests() {
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {individualGuests.map((guest) => (
-              <tr key={guest.id}>
+              <tr 
+                key={guest.id}
+                className={`transition-all duration-300 ${
+                  deletingItems.has(guest.id) 
+                    ? 'opacity-0 scale-95 -translate-x-4 bg-red-50 dark:bg-red-900/10' 
+                    : 'opacity-100 scale-100 translate-x-0'
+                }`}
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                   {guest.firstName} {guest.lastName}
                 </td>
@@ -404,15 +528,17 @@ export default function Guests() {
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleEditIndividual(guest)}
-                    className="text-pink-600 hover:text-pink-900 dark:hover:text-pink-400 mr-3"
+                    className="text-pink-600 hover:text-pink-900 dark:hover:text-pink-400 mr-3 p-2 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all duration-200 hover:scale-110 transform"
                     disabled={saving}
+                    title="Modifier l'invité"
                   >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => handleDeleteIndividual(guest.id)}
-                    className="text-red-600 hover:text-red-900 dark:hover:text-red-400"
+                    onClick={() => handleDeleteIndividual(guest)}
+                    className="text-red-600 hover:text-red-900 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 hover:scale-110 transform"
                     disabled={saving}
+                    title="Supprimer l'invité"
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -677,6 +803,62 @@ export default function Guests() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmation de Suppression */}
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-full max-w-md mx-4 transform animate-in zoom-in-95 duration-200">
+            <div className="flex justify-center items-center mb-6">
+              <div className="relative">
+                <div className={`absolute inset-0 rounded-full animate-ping ${
+                  deleteModal.canDelete 
+                    ? 'bg-red-100 dark:bg-red-900/20' 
+                    : 'bg-yellow-100 dark:bg-yellow-900/20'
+                }`}></div>
+                <ExclamationTriangleIcon className={`h-16 w-16 relative z-10 ${
+                  deleteModal.canDelete 
+                    ? 'text-red-500' 
+                    : 'text-yellow-500'
+                }`} />
+              </div>
+            </div>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                {deleteModal.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                {deleteModal.message}
+              </p>
+            </div>
+            
+                        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+              <button
+                onClick={cancelDelete}
+                className="px-6 py-3 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-md"
+              >
+                {deleteModal.canDelete ? 'Annuler' : 'Compris'}
+              </button>
+              {deleteModal.canDelete && (
+                <button
+                  onClick={confirmDelete}
+                  disabled={saving}
+                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-all duration-200 hover:shadow-md hover:scale-105 transform flex items-center gap-2"
+                >
+                  {saving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Suppression...
+                    </>
+                  ) : (
+                    'Supprimer'
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
