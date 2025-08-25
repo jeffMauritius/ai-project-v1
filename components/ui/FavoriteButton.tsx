@@ -85,9 +85,10 @@ export function FavoriteButton({
           setIsFavorite(false);
           showNotification('Retiré des favoris !', false);
           
-          // Mettre à jour l'historique des recherches
+          // Mettre à jour le statut de la vitrine consultée
           try {
-            await fetch('/api/search-history/update-status', {
+            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: remove, storefrontId:', storefrontId)
+            const response = await fetch('/api/consulted-storefronts/update-status', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -98,8 +99,9 @@ export function FavoriteButton({
                 action: 'remove'
               }),
             });
+            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', response.status, response.ok)
           } catch (error) {
-            console.error('Erreur lors de la mise à jour de l\'historique:', error);
+            console.error('Erreur lors de la mise à jour du statut:', error);
           }
         } else {
           console.error('Erreur lors de la suppression du favori');
@@ -126,9 +128,10 @@ export function FavoriteButton({
           setIsFavorite(true);
           showNotification('Ajouté aux favoris !', true);
           
-          // Mettre à jour l'historique des recherches
+          // Mettre à jour le statut de la vitrine consultée
           try {
-            await fetch('/api/search-history/update-status', {
+            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: add, storefrontId:', storefrontId)
+            const response = await fetch('/api/consulted-storefronts/update-status', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -139,8 +142,9 @@ export function FavoriteButton({
                 action: 'add'
               }),
             });
+            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', response.status, response.ok)
           } catch (error) {
-            console.error('Erreur lors de la mise à jour de l\'historique:', error);
+            console.error('Erreur lors de la mise à jour du statut:', error);
           }
         } else if (response.status === 409) {
           showNotification('Déjà dans vos favoris !', true);

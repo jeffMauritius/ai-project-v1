@@ -161,7 +161,7 @@ export default function Results() {
     return `À partir de ${price.toLocaleString('fr-FR')}€`
   }
 
-  const handleViewDetails = (result: SearchResult) => {
+  const handleViewDetails = async (result: SearchResult) => {
     console.log('🔍 Redirection vers storefront:', {
       id: result.id,
       name: result.name || result.companyName,
@@ -174,6 +174,25 @@ export default function Results() {
       console.error('❌ ID invalide pour la redirection:', result.id)
       alert('Erreur: ID invalide pour ce prestataire')
       return
+    }
+    
+    // Marquer la vitrine comme consultée
+    try {
+      await fetch('/api/consulted-storefronts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          storefrontId: result.id,
+          name: result.name || result.companyName || 'Prestataire',
+          type: result.type || 'PARTNER',
+          serviceType: result.serviceType
+        }),
+      })
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la consultation:', error)
+      // Ne pas bloquer la redirection si la sauvegarde échoue
     }
     
     // Rediriger tous les prestataires vers leur vitrine

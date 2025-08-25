@@ -11,6 +11,7 @@ interface SearchResultStatusProps {
 export function SearchResultStatus({ status, className }: SearchResultStatusProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
+      case 'SAVED':
       case 'Sauvegardé':
         return {
           icon: Heart,
@@ -18,12 +19,21 @@ export function SearchResultStatus({ status, className }: SearchResultStatusProp
           bgColor: 'bg-green-50 dark:bg-green-900/20',
           label: 'Sauvegardé'
         }
+      case 'CONTACTED':
       case 'Contacté':
         return {
           icon: CheckCircle,
           color: 'text-blue-600 dark:text-blue-400',
           bgColor: 'bg-blue-50 dark:bg-blue-900/20',
           label: 'Contacté'
+        }
+      case 'CONSULTED':
+      case 'Consulté':
+        return {
+          icon: Eye,
+          color: 'text-gray-600 dark:text-gray-400',
+          bgColor: 'bg-gray-50 dark:bg-gray-900/20',
+          label: 'Consulté'
         }
       case 'Rendez-vous prévu':
         return {
