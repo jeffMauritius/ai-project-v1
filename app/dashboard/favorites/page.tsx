@@ -51,7 +51,7 @@ export default function Favorites() {
     }
   }
 
-  const handleRemoveFavorite = async (storefrontId: string) => {
+  const handleRemoveFavorite = async (storefrontId: string, name: string) => {
     try {
       const response = await fetch(`/api/favorites?storefrontId=${storefrontId}`, {
         method: 'DELETE',
@@ -60,6 +60,25 @@ export default function Favorites() {
       if (response.ok) {
         // Mettre à jour la liste locale
         setFavorites(prev => prev.filter(fav => fav.storefrontId !== storefrontId))
+        
+        // Mettre à jour le statut de la vitrine consultée
+        try {
+          console.log('[FAVORITES_PAGE] Mise à jour du statut - action: remove, storefrontId:', storefrontId)
+          const statusResponse = await fetch('/api/consulted-storefronts/update-status', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              storefrontId,
+              name,
+              action: 'remove'
+            }),
+          });
+          console.log('[FAVORITES_PAGE] Réponse mise à jour statut:', statusResponse.status, statusResponse.ok)
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour du statut:', error);
+        }
       } else {
         console.error('Erreur lors de la suppression du favori')
       }
@@ -122,15 +141,24 @@ export default function Favorites() {
               onClick={() => handleViewDetails(favorite.storefrontId)}
             >
               <div className="relative h-48 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20">
-                {/* Image ou placeholder */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <HeartIcon className="h-12 w-12 text-pink-300 dark:text-pink-600 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {favorite.name}
-                    </p>
+                {/* Image de la vitrine */}
+                {favorite.imageUrl && favorite.imageUrl !== '/placeholder-venue.jpg' ? (
+                  <img
+                    src={favorite.imageUrl}
+                    alt={favorite.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  /* Placeholder joli avec bannière rose */
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20 flex items-center justify-center">
+                    <div className="text-center">
+                      <HeartIcon className="h-12 w-12 text-pink-300 dark:text-pink-600 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        {favorite.name}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {/* Badge "Favori" */}
                 <div className="absolute top-2 left-2">
@@ -147,7 +175,7 @@ export default function Favorites() {
                   className="absolute top-2 right-2 bg-white/80 hover:bg-white/90 text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleRemoveFavorite(favorite.storefrontId)
+                    handleRemoveFavorite(favorite.storefrontId, favorite.name)
                   }}
                 >
                   <TrashIcon className="h-4 w-4" />

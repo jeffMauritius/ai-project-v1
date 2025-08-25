@@ -21,7 +21,35 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(favorites)
+    // Enrichir les favoris avec les images des storefronts
+    const enrichedFavorites = await Promise.all(
+      favorites.map(async (favorite) => {
+        try {
+          const storefront = await prisma.partnerStorefront.findUnique({
+            where: { id: favorite.storefrontId },
+            include: {
+              media: {
+                take: 1,
+                orderBy: { order: 'asc' }
+              }
+            }
+          })
+
+          return {
+            ...favorite,
+            imageUrl: storefront?.media[0]?.url || favorite.imageUrl || '/placeholder-venue.jpg'
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la récupération du storefront ${favorite.storefrontId}:`, error)
+          return {
+            ...favorite,
+            imageUrl: favorite.imageUrl || '/placeholder-venue.jpg'
+          }
+        }
+      })
+    )
+
+    return NextResponse.json(enrichedFavorites)
   } catch (error) {
     console.error("[FAVORITES_GET] Erreur:", error)
     return new NextResponse("Erreur interne", { status: 500 })
