@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/components/ui/use-toast"
+import { loginSchema, type LoginFormData } from '@/lib/validation-schemas'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
 
 export default function Login() {
   const router = useRouter()
@@ -18,6 +21,19 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+  })
+
+  const rememberMe = watch('remember')
+
   useEffect(() => {
     if (session?.user) {
       const callbackUrl = searchParams.get('callbackUrl') || 
@@ -26,19 +42,14 @@ export default function Login() {
     }
   }, [session, router, searchParams])
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-
     try {
       const result = await signIn('credentials', {
-        email,
-        password,
+        email: data.email,
+        password: data.password,
         redirect: false,
       })
 
@@ -68,19 +79,23 @@ export default function Login() {
   return (
     <div className="sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div>
             <Label htmlFor="email">Adresse email</Label>
             <div className="mt-1">
               <Input
                 id="email"
-                name="email"
-                type="email"
+                type="text"
                 autoComplete="email"
-                required
-                className="block w-full"
+                className={`block w-full ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                {...register('email')}
               />
             </div>
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -88,18 +103,26 @@ export default function Login() {
             <div className="mt-1">
               <Input
                 id="password"
-                name="password"
                 type="password"
                 autoComplete="current-password"
-                required
-                className="block w-full"
+                className={`block w-full ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                {...register('password')}
               />
             </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Checkbox id="remember" name="remember" />
+              <Checkbox 
+                id="remember" 
+                checked={rememberMe}
+                onCheckedChange={(checked) => setValue('remember', checked as boolean)}
+              />
               <Label htmlFor="remember" className="ml-2">
                 Se souvenir de moi
               </Label>
@@ -129,8 +152,6 @@ export default function Login() {
             </Button>
           </div>
         </form>
-
-
 
         <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
           Pas encore de compte ?{' '}
