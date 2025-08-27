@@ -50,8 +50,13 @@ export default function EstablishmentPage() {
         <div className="relative h-[400px] w-full">
           <div className="absolute right-4 top-4 z-10">
             <FavoriteButton
-              url={`${typeof window !== 'undefined' ? window.location.href : ''}`}
-              title={`${establishment.name} - ${establishment.location}`}
+              storefrontId={establishment.id}
+              name={establishment.name}
+              location={establishment.location}
+              rating={establishment.rating}
+              numberOfReviews={establishment.numberOfReviews}
+              description={establishment.description}
+              imageUrl={establishment.imageUrl}
               className="rounded-full bg-white/80 hover:bg-white/90"
               size="icon"
             />

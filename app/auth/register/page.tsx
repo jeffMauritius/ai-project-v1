@@ -18,6 +18,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useState, useEffect } from 'react'
+import { 
+  registerCoupleSchema, 
+  registerPartnerSchema, 
+  type RegisterCoupleFormData, 
+  type RegisterPartnerFormData 
+} from '@/lib/validation-schemas'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
 
 const partnerTypes = [
   { id: 'venue', name: 'Lieu de réception' },
@@ -42,38 +50,53 @@ export default function Register() {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const router = useRouter()
   
+  // Form pour couple
+  const coupleForm = useForm<RegisterCoupleFormData>({
+    resolver: zodResolver(registerCoupleSchema),
+    mode: 'onChange',
+  })
+
+  // Form pour partenaire
+  const partnerForm = useForm<RegisterPartnerFormData>({
+    resolver: zodResolver(registerPartnerSchema),
+    mode: 'onChange',
+  })
+
+  // Utiliser le bon formulaire selon le type de compte
+  const form = accountType === 'couple' ? coupleForm : partnerForm
+  const errors = form.formState.errors
+  
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Réinitialiser les formulaires quand on change de type de compte
+  useEffect(() => {
+    form.reset()
+    setError(null)
+  }, [accountType, form])
 
   if (!mounted) {
     return null
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  async function onSubmit(data: RegisterCoupleFormData | RegisterPartnerFormData) {
     setIsLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-    const name = formData.get('name') as string
-    const partnerType = formData.get('partner-type') as string
-    const siret = formData.get('siret') as string
-    
     try {
       const requestBody: any = {
-        email,
-        password,
-        name,
+        email: data.email,
+        password: data.password,
+        name: data.name,
         role: accountType === 'partner' ? 'PARTNER' : 'USER'
       }
 
       // Ajouter les données spécifiques aux partenaires
       if (accountType === 'partner') {
-        requestBody.partnerType = partnerType
-        requestBody.siret = siret
+        const partnerData = data as RegisterPartnerFormData
+        requestBody.partnerType = partnerData.partnerType
+        requestBody.siret = partnerData.siret
       }
 
       const response = await fetch('/api/register', {
@@ -84,10 +107,10 @@ export default function Register() {
         body: JSON.stringify(requestBody)
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Une erreur est survenue')
+        throw new Error(responseData.error || 'Une erreur est survenue')
       }
 
       router.push('/auth/login')
@@ -144,38 +167,48 @@ export default function Register() {
           </button>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
               {error}
             </div>
           )}
+          
           <div>
             <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">
               Nom complet
             </Label>
             <Input
               id="name"
-              name="name"
               type="text"
-              required
-              className="mt-1"
+              className={`mt-1 ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
               placeholder="John Doe"
+              {...(accountType === 'couple' ? coupleForm.register('name') : partnerForm.register('name'))}
             />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.name.message}
+              </p>
+            )}
           </div>
+          
           <div>
             <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
               Adresse email
             </Label>
             <Input
               id="email"
-              name="email"
-              type="email"
+              type="text"
               autoComplete="email"
-              required
-              className="mt-1"
+              className={`mt-1 ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
               placeholder="vous@exemple.fr"
+              {...(accountType === 'couple' ? coupleForm.register('email') : partnerForm.register('email'))}
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           {accountType === 'partner' && (
@@ -184,8 +217,11 @@ export default function Register() {
                 <Label htmlFor="partner-type" className="text-gray-700 dark:text-gray-300">
                   Type de prestation
                 </Label>
-                <Select name="partner-type" required>
-                  <SelectTrigger className="mt-1">
+                <Select 
+                  onValueChange={(value) => partnerForm.setValue('partnerType', value)}
+                  value={partnerForm.watch('partnerType')}
+                >
+                  <SelectTrigger className={`mt-1 ${errors.partnerType ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}>
                     <SelectValue placeholder="Sélectionnez votre activité" />
                   </SelectTrigger>
                   <SelectContent>
@@ -194,6 +230,11 @@ export default function Register() {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.partnerType && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.partnerType.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -202,14 +243,17 @@ export default function Register() {
                 </Label>
                 <Input
                   id="siret"
-                  name="siret"
                   type="text"
-                  required
-                  pattern="[0-9]{14}"
-                  className="mt-1"
+                  className={`mt-1 ${errors.siret ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="12345678901234"
+                  {...partnerForm.register('siret')}
                 />
                 <p className="mt-1 text-xs text-gray-500">Format : 14 chiffres sans espaces</p>
+                {errors.siret && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.siret.message}
+                  </p>
+                )}
               </div>
             </>
           )}
@@ -220,13 +264,17 @@ export default function Register() {
             </Label>
             <Input
               id="password"
-              name="password"
               type="password"
               autoComplete="new-password"
-              required
-              className="mt-1"
+              className={`mt-1 ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
               placeholder="••••••••"
+              {...(accountType === 'couple' ? coupleForm.register('password') : partnerForm.register('password'))}
             />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -235,20 +283,30 @@ export default function Register() {
             </Label>
             <Input
               id="password-confirmation"
-              name="password-confirmation"
               type="password"
               autoComplete="new-password"
-              required
-              className="mt-1"
+              className={`mt-1 ${errors.passwordConfirmation ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
               placeholder="••••••••"
+              {...(accountType === 'couple' ? coupleForm.register('passwordConfirmation') : partnerForm.register('passwordConfirmation'))}
             />
+            {errors.passwordConfirmation && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.passwordConfirmation.message}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center">
             <Checkbox
               id="terms"
-              name="terms"
-              required
+              checked={accountType === 'couple' ? coupleForm.watch('terms') : partnerForm.watch('terms')}
+              onCheckedChange={(checked) => {
+                if (accountType === 'couple') {
+                  coupleForm.setValue('terms', checked as boolean)
+                } else {
+                  partnerForm.setValue('terms', checked as boolean)
+                }
+              }}
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
               J&apos;accepte les{' '}
@@ -261,6 +319,11 @@ export default function Register() {
               </button>
             </label>
           </div>
+          {errors.terms && (
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {errors.terms.message}
+            </p>
+          )}
 
           <div>
             <button

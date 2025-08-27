@@ -212,6 +212,7 @@ model PartnerStorefront {
   // Relations
   media           Media[]
   quoteRequests   QuoteRequest[]
+  favorites       Favorite[]
   
   @@map("partner_storefronts")
 }
@@ -303,6 +304,12 @@ model User {
   profile       Profile?
   billingInfo   BillingInfo?
   subscriptions Subscription[]
+  favorites     Favorite[]
+  searchHistory SearchHistory[]
+  consultedStorefronts ConsultedStorefront[] // Vitrines consultées par l'utilisateur
+  guestGroups   GuestGroup[] // Groupes d'invités créés par l'utilisateur
+  guests        Guest[] // Invités individuels associés à l'utilisateur
+  tables        Table[] // Tables du plan de table créées par l'utilisateur
 
   @@map("users")
 }
@@ -360,6 +367,31 @@ model SubscriptionPlan {
   subscriptions Subscription[]
 
   @@map("subscription_plans")
+}
+
+// ===== MODÈLE FAVORITE =====
+model Favorite {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Relations
+  userId    String @db.ObjectId
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  storefrontId String @db.ObjectId
+  storefront   PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
+  
+  // Métadonnées du favori
+  name      String
+  location  String
+  rating    Float
+  numberOfReviews Int
+  description String
+  imageUrl  String?
+  
+  @@unique([userId, storefrontId])
+  @@map("favorites")
 }
 
 model BillingInfo {
@@ -454,4 +486,105 @@ model QuoteRequest {
   storefront    PartnerStorefront  @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
 
   @@map("quote_requests")
+}
+
+// ===== MODÈLE SEARCH HISTORY (HISTORIQUE DES RECHERCHES) =====
+model SearchHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  
+  // Informations de la recherche
+  query     String   // Requête de recherche (ex: "Château avec jardin près de Paris")
+  type      String   // Type de recherche: "LIEU", "PRESTATAIRE", etc.
+  
+  // Résultats de la recherche
+  results   Json     // Array des résultats trouvés avec leurs statuts
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("search_history")
+}
+
+// ===== MODÈLE CONSULTED STOREFRONT (VITRINES CONSULTÉES) =====
+model ConsultedStorefront {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations de la vitrine
+  storefrontId String   // ID de la vitrine consultée
+  name         String   // Nom de la vitrine
+  type         String   // Type: "VENUE", "PARTNER"
+  serviceType  String?  // Type de service (pour les partenaires)
+  
+  // Statut de consultation
+  status       String   @default("CONSULTED") // "CONSULTED", "SAVED", "CONTACTED"
+  
+  // Relations
+  userId       String   @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("consulted_storefronts")
+}
+
+// ===== MODÈLE GUEST GROUP (GROUPES D'INVITÉS) =====
+model GuestGroup {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations du groupe
+  name      String   // Nom du groupe (ex: "Famille Martin")
+  type      String   // Type: "family", "friends", "colleagues", "other"
+  count     Int      // Nombre d'invités dans le groupe
+  confirmed Boolean  @default(false) // Groupe confirmé ou non
+  notes     String   @default("") // Notes optionnelles
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guests    Guest[]  // Invités individuels dans ce groupe
+  
+  @@map("guest_groups")
+}
+
+// ===== MODÈLE GUEST (INVITÉS INDIVIDUELS) =====
+model Guest {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations personnelles
+  firstName String   // Prénom
+  lastName  String   // Nom
+  email     String   // Email
+  status    String   // Status: "pending", "confirmed", "declined"
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId   String   @db.ObjectId
+  group     GuestGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@map("guests")
+}
+
+// ===== MODÈLE TABLE (TABLES DU PLAN DE TABLE) =====
+model Table {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations de la table
+  name      String   // Nom de la table (ex: "Table des mariés")
+  seats     Int      // Nombre de places à la table
+  guests    String[] // Liste des noms des invités assignés à cette table
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("tables")
 }

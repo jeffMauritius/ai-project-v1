@@ -2,26 +2,41 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validation-schemas';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    mode: 'onChange',
+  });
+
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     setError("");
     setNotFound(false);
     setSubmitted(false);
+    
     try {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: data.email }),
       });
-      const data = await res.json();
-      if (data.exists) {
+      const responseData = await res.json();
+      
+      if (responseData.exists) {
         setSubmitted(true);
       } else {
         setNotFound(true);
@@ -52,29 +67,32 @@ export default function ForgotPassword() {
             </Link>
           </div>
         ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Adresse email
-              </label>
-              <input
+              </Label>
+              <Input
                 id="email"
-                name="email"
-                type="email"
+                type="text"
                 autoComplete="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm"
                 placeholder="Votre adresse email"
+                className={`mt-1 ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                {...register('email')}
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
-            <button
+            <Button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+              className="w-full"
+              disabled={isSubmitting}
             >
-              Envoyer le lien de réinitialisation
-            </button>
+              {isSubmitting ? 'Envoi...' : 'Envoyer le lien de réinitialisation'}
+            </Button>
             {error && <p className="text-red-600 dark:text-red-400 text-center mt-2">{error}</p>}
           </form>
         )}

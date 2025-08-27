@@ -90,6 +90,8 @@ export default function AISearchBar() {
           } : 'Aucun résultat'
         })
         
+
+        
         // Stocker les résultats dans sessionStorage au lieu de les passer dans l'URL
         sessionStorage.setItem('searchResults', JSON.stringify(data.results))
         sessionStorage.setItem('searchCriteria', JSON.stringify(data.criteria))

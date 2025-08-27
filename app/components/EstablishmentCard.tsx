@@ -1,23 +1,33 @@
-'use client';
+'use client'
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ZoomIn } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import type { Establishment } from "../types/establishment";
-import { useGallery } from "@/components/ui/GlobalImageGallery";
-import { FavoriteButton } from "@/components/ui/FavoriteButton";
-import { useEffect, useState } from "react";
+import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { ZoomIn } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { FavoriteButton } from '@/components/ui/FavoriteButton'
+import { useImageGallery } from '@/hooks/useImageGallery'
 
 interface EstablishmentCardProps {
-  establishment: Establishment;
+  establishment: {
+    id: string
+    name: string
+    location: string
+    rating: number
+    numberOfReviews: number
+    description: string
+    priceRange: string
+    capacity: string
+    imageUrl: string
+    images?: string[]
+  }
 }
 
-export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
-  const { openGallery } = useGallery();
-  const [favoriteUrl, setFavoriteUrl] = useState<string>('');
-  
+export default function EstablishmentCard({ establishment }: EstablishmentCardProps) {
+  const { openGallery } = useImageGallery()
+  const [isNavigating, setIsNavigating] = useState(false)
+
   const {
     id,
     name,
@@ -33,10 +43,32 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
 
   const allImages = [imageUrl, ...images];
 
-  useEffect(() => {
-    // Set the URL only on client side
-    setFavoriteUrl(`${window.location.origin}/establishments/${id}`);
-  }, [id]);
+  const handleCardClick = async () => {
+    if (isNavigating) return
+    
+    setIsNavigating(true)
+    
+    // Marquer l'établissement comme consulté
+    try {
+      await fetch('/api/consulted-storefronts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          storefrontId: id,
+          name: name,
+          type: 'VENUE',
+          serviceType: 'Lieu de réception'
+        }),
+      })
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la consultation:', error)
+      // Ne pas bloquer la navigation si la sauvegarde échoue
+    }
+    
+    setIsNavigating(false)
+  }
 
   return (
     <Card className="w-full overflow-hidden group">
@@ -44,15 +76,20 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
         {/* Favorite Button - Outside the Link */}
         <div className="absolute right-2 top-2 z-10">
           <FavoriteButton
-            url={favoriteUrl}
-            title={`${name} - ${location}`}
+            storefrontId={id}
+            name={name}
+            location={location}
+            rating={rating}
+            numberOfReviews={numberOfReviews}
+            description={description}
+            imageUrl={imageUrl}
             className="rounded-full bg-white/80 hover:bg-white/90"
             size="icon"
           />
         </div>
         
         {/* Link wrapper for the rest of the card */}
-        <Link href={`/establishments/${id}`}>
+        <Link href={`/establishments/${id}`} onClick={handleCardClick}>
           <div className="absolute left-4 top-4 z-10">
             <span className="rounded-md bg-amber-400 px-2 py-1 text-sm font-semibold">
               TOP

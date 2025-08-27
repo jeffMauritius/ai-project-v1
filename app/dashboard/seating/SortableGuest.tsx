@@ -7,7 +7,7 @@ type Guest = {
   name: string
   group: string
   status: 'unassigned' | 'assigned',
-  tableId: number | null
+  tableId: string | null
 }
 
 export function SortableGuest({ guest }: { guest: Guest }) {
