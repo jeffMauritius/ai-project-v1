@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,9 +38,9 @@ export default function MediaManager({ storefrontId }: MediaManagerProps) {
     if (session?.user && storefrontId) {
       fetchMedia()
     }
-  }, [session, storefrontId])
+  }, [session, storefrontId, fetchMedia])
 
-  const fetchMedia = async () => {
+  const fetchMedia = useCallback(async () => {
     if (!storefrontId) {
       console.log("[MediaManager] Pas de storefrontId, impossible de charger les médias")
       return
@@ -67,7 +67,7 @@ export default function MediaManager({ storefrontId }: MediaManagerProps) {
         variant: "destructive",
       })
     }
-  }
+  }, [storefrontId, toast])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

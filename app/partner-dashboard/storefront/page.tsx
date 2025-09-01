@@ -416,7 +416,7 @@ export default function PartnerStorefrontPage() {
                     <p className="text-sm text-red-500">{locationErrors.venueAddress}</p>
                   )}
                   <p className="text-sm text-gray-500">
-                    Les coordonnées se mettent à jour automatiquement. Format recommandé: "123 Rue de la Paix, 75001 Paris, France"
+                    Les coordonnées se mettent à jour automatiquement. Format recommandé: &quot;123 Rue de la Paix, 75001 Paris, France&quot;
                   </p>
                 </div>
 

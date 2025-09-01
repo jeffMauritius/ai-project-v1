@@ -341,17 +341,17 @@ export default function Register() {
       <Dialog open={isTermsModalOpen} onOpenChange={setIsTermsModalOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Conditions d'utilisation</DialogTitle>
+            <DialogTitle>Conditions d&apos;utilisation</DialogTitle>
             <DialogDescription>
-              Veuillez lire attentivement les conditions d'utilisation avant de créer votre compte.
+              Veuillez lire attentivement les conditions d&apos;utilisation avant de créer votre compte.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <h3>1. Acceptation des conditions</h3>
               <p>
-                En créant un compte sur MonMariage.ai, vous acceptez d'être lié par ces conditions d'utilisation. 
-                Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre service.
+                En créant un compte sur MonMariage.ai, vous acceptez d&apos;être lié par ces conditions d&apos;utilisation. 
+                Si vous n&apos;acceptez pas ces conditions, veuillez ne pas utiliser notre service.
               </p>
 
               <h3>2. Description du service</h3>
@@ -375,9 +375,9 @@ export default function Register() {
               </p>
               <ul>
                 <li>Violer toute loi applicable</li>
-                <li>Harceler, abuser ou nuire à d'autres utilisateurs</li>
+                <li>Harceler, abuser ou nuire à d&apos;autres utilisateurs</li>
                 <li>Transmettre du contenu offensant ou inapproprié</li>
-                <li>Tenter d'accéder non autorisé à nos systèmes</li>
+                <li>Tenter d&apos;accéder non autorisé à nos systèmes</li>
               </ul>
 
               <h3>5. Protection des données</h3>
@@ -402,8 +402,8 @@ export default function Register() {
 
               <h3>8. Contact</h3>
               <p>
-                Pour toute question concernant ces conditions d'utilisation, veuillez nous contacter 
-                à l'adresse suivante : contact@monmariage.ai
+                Pour toute question concernant ces conditions d&apos;utilisation, veuillez nous contacter 
+                à l&apos;adresse suivante : contact@monmariage.ai
               </p>
             </div>
           </div>
@@ -412,7 +412,7 @@ export default function Register() {
               onClick={() => setIsTermsModalOpen(false)}
               className="w-full sm:w-auto"
             >
-              J'ai compris
+              J&apos;ai compris
             </Button>
           </DialogFooter>
         </DialogContent>

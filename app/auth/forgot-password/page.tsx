@@ -59,7 +59,7 @@ export default function ForgotPassword() {
         ) : notFound ? (
           <div className="text-center mt-4">
             <p className="text-red-600 dark:text-red-400 mb-2">
-              Cette adresse email n'est pas dans notre système.<br />
+              Cette adresse email n&apos;est pas dans notre système.<br />
               Vous pouvez créer un compte via le lien ci-dessous.
             </p>
             <Link href="/auth/register" className="text-pink-600 dark:text-pink-400 underline">

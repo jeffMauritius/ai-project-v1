@@ -671,7 +671,7 @@ export default function Settings() {
                 ⚠️ Attention : Cette action supprimera définitivement :
               </p>
               <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
-                <li>• Toutes vos informations d'entreprise</li>
+                <li>• Toutes vos informations d&apos;entreprise</li>
                 <li>• Votre historique de messages et conversations</li>
                 <li>• Vos statistiques et analyses</li>
                 <li>• Vos avis clients</li>
