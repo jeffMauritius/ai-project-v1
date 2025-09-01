@@ -309,7 +309,7 @@ export default function Seating() {
               <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
                 <UserIcon className="h-12 w-12 mb-4 opacity-50" />
                 <p className="text-center">Aucun invité trouvé</p>
-                <p className="text-sm text-center mt-2">Ajoutez des invités dans la section "Invités"</p>
+                <p className="text-sm text-center mt-2">Ajoutez des invités dans la section &quot;Invités&quot;</p>
               </div>
             ) : (
               <>

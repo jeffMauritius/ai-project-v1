@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -115,10 +116,12 @@ export default function Partners() {
         {filteredPartners.map((partner) => (
           <Card key={partner.id} className={partner.featured ? 'border-pink-500' : ''}>
             <div className="relative h-48">
-              <img
+              <Image
                 src={partner.image}
                 alt={partner.name}
-                className="w-full h-full object-cover rounded-t-lg"
+                fill
+                className="object-cover rounded-t-lg"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
               {partner.featured && (
                 <div className="absolute top-2 right-2 bg-pink-500 text-white text-xs font-medium px-2 py-1 rounded-full">

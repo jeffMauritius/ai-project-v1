@@ -3,7 +3,7 @@
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 
 interface FavoriteButtonProps {
@@ -42,9 +42,9 @@ export function FavoriteButton({
     if (session?.user && storefrontId) {
       checkIfFavorite();
     }
-  }, [session, storefrontId]);
+  }, [session, storefrontId, checkIfFavorite]);
 
-  const checkIfFavorite = async () => {
+  const checkIfFavorite = useCallback(async () => {
     try {
       const response = await fetch('/api/favorites');
       if (response.ok) {
@@ -55,7 +55,7 @@ export function FavoriteButton({
     } catch (error) {
       console.error('Erreur lors de la vérification des favoris:', error);
     }
-  };
+  }, [storefrontId]);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();

@@ -191,7 +191,7 @@ export function QuoteRequestForm({
                 Créez un compte gratuitement pour demander un devis
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                Vous devez être connecté pour envoyer une demande de devis. C'est rapide et gratuit !
+                Vous devez être connecté pour envoyer une demande de devis. C&apos;est rapide et gratuit !
               </p>
             </div>
           </div>
@@ -213,11 +213,11 @@ export function QuoteRequestForm({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-pink-600" />
-                Détails de l'événement
+                Détails de l&apos;événement
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="eventDate">Date de l'événement *</Label>
+                  <Label htmlFor="eventDate">Date de l&apos;événement *</Label>
                   <Input
                     id="eventDate"
                     type="date"
@@ -231,7 +231,7 @@ export function QuoteRequestForm({
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="guestCount">Nombre d'invités *</Label>
+                  <Label htmlFor="guestCount">Nombre d&apos;invités *</Label>
                   <Select value={formData.guestCount} onValueChange={(value) => handleInputChange('guestCount', value)}>
                     <SelectTrigger className={errors.guestCount ? 'border-red-500' : ''}>
                       <SelectValue placeholder="Sélectionnez" />
@@ -250,10 +250,10 @@ export function QuoteRequestForm({
                 </div>
               </div>
               <div>
-                <Label htmlFor="eventType">Type d'événement *</Label>
+                <Label htmlFor="eventType">Type d&apos;événement *</Label>
                 <Select value={formData.eventType} onValueChange={(value) => handleInputChange('eventType', value)}>
                   <SelectTrigger className={errors.eventType ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Sélectionnez le type d'événement" />
+                    <SelectValue placeholder="Sélectionnez le type d&apos;événement" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="mariage">Mariage</SelectItem>
@@ -278,7 +278,7 @@ export function QuoteRequestForm({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="venueLocation">Lieu de l'événement *</Label>
+                  <Label htmlFor="venueLocation">Lieu de l&apos;événement *</Label>
                   <Input
                     id="venueLocation"
                     value={formData.venueLocation}

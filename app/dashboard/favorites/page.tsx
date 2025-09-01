@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -143,10 +144,12 @@ export default function Favorites() {
               <div className="relative h-48 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20">
                 {/* Image de la vitrine */}
                 {favorite.imageUrl && favorite.imageUrl !== '/placeholder-venue.jpg' ? (
-                  <img
+                  <Image
                     src={favorite.imageUrl}
                     alt={favorite.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 ) : (
                   /* Placeholder joli avec bannière rose */

@@ -24,7 +24,7 @@ interface EstablishmentCardProps {
   }
 }
 
-export default function EstablishmentCard({ establishment }: EstablishmentCardProps) {
+export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
   const { openGallery } = useImageGallery()
   const [isNavigating, setIsNavigating] = useState(false)
 

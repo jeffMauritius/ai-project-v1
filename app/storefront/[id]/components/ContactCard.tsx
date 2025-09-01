@@ -72,7 +72,7 @@ export default function ContactCard({
             <span className="font-semibold text-sm">{serviceType}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Zone d'intervention :</span>
+            <span className="text-sm text-gray-600">Zone d&apos;intervention :</span>
             <span className="font-semibold text-sm">
               {interventionType === 'all_france' ? 'Toute la France' : `${interventionRadius}km`}
             </span>

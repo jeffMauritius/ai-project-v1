@@ -601,7 +601,7 @@ export default function Guests() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nombre d'invités
+                    Nombre d&apos;invités
                   </label>
                   <input
                     type="number"
