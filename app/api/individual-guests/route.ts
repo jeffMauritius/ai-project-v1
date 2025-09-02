@@ -65,6 +65,20 @@ export async function POST(request: Request) {
       return new NextResponse("Groupe non trouvé", { status: 404 })
     }
 
+    // Vérifier que le groupe n'a pas atteint sa limite d'invités
+    const currentGuestCount = await prisma.guest.count({
+      where: {
+        groupId: groupId
+      }
+    })
+
+    if (currentGuestCount >= group.count) {
+      return new NextResponse(
+        `Ce groupe a atteint sa limite de ${group.count} invités. Impossible d'ajouter un invité supplémentaire.`, 
+        { status: 400 }
+      )
+    }
+
     const individualGuest = await prisma.guest.create({
       data: {
         firstName,

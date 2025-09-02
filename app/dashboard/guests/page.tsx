@@ -163,6 +163,20 @@ export default function Guests() {
     try {
       const validatedData = individualGuestSchema.parse(newIndividualGuest)
       
+      // Vérifier la limite du groupe avant d'ajouter un invité
+      if (!editingIndividualGuest) {
+        const selectedGroup = guestGroups.find(group => group.id === validatedData.groupId)
+        if (selectedGroup) {
+          const currentGuestCount = individualGuests.filter(guest => guest.groupId === selectedGroup.id).length
+          if (currentGuestCount >= selectedGroup.count) {
+            setIndividualErrors({
+              groupId: `Ce groupe a atteint sa limite de ${selectedGroup.count} invités. Impossible d'ajouter un invité supplémentaire.`
+            })
+            return
+          }
+        }
+      }
+      
       if (editingIndividualGuest) {
         await updateIndividualGuest(editingIndividualGuest.id, validatedData)
         setEditingIndividualGuest(null)
@@ -320,8 +334,8 @@ export default function Guests() {
   }
 
   // Calculs pour les statistiques
-  const totalGuests = guestGroups.reduce((sum, guest) => sum + guest.count, 0)
-  const confirmedGuests = guestGroups.reduce((sum, guest) => guest.confirmed ? sum + guest.count : sum, 0)
+  const totalGuests = individualGuests.length
+  const confirmedGuests = individualGuests.filter(guest => guest.status === 'confirmed').length
 
   if (loading) {
     return (
@@ -375,8 +389,14 @@ export default function Guests() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {guestTypes.map(type => {
           const typeGuests = guestGroups.filter(g => g.type === type.id)
-          const typeCount = typeGuests.reduce((sum, g) => sum + g.count, 0)
-          const typeConfirmed = typeGuests.reduce((sum, g) => g.confirmed ? sum + g.count : sum, 0)
+          const typeCount = typeGuests.reduce((sum, g) => {
+            const actualGuestCount = individualGuests.filter(ig => ig.groupId === g.id).length
+            return sum + actualGuestCount
+          }, 0)
+          const typeConfirmed = typeGuests.reduce((sum, g) => {
+            const confirmedGuests = individualGuests.filter(ig => ig.groupId === g.id && ig.status === 'confirmed').length
+            return sum + confirmedGuests
+          }, 0)
           
           return (
             <div key={type.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -432,7 +452,7 @@ export default function Guests() {
                   {guestTypes.find(t => t.id === guest.type)?.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {guest.count} personnes
+                  {individualGuests.filter(g => g.groupId === guest.id).length} / {guest.count} personnes
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
