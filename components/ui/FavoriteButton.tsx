@@ -37,13 +37,6 @@ export function FavoriteButton({
   const [isFavorite, setIsFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Vérifier si c'est déjà un favori au chargement
-  useEffect(() => {
-    if (session?.user && storefrontId) {
-      checkIfFavorite();
-    }
-  }, [session, storefrontId, checkIfFavorite]);
-
   const checkIfFavorite = useCallback(async () => {
     try {
       const response = await fetch('/api/favorites');
@@ -56,6 +49,13 @@ export function FavoriteButton({
       console.error('Erreur lors de la vérification des favoris:', error);
     }
   }, [storefrontId]);
+
+  // Vérifier si c'est déjà un favori au chargement
+  useEffect(() => {
+    if (session?.user && storefrontId) {
+      checkIfFavorite();
+    }
+  }, [session, storefrontId, checkIfFavorite]);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
