@@ -283,7 +283,7 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
           {/* Chat en temps réel */}
           <div className="lg:col-span-1">
             <div className="h-96">
-              <ChatCard companyName={companyName} />
+              <ChatCard companyName={companyName} storefrontId={id} />
             </div>
           </div>
         </div>

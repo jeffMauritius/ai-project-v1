@@ -21,60 +21,85 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Récupérer les demandes de devis pour ce partenaire
-    const quoteRequests = await prisma.quoteRequest.findMany({
+    // Récupérer les conversations en temps réel pour ce partenaire
+    const conversations = await prisma.conversation.findMany({
       where: {
-        storefront: {
-          userId: session.user.id
-        }
+        partnerId: session.user.id
       },
       include: {
+        client: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 1 // Dernier message seulement
+        },
         storefront: {
           select: {
-            companyName: true
+            companyName: true,
+            type: true
+          }
+        },
+        quoteRequest: {
+          select: {
+            id: true,
+            status: true,
+            eventDate: true,
+            guestCount: true,
+            eventType: true,
+            venueLocation: true,
+            budget: true,
+            message: true
           }
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        lastMessageAt: 'desc'
       }
     });
 
     // Transformer les données pour correspondre au format attendu par le frontend
-    const conversations = quoteRequests.map((request, index) => ({
-      id: request.id,
-      client: {
-        name: `${request.firstName} ${request.lastName}`,
-        avatar: `https://images.unsplash.com/photo-${1500000000000 + index}?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80`,
-        type: `${request.eventType} ${new Date(request.eventDate).getFullYear()}`
-      },
-      messages: [
-        {
-          id: 1,
-          sender: 'client' as const,
-          content: `Demande de devis pour ${request.eventType} le ${new Date(request.eventDate).toLocaleDateString('fr-FR')} avec ${request.guestCount} invités.${request.message ? `\n\nMessage: ${request.message}` : ''}`,
-          date: request.createdAt.toISOString(),
-          read: request.status !== 'PENDING'
-        }
-      ],
-      lastMessage: `Demande de devis pour ${request.eventType} le ${new Date(request.eventDate).toLocaleDateString('fr-FR')} avec ${request.guestCount} invités.`,
-      date: request.createdAt.toISOString(),
-      unread: request.status === 'PENDING',
-      quoteRequest: {
-        id: request.id,
-        status: request.status,
-        eventDate: request.eventDate,
-        guestCount: request.guestCount,
-        eventType: request.eventType,
-        venueLocation: request.venueLocation,
-        budget: request.budget,
-        message: request.message,
-        customerEmail: request.email,
-        customerName: `${request.firstName} ${request.lastName}`
-      }
-    }));
+    const formattedConversations = conversations.map((conv) => {
+      const lastMessage = conv.messages[0];
+      const clientName = `${conv.client.firstName} ${conv.client.lastName}`;
+      
+      return {
+        id: conv.id,
+        client: {
+          name: clientName,
+          avatar: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000)}?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80`,
+          type: conv.storefront?.type === 'VENUE' ? 'Lieu' : conv.storefront?.type || 'Prestataire'
+        },
+        messages: conv.messages.map(msg => ({
+          id: msg.id,
+          sender: msg.senderId === session.user.id ? 'partner' as const : 'client' as const,
+          content: msg.content,
+          date: msg.createdAt.toISOString(),
+          read: msg.read
+        })),
+        lastMessage: lastMessage?.content || 'Aucun message',
+        date: conv.lastMessageAt.toISOString(),
+        unread: conv.unreadCount > 0,
+        quoteRequest: conv.quoteRequest ? {
+          id: conv.quoteRequest.id,
+          status: conv.quoteRequest.status,
+          eventDate: conv.quoteRequest.eventDate,
+          guestCount: conv.quoteRequest.guestCount,
+          eventType: conv.quoteRequest.eventType,
+          venueLocation: conv.quoteRequest.venueLocation,
+          budget: conv.quoteRequest.budget,
+          message: conv.quoteRequest.message,
+          customerEmail: conv.client.email,
+          customerName: clientName
+        } : null
+      };
+    });
 
-    return NextResponse.json({ conversations });
+    return NextResponse.json({ conversations: formattedConversations });
 
   } catch (error) {
     console.error('Error fetching messages:', error);

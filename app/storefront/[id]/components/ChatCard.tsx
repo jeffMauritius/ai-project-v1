@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MessageCircle, Send, User, Bot, Mic } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 
 interface ChatCardProps {
   companyName: string
+  storefrontId: string
 }
 
 interface Message {
@@ -14,21 +16,94 @@ interface Message {
   timestamp: Date
 }
 
-export default function ChatCard({ companyName }: ChatCardProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: `Bonjour ! Je suis l'assistant de ${companyName}. Comment puis-je vous aider pour votre mariage ?`,
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ])
+export default function ChatCard({ companyName, storefrontId }: ChatCardProps & { storefrontId: string }) {
+  const { data: session } = useSession()
+  const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [conversationId, setConversationId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Charger les messages existants
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        console.log('📱 [CHAT] Chargement des messages pour storefront:', storefrontId)
+        const response = await fetch(`/api/messages?storefrontId=${storefrontId}`)
+        
+        if (response.ok) {
+          const data = await response.json()
+          console.log('✅ [CHAT] Messages chargés:', data)
+          
+          if (data.conversation && data.conversation.messages) {
+            setConversationId(data.conversation.id)
+            
+            // Convertir les messages de l'API au format local
+            const apiMessages = data.conversation.messages.map((msg: any) => ({
+              id: msg.id,
+              text: msg.content,
+              sender: msg.senderId === session?.user?.email ? 'user' : 'bot',
+              timestamp: new Date(msg.createdAt)
+            }))
+            
+            setMessages(apiMessages)
+            console.log('✅ [CHAT] Messages convertis:', apiMessages.length)
+          }
+        } else {
+          console.log('⚠️ [CHAT] Erreur API:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ [CHAT] Erreur lors du chargement des messages:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (storefrontId) {
+      loadMessages()
+    }
+  }, [storefrontId, session?.user?.email])
+
+  // Mise à jour automatique des messages toutes les 3 secondes
+  useEffect(() => {
+    if (storefrontId && conversationId) {
+      const interval = setInterval(async () => {
+        try {
+          console.log('🔄 [CHAT] Mise à jour automatique des messages...')
+          
+          // Récupérer les messages depuis l'API
+          const response = await fetch(`/api/messages?storefrontId=${storefrontId}`)
+          if (response.ok) {
+            const data = await response.json()
+            
+            if (data.conversation && data.conversation.messages) {
+              // Convertir les messages de l'API au format local
+              const apiMessages = data.conversation.messages.map((msg: any) => ({
+                id: msg.id,
+                text: msg.content,
+                sender: msg.senderId === session?.user?.email ? 'user' : 'bot',
+                timestamp: new Date(msg.createdAt)
+              }))
+              
+              // Mettre à jour seulement si il y a de nouveaux messages
+              if (apiMessages.length > messages.length) {
+                console.log('✅ [CHAT] Nouveaux messages détectés:', apiMessages.length - messages.length)
+                setMessages(apiMessages)
+              }
+            }
+          }
+        } catch (error) {
+          console.log('⚠️ [CHAT] Mise à jour silencieuse échouée:', error)
+        }
+      }, 3000) // Vérification toutes les 3 secondes
+      
+      return () => clearInterval(interval)
+    }
+  }, [storefrontId, conversationId, messages.length, session?.user?.email])
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return
+    if (!inputValue.trim() || !session?.user?.email) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -37,21 +112,50 @@ export default function ChatCard({ companyName }: ChatCardProps) {
       timestamp: new Date()
     }
 
+    // Ajouter le message immédiatement à l'interface
     setMessages(prev => [...prev, userMessage])
     setInputValue('')
     setIsTyping(true)
 
-    // Simuler une réponse du bot
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: `Merci pour votre message ! L'équipe de ${companyName} vous répondra dans les plus brefs délais. En attendant, vous pouvez consulter nos disponibilités ou demander un devis personnalisé.`,
-        sender: 'bot',
-        timestamp: new Date()
+    try {
+      console.log('📤 [CHAT] Envoi du message:', inputValue.trim())
+      
+      // Envoyer le message via l'API
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          storefrontId,
+          content: inputValue.trim()
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ [CHAT] Message envoyé avec succès:', data)
+        
+        if (!conversationId && data.message?.conversationId) {
+          setConversationId(data.message.conversationId)
+        }
+        
+        // Remplacer le message temporaire par le vrai message de l'API
+        if (data.message) {
+          setMessages(prev => prev.map(msg => 
+            msg.id === userMessage.id 
+              ? { ...msg, id: data.message.id }
+              : msg
+          ))
+        }
+      } else {
+        console.error('❌ [CHAT] Erreur lors de l\'envoi:', response.status)
       }
-      setMessages(prev => [...prev, botMessage])
+    } catch (error) {
+      console.error('❌ [CHAT] Erreur lors de l\'envoi du message:', error)
+    } finally {
       setIsTyping(false)
-    }, 2000)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -142,39 +246,53 @@ export default function ChatCard({ companyName }: ChatCardProps) {
 
       {/* Input */}
       <div className="p-4 border-t">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Tapez votre message..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-            disabled={isTyping}
-          />
-          <button
-            onClick={handleVoiceInput}
-            disabled={isTyping}
-            className={`px-3 py-2 rounded-lg transition-colors ${
-              isRecording 
-                ? 'bg-red-500 text-white hover:bg-red-600' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-            title="Dictée vocale"
-          >
-            <Mic className={`w-4 h-4 ${isRecording ? 'animate-pulse' : ''}`} />
-          </button>
-          <button
-            onClick={handleSendMessage}
-            disabled={!inputValue.trim() || isTyping}
-            className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
-        <p className="text-xs text-gray-500 mt-2 text-center">
-          Réponse garantie sous 24h
-        </p>
+        {!session?.user?.email ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-gray-600 mb-2">Connectez-vous pour discuter</p>
+            <button
+              onClick={() => window.location.href = '/auth/login'}
+              className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+            >
+              Se connecter
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Tapez votre message..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                disabled={isTyping}
+              />
+              <button
+                onClick={handleVoiceInput}
+                disabled={isTyping}
+                className={`px-3 py-2 rounded-lg transition-colors ${
+                  isRecording 
+                    ? 'bg-red-500 text-white hover:bg-red-600' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Dictée vocale"
+              >
+                <Mic className={`w-4 h-4 ${isRecording ? 'animate-pulse' : ''}`} />
+              </button>
+              <button
+                onClick={handleSendMessage}
+                disabled={!inputValue.trim() || isTyping}
+                className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Réponse garantie sous 24h
+            </p>
+          </>
+        )}
       </div>
     </div>
   )

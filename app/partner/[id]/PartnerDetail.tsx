@@ -1,160 +1,129 @@
 'use client'
 
-import Image from 'next/image'
-import { PageNavigation } from '../../components/PageNavigation'
-import { StarIcon } from '@heroicons/react/24/solid'
-import { MapPinIcon, BanknotesIcon, CalendarDaysIcon, CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon, PaperAirplaneIcon, MicrophoneIcon, DocumentPlusIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import Image from 'next/image'
+import { ChevronLeftIcon, ChevronRightIcon, StarIcon, MapPinIcon, MicrophoneIcon, DocumentPlusIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline'
+import { useToast } from '@/hooks/useToast'
+import { useSession } from 'next-auth/react'
 
-const mockPartners = {
-  "1": {
-    id: "1",
-    title: "Traiteur Royal",
-    type: "Traiteur",
-    description: `Traiteur de luxe spécialisé dans la gastronomie française, le Traiteur Royal met son savoir-faire à votre service pour créer un moment d'exception.
-
-Notre équipe de chefs étoilés crée des menus personnalisés pour votre mariage, alliant tradition française et créativité moderne.
-
-Notre offre comprend :
-• Une dégustation personnalisée pour les mariés
-• Un service à table professionnel
-• Des buffets gastronomiques sur mesure
-• Une cave à vins d'exception
-• Un wedding cake artisanal
-• Un bar à champagne élégant
-
-Services inclus :
-• Chef de cuisine dédié
-• Maître d'hôtel coordinateur
-• Personnel de service qualifié
-• Arts de la table haut de gamme
-• Installation et désinstallation complète`,
-    images: [
-      "https://images.unsplash.com/photo-1555244162-803834f70033?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
-    ],
-    rating: 4.8,
-    location: "Paris, France",
-    price: "À partir de 90€/personne",
-    availability: "Disponible en 2024",
-    options: [
-      "Service pour 50 à 500 personnes",
-      "Cuisine sur place possible",
-      "Menu végétarien disponible",
-      "Options sans gluten",
-      "Service de wedding cake",
-      "Bar à cocktails",
-      "Personnel de service inclus",
-      "Vaisselle et décoration de table"
-    ],
-    contact: {
-      phone: "+33 1 23 45 67 89",
-      email: "contact@traiteur-royal.fr"
-    }
-  },
-  "2": {
-    id: "2",
-    title: "Fleurs & Passion",
-    type: "Fleuriste",
-    description: `Fleurs & Passion est un atelier floral d'excellence, spécialisé dans la création d'atmosphères uniques pour les mariages.
-
-Notre équipe d'artisans fleuristes crée des compositions sur mesure qui reflètent votre personnalité et subliment votre événement.
-
-Nos créations comprennent :
-• Bouquets de mariée personnalisés
-• Compositions pour la cérémonie
-• Décoration florale des tables
-• Arches et structures florales
-• Boutonnières et accessoires
-• Couronnes de fleurs
-
-Services inclus :
-• Consultation personnalisée
-• Moodboard et proposition détaillée
-• Installation et démontage
-• Fleurs de saison
-• Service de location de vases et supports`,
-    images: [
-      "https://images.unsplash.com/photo-1507290439931-a861b5a38200?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1494336934272-f0efcedfc8d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
-    ],
-    rating: 4.9,
-    location: "Lyon, France",
-    price: "À partir de 2000€",
-    availability: "Disponible en 2024",
-    options: [
-      "Bouquet de mariée sur mesure",
-      "Décoration de cérémonie",
-      "Centres de table",
-      "Arches florales",
-      "Location de vases",
-      "Fleurs de saison",
-      "Installation comprise",
-      "Service de conseil"
-    ],
-    contact: {
-      phone: "+33 4 56 78 90 12",
-      email: "contact@fleurs-passion.fr"
-    }
-  },
-  "3": {
-    id: "3",
-    title: "DJ Atmosphère",
-    type: "DJ",
-    description: `DJ Atmosphère est votre partenaire musical pour créer une ambiance inoubliable lors de votre mariage.
-
-Fort de 15 ans d'expérience dans l'animation de mariages, nous savons créer l'ambiance parfaite pour chaque moment de votre soirée.
-
-Notre prestation comprend :
-• Une sonorisation professionnelle complète
-• Un éclairage architectural et d'ambiance
-• Un système de karaoké haute qualité
-• Une cabine DJ design
-• Des effets spéciaux (machine à fumée, stroboscopes)
-• Une playlist personnalisée
-
-Services inclus :
-• Rendez-vous de préparation
-• Installation et démontage
-• Backup matériel complet
-• Technicien son et lumière
-• Assurance professionnelle`,
-    images: [
-      "https://images.unsplash.com/photo-1516873240891-4bf014598ab4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
-    ],
-    rating: 4.7,
-    location: "Bordeaux, France",
-    price: "À partir de 1200€",
-    availability: "Disponible en 2024",
-    options: [
-      "Sonorisation jusqu'à 300 personnes",
-      "Éclairage architectural",
-      "Machine à fumée",
-      "Karaoké professionnel",
-      "Playlist personnalisée",
-      "Mix en direct",
-      "Backup matériel",
-      "Technicien inclus"
-    ],
-    contact: {
-      phone: "+33 5 34 56 78 90",
-      email: "contact@dj-atmosphere.fr"
-    }
-  }
+type Partner = {
+  id: string
+  title: string
+  description: string
+  location: string
+  rating: number
+  price: string
+  images: string[]
+  partnerId?: string // ID réel du partenaire en base de données
 }
 
 export default function PartnerDetail({ id }: { id: string }) {
-  const partner = mockPartners[id as keyof typeof mockPartners]
+  const { data: session } = useSession()
+  const [partner, setPartner] = useState<Partner | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [chatMessage, setChatMessage] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  const [chatHistory, setChatHistory] = useState<Array<{
+    id: number
+    type: 'partner' | 'user'
+    content: string
+    timestamp: string
+  }>>([])
+  const { toast } = useToast()
+
+  // Récupérer les informations du partenaire
+  useEffect(() => {
+    const fetchPartner = async () => {
+      try {
+        // Essayer de récupérer depuis l'API d'abord
+        const response = await fetch(`/api/partner-storefront`)
+        if (response.ok) {
+          const data = await response.json()
+          // Si c'est le partenaire connecté, utiliser ses données
+          if (data.partner && data.partner.companyName) {
+            setPartner({
+              id: id,
+              title: data.partner.companyName,
+              description: data.partner.description || 'Description non disponible',
+              location: `${data.partner.billingCity || 'Ville'}, ${data.partner.billingCountry || 'Pays'}`,
+              rating: 4.5,
+              price: 'Sur devis',
+              images: [
+                'https://images.unsplash.com/photo-1464808322410-1a934aab61e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80',
+                'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80',
+                'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80'
+              ],
+              partnerId: data.id // ID du storefront
+            })
+            return
+          }
+        }
+      } catch (error) {
+        console.log('Pas de partenaire connecté, utilisation des données mockées')
+      }
+
+      // Fallback vers les données mockées
+      const mockPartners: Record<string, Partner> = {
+        "1": {
+          id: "1",
+          title: "Château de Vaux-le-Vicomte",
+          description: "Un château majestueux du XVIIe siècle entouré de jardins à la française, parfait pour des mariages de prestige.",
+          location: "Maincy, Île-de-France",
+          rating: 4.9,
+          price: "À partir de 15 000€",
+          images: [
+            "https://images.unsplash.com/photo-1464808322410-1a934aab61e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80",
+            "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80",
+            "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80"
+          ]
+        },
+        "2": {
+          id: "2",
+          title: "Studio Lumière",
+          description: "Studio photo professionnel spécialisé dans la photographie de mariage et d'événements.",
+          location: "Paris, Île-de-France",
+          rating: 4.8,
+          price: "À partir de 800€",
+          images: [
+            "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80",
+            "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80"
+          ]
+        },
+        "mona-ilsa": {
+          id: "mona-ilsa",
+          title: "Mona Ilsa",
+          description: "Lisa est passionnée par la création de moments inoubliables. Dès son plus jeune âge, elle a été attirée par le dessin, le design et la création. Après des études artistiques, son mariage en 2014 a été une révélation qui l'a conduite vers la décoration d'événements. Aujourd'hui Wedding & Event Designer, elle croit que chaque événement est unique et s'efforce de personnaliser chaque concept. La décoration et l'organisation sont deux services distincts proposés par l'entreprise.",
+          location: "Liège, France",
+          rating: 4.5,
+          price: "Sur devis",
+          images: [
+            "https://images.unsplash.com/photo-1464808322410-1a934aab61e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80",
+            "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80",
+            "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=800&q=80"
+          ],
+          partnerId: "68b54449a15c57f76264a4e2@monmariage.ai" // ID réel de Mona Ilsa
+        }
+      }
+
+      const mockPartner = mockPartners[id]
+      if (mockPartner) {
+        setPartner(mockPartner)
+        // Initialiser le chat avec le message de bienvenue
+        setChatHistory([
+          {
+            id: 1,
+            type: 'partner' as const,
+            content: `Bonjour ! Je suis l'assistant virtuel de ${mockPartner.title}. Comment puis-je vous aider à planifier votre événement ?`,
+            timestamp: '10:00'
+          }
+        ])
+      }
+    }
+
+    fetchPartner()
+  }, [id])
   
   if (!partner) {
     return <div>Partenaire non trouvé</div>
@@ -166,6 +135,99 @@ export default function PartnerDetail({ id }: { id: string }) {
   
   const previousImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + partner.images.length) % partner.images.length)
+  }
+
+  const handleSendMessage = async () => {
+    if (!chatMessage.trim() || isSending) return
+
+    // Vérifier que l'utilisateur est connecté
+    if (!session?.user?.email) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez être connecté pour envoyer un message",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const userMessage = {
+      id: Date.now(),
+      type: 'user' as const,
+      content: chatMessage.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+
+    // Ajouter le message de l'utilisateur au chat
+    setChatHistory(prev => [...prev, userMessage])
+    setChatMessage('')
+    setIsSending(true)
+
+    try {
+      // Envoyer le message via l'API
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          storefrontId: partner.partnerId || partner.id,
+          content: userMessage.content
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Ajouter une réponse automatique du partenaire
+        const partnerResponse = {
+          id: Date.now() + 1,
+          type: 'partner' as const,
+          content: `Merci pour votre message ! L'équipe de ${partner.title} vous répondra dans les plus brefs délais. En attendant, vous pouvez consulter nos disponibilités ou demander un devis personnalisé.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+
+        setChatHistory(prev => [...prev, partnerResponse])
+
+        toast({
+          title: "Message envoyé",
+          description: "Votre message a été envoyé avec succès ! Il apparaîtra dans votre dashboard de messagerie.",
+        })
+
+        // Rediriger vers le dashboard après un délai
+        setTimeout(() => {
+          window.location.href = '/dashboard/messages'
+        }, 2000)
+      } else {
+        throw new Error('Erreur lors de l\'envoi')
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message:', error)
+      
+      // Ajouter une réponse d'erreur
+      const errorResponse = {
+        id: Date.now() + 1,
+        type: 'partner' as const,
+        content: 'Désolé, une erreur est survenue lors de l\'envoi de votre message. Veuillez réessayer.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+
+      setChatHistory(prev => [...prev, errorResponse])
+
+      toast({
+        title: "Erreur",
+        description: "Impossible d'envoyer le message. Veuillez réessayer.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
   }
 
   return (
@@ -229,52 +291,84 @@ export default function PartnerDetail({ id }: { id: string }) {
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 h-[600px] mb-8 flex flex-col">
               <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+                {chatHistory.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`rounded-lg p-4 max-w-md ${
+                        message.type === 'user'
+                          ? 'bg-pink-50 dark:bg-pink-900/20'
+                          : 'bg-gray-100 dark:bg-gray-700'
+                      }`}
+                    >
+                  <p className="text-gray-600 dark:text-gray-300">
+                        {message.content}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        {message.timestamp}
+                  </p>
+                </div>
+                </div>
+                ))}
+                {isSending && (
+                  <div className="flex justify-start">
                 <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Bonjour ! Je suis l&apos;assistant virtuel du {partner.title}. Comment puis-je vous aider à planifier votre événement ?
-                  </p>
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-600"></div>
+                        <span className="text-gray-600 dark:text-gray-300 text-sm">Envoi en cours...</span>
+                      </div>
+                    </div>
                 </div>
-                <div className="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-4 ml-8">
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Je souhaite organiser un mariage pour 150 personnes en juin 2024.
-                  </p>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Excellent choix ! Nous pouvons assurer le service pour votre mariage. Souhaitez-vous des informations sur nos formules ou un devis personnalisé ?
-                  </p>
-                </div>
+                )}
               </div>
               <div className="relative">
                 <textarea
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
-                  placeholder="Posez vos questions..."
-                  className="block w-full rounded-xl border-0 py-4 pl-4 pr-32 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pink-500/50 resize-none"
+                  onKeyPress={handleKeyPress}
+                  placeholder={session?.user ? "Posez vos questions..." : "Connectez-vous pour poser vos questions..."}
+                  className="block w-full rounded-xl border-0 py-4 pl-4 pr-32 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pink-500/50 resize-none disabled:opacity-50"
                   rows={3}
+                  disabled={isSending || !session?.user}
                 />
                 <div className="absolute right-2 bottom-2 flex gap-2">
                   <button 
                     type="button"
-                    className="p-2 rounded-lg text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
                     aria-label="Commande vocale"
+                    disabled={isSending || !session?.user}
                   >
                     <MicrophoneIcon className="h-5 w-5" />
                   </button>
                   <button 
                     type="button"
-                    className="p-2 rounded-lg text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
                     aria-label="Ajouter un fichier"
+                    disabled={isSending || !session?.user}
                   >
                     <DocumentPlusIcon className="h-5 w-5" />
                   </button>
                   <button 
-                    type="submit" 
-                    className="p-2 rounded-lg bg-pink-600 hover:bg-pink-500 transition-colors"
+                    type="button"
+                    onClick={handleSendMessage}
+                    disabled={!chatMessage.trim() || isSending || !session?.user}
+                    className="p-2 rounded-lg bg-pink-600 hover:bg-pink-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                   >
                     <PaperAirplaneIcon className="h-5 w-5 text-white" />
                   </button>
                 </div>
+              </div>
+              <div className="mt-3 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Réponse garantie sous 24h
+                </p>
+                {!session?.user && (
+                  <p className="text-xs text-pink-600 dark:text-pink-400 mt-1">
+                    Connectez-vous pour envoyer un message
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -297,51 +391,12 @@ export default function PartnerDetail({ id }: { id: string }) {
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">{partner.price}</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">{partner.availability}</div>
               </div>
-            </div>
-            <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
-              {partner.description.split('\n').map((paragraph, index) => (
-                <p key={index} className="text-gray-600 dark:text-gray-300">
-                  {paragraph}
-                </p>
-              ))}
             </div>
             
-            {/* Options */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Services et Options</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {partner.options.map((option, index) => (
-                  <div key={index} className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                    {option}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Contact */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <a 
-                href={`tel:${partner.contact.phone}`}
-                className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                <PhoneIcon className="h-5 w-5" />
-                {partner.contact.phone}
-              </a>
-              <a 
-                href={`mailto:${partner.contact.email}`}
-                className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                <EnvelopeIcon className="h-5 w-5" />
-                {partner.contact.email}
-              </a>
-            </div>
-
-            <button className="w-full bg-pink-600 text-white py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors text-lg font-semibold">
-              Demander un devis
-            </button>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              {partner.description}
+            </p>
           </div>
         </div>
       </main>
