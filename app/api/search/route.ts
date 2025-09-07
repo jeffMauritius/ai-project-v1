@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { PrismaClient, ServiceType, StorefrontType } from '@prisma/client'
+import { transformImageUrlWithEntity } from '@/lib/image-url-transformer'
 
 const prisma = new PrismaClient()
 const openai = new OpenAI({
@@ -160,8 +161,10 @@ export async function POST(request: NextRequest) {
         if (storefront.media && storefront.media.length > 0) {
           const firstImage = storefront.media.find(media => media.type === 'IMAGE')
           if (firstImage) {
-            imageUrl = firstImage.url
+            imageUrl = transformImageUrlWithEntity(firstImage.url, establishment.id, 'establishments', 1)
           }
+        } else if (establishment.imageUrl) {
+          imageUrl = transformImageUrlWithEntity(establishment.imageUrl, establishment.id, 'establishments', 1)
         }
         
         return {
@@ -263,7 +266,7 @@ export async function POST(request: NextRequest) {
         if (bestStorefront.media && bestStorefront.media.length > 0) {
           const firstImage = bestStorefront.media.find(media => media.type === 'IMAGE')
           if (firstImage) {
-            imageUrl = firstImage.url
+            imageUrl = transformImageUrlWithEntity(firstImage.url, partner.id, 'partners', 1)
           }
         }
         

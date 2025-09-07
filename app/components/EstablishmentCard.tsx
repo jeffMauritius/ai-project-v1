@@ -19,13 +19,12 @@ interface EstablishmentCardProps {
     description: string
     priceRange: string
     capacity: string
-    imageUrl: string
-    images?: string[]
+    images: string[] // Tableau d'URLs Vercel Blob Storage
+    imageUrl?: string // Champ optionnel pour compatibilité
   }
 }
 
-export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
-  const { openGallery } = useImageGallery()
+export default function EstablishmentCard({ establishment }: EstablishmentCardProps) {
   const [isNavigating, setIsNavigating] = useState(false)
 
   const {
@@ -37,20 +36,30 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
     description,
     priceRange,
     capacity,
+    images,
     imageUrl,
-    images = [],
   } = establishment;
 
-  const allImages = [imageUrl, ...images];
+  // Utiliser le tableau images comme source principale (URLs Vercel Blob), avec imageUrl comme fallback
+  const allImages = images && images.length > 0 ? images : (imageUrl ? [imageUrl] : []);
+  const mainImage = allImages[0] || '/placeholder-venue.jpg';
+  
+  const { openGallery } = useImageGallery(
+    allImages.map((url, index) => ({
+      id: `card-img-${id}-${index}`,
+      url,
+      alt: `${name} - Image ${index + 1}`
+    }))
+  )
 
   const handleCardClick = async () => {
     if (isNavigating) return
     
     setIsNavigating(true)
     
-    // Marquer l'établissement comme consulté
+    // Marquer l'établissement comme consulté (optionnel, ne bloque pas la navigation)
     try {
-      await fetch('/api/consulted-storefronts', {
+      const response = await fetch('/api/consulted-storefronts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,9 +71,14 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
           serviceType: 'Lieu de réception'
         }),
       })
+      
+      if (!response.ok) {
+        // Si l'utilisateur n'est pas connecté, on ignore l'erreur
+        console.log('Utilisateur non connecté, consultation non sauvegardée')
+      }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de la consultation:', error)
       // Ne pas bloquer la navigation si la sauvegarde échoue
+      console.log('Erreur lors de la sauvegarde de la consultation (non bloquante):', error)
     }
     
     setIsNavigating(false)
@@ -82,21 +96,21 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
             rating={rating}
             numberOfReviews={numberOfReviews}
             description={description}
-            imageUrl={imageUrl}
+            imageUrl={mainImage}
             className="rounded-full bg-white/80 hover:bg-white/90"
             size="icon"
           />
         </div>
         
-        {/* Link wrapper for the rest of the card */}
-        <Link href={`/establishments/${id}`} onClick={handleCardClick}>
+        {/* Image container with relative positioning */}
+        <div className="relative h-full w-full">
           <div className="absolute left-4 top-4 z-10">
             <span className="rounded-md bg-amber-400 px-2 py-1 text-sm font-semibold">
               TOP
             </span>
           </div>
           <Image
-            src={imageUrl}
+            src={mainImage}
             alt={name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -107,13 +121,7 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                openGallery(
-                  allImages.map((url, index) => ({
-                    id: `card-img-${id}-${index}`,
-                    url,
-                    alt: `${name} - Image ${index + 1}`
-                  }))
-                );
+                openGallery(0);
               }}
               className="absolute left-4 bottom-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10"
               aria-label="Voir la galerie"
@@ -131,7 +139,14 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
               />
             ))}
           </div>
-        </Link>
+          {/* Link overlay for the entire image area */}
+          <Link 
+            href={`/storefront/${id}`} 
+            onClick={handleCardClick}
+            className="absolute inset-0 z-0"
+            aria-label={`Voir les détails de ${name}`}
+          />
+        </div>
       </div>
       
       <CardContent className="p-4">
@@ -145,15 +160,20 @@ export function EstablishmentCard({ establishment }: EstablishmentCardProps) {
           </div>
         </div>
         <h3 className="mb-2 text-xl font-semibold group-hover:text-pink-600 transition-colors">{name}</h3>
-        <p className="mb-4 text-sm text-gray-600 line-clamp-2">{description}</p>
+        <div 
+          className="mb-4 text-sm text-gray-600 line-clamp-2"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold">À partir de {priceRange}</span>
             <span className="text-sm text-gray-600">{capacity}</span>
           </div>
-          <Button variant="default" className="group-hover:bg-pink-600 transition-colors">
-            Voir les détails
-          </Button>
+          <Link href={`/storefront/${id}`} onClick={handleCardClick}>
+            <Button variant="default" className="group-hover:bg-pink-600 transition-colors">
+              Voir les détails
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

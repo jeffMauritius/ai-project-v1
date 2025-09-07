@@ -33,13 +33,6 @@ export default function MediaManager({ storefrontId }: MediaManagerProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
 
-  // Charger les médias existants
-  useEffect(() => {
-    if (session?.user && storefrontId) {
-      fetchMedia()
-    }
-  }, [session, storefrontId, fetchMedia])
-
   const fetchMedia = useCallback(async () => {
     if (!storefrontId) {
       console.log("[MediaManager] Pas de storefrontId, impossible de charger les médias")
@@ -68,6 +61,13 @@ export default function MediaManager({ storefrontId }: MediaManagerProps) {
       })
     }
   }, [storefrontId, toast])
+
+  // Charger les médias existants
+  useEffect(() => {
+    if (session?.user && storefrontId) {
+      fetchMedia()
+    }
+  }, [session, storefrontId, fetchMedia])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

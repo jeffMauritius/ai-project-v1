@@ -1,6 +1,284 @@
 import { notFound } from 'next/navigation'
-import { MapPin, Star } from 'lucide-react'
+import { 
+  MapPin, 
+  Star, 
+  Users, 
+  Square, 
+  Home, 
+  Car, 
+  Music, 
+  Camera, 
+  Utensils, 
+  Palette, 
+  Tent, 
+  Gift, 
+  Calendar, 
+  Clock, 
+  Euro, 
+  Wifi, 
+  ParkingCircle, 
+  TreePine, 
+  Building, 
+  Accessibility, 
+  Sun, 
+  Moon, 
+  Coffee, 
+  Wine, 
+  Cake, 
+  Heart, 
+  Sparkles, 
+  Mic, 
+  Volume2, 
+  Video, 
+  Image, 
+  FileText, 
+  Mail, 
+  Phone, 
+  Globe, 
+  Map, 
+  Navigation, 
+  Route, 
+  Bus, 
+  Truck, 
+  Flower2, 
+  Crown, 
+  Ring, 
+  Plane, 
+  Bed, 
+  Shower, 
+  Waves, 
+  Mountain, 
+  Umbrella, 
+  Thermometer, 
+  Wind, 
+  Droplets, 
+  Lightbulb, 
+  Zap, 
+  Shield, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle, 
+  Info, 
+  HelpCircle, 
+  Settings, 
+  Wrench, 
+  Hammer, 
+  Scissors, 
+  Paintbrush, 
+  Brush, 
+  PenTool, 
+  Type, 
+  Bold, 
+  Italic, 
+  Underline, 
+  AlignLeft, 
+  AlignCenter, 
+  AlignRight, 
+  List, 
+  Grid3X3, 
+  Columns, 
+  Rows, 
+  Layout, 
+  Layers, 
+  Copy, 
+  Move, 
+  RotateCcw, 
+  RotateCw, 
+  ZoomIn, 
+  ZoomOut, 
+  Maximize, 
+  Minimize, 
+  Monitor, 
+  Smartphone, 
+  Tablet, 
+  Laptop, 
+  Desktop, 
+  Server, 
+  Database, 
+  HardDrive, 
+  Folder, 
+  File, 
+  Archive, 
+  Download, 
+  Upload, 
+  Share, 
+  Link, 
+  ExternalLink, 
+  Bookmark, 
+  Tag, 
+  Tags, 
+  Search, 
+  Filter, 
+  SortAsc, 
+  SortDesc, 
+  ArrowUp, 
+  ArrowDown, 
+  ArrowLeft, 
+  ArrowRight, 
+  ChevronUp, 
+  ChevronDown, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Minus, 
+  X, 
+  Check, 
+  Trash2, 
+  Edit, 
+  Save, 
+  RefreshCw, 
+  RotateCcw as Refresh, 
+  Play, 
+  Pause, 
+  Stop, 
+  SkipBack, 
+  SkipForward, 
+  VolumeX, 
+  Volume1, 
+  Volume2 as Volume, 
+  Headphones, 
+  Radio, 
+  Tv, 
+  Film, 
+  Clapperboard, 
+  Camera as CameraIcon, 
+  Video as VideoIcon, 
+  Image as ImageIcon, 
+  Mic as MicIcon, 
+  MicOff, 
+  Phone as PhoneIcon, 
+  PhoneCall, 
+  PhoneIncoming, 
+  PhoneOutgoing, 
+  PhoneMissed, 
+  PhoneOff, 
+  MessageCircle, 
+  MessageSquare, 
+  Mail as MailIcon, 
+  Send, 
+  Inbox, 
+  Outbox, 
+  Archive as ArchiveIcon, 
+  Trash, 
+  Trash2 as TrashIcon, 
+  Folder as FolderIcon, 
+  FolderOpen, 
+  File as FileIcon, 
+  FileText as FileTextIcon, 
+  FileImage, 
+  FileVideo, 
+  FileAudio, 
+  FileCode, 
+  FileSpreadsheet, 
+  FilePdf, 
+  FileWord, 
+  FileExcel, 
+  FilePowerpoint, 
+  FileZip, 
+  FileCheck, 
+  FileX, 
+  FilePlus, 
+  FileMinus, 
+  FileEdit, 
+  FileSearch, 
+  FileSlash, 
+  FileQuestion, 
+  FileWarning, 
+  FileInfo, 
+  FileHeart, 
+  FileClock, 
+  FileUp, 
+  FileDown, 
+  FileLeft, 
+  FileRight, 
+  FileSymlink, 
+  FileBinary, 
+  FileType, 
+  FileType2, 
+  FileJson, 
+  FileJs, 
+  FileTs, 
+  FileJsx, 
+  FileTsx, 
+  FileVue, 
+  FileSvelte, 
+  FileHtml, 
+  FileCss, 
+  FileScss, 
+  FileLess, 
+  FileSass, 
+  FileStylus, 
+  FileMarkdown, 
+  FileYaml, 
+  FileToml, 
+  FileIni, 
+  FileEnv, 
+  FileGit, 
+  FileGitignore, 
+  FileDocker, 
+  FileKubernetes, 
+  FileTerraform, 
+  FileAnsible, 
+  FileJenkins, 
+  FileTravis, 
+  FileCircleci, 
+  FileGithub, 
+  FileGitlab, 
+  FileBitbucket, 
+  FileAzure, 
+  FileAws, 
+  FileGcp, 
+  FileDigitalocean, 
+  FileHeroku, 
+  FileVercel, 
+  FileNetlify, 
+  FileSurge, 
+  FileFirebase, 
+  FileSupabase, 
+  FilePlanetscale, 
+  FileMongodb, 
+  FilePostgres, 
+  FileMysql, 
+  FileRedis, 
+  FileElasticsearch, 
+  FileKibana, 
+  FileLogstash, 
+  FileBeats, 
+  FileDocker as Docker, 
+  FileKubernetes as Kubernetes, 
+  FileTerraform as Terraform, 
+  FileAnsible as Ansible, 
+  FileJenkins as Jenkins, 
+  FileTravis as Travis, 
+  FileCircleci as Circleci, 
+  FileGithub as Github, 
+  FileGitlab as Gitlab, 
+  FileBitbucket as Bitbucket, 
+  FileAzure as Azure, 
+  FileAws as Aws, 
+  FileGcp as Gcp, 
+  FileDigitalocean as Digitalocean, 
+  FileHeroku as Heroku, 
+  FileVercel as Vercel, 
+  FileNetlify as Netlify, 
+  FileSurge as Surge, 
+  FileFirebase as Firebase, 
+  FileSupabase as Supabase, 
+  FilePlanetscale as Planetscale, 
+  FileMongodb as Mongodb, 
+  FilePostgres as Postgres, 
+  FileMysql as Mysql, 
+  FileRedis as Redis, 
+  FileElasticsearch as Elasticsearch, 
+  FileKibana as Kibana, 
+  FileLogstash as Logstash, 
+  FileBeats as Beats
+} from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { transformEstablishmentImages } from '@/lib/image-url-transformer'
 import ImageGallery from './components/ImageGallery'
 import ImageCarousel from './components/ImageCarousel'
 import ContactCard from './components/ContactCard'
@@ -9,6 +287,7 @@ import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { FavoriteButton } from '@/components/ui/FavoriteButton'
 import { ShareButton } from '@/components/ui/ShareButton'
 import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
+import { getFieldIcon, getSectionIcon } from '@/lib/field-icons'
 
 async function getStorefrontData(id: string) {
   try {
@@ -18,7 +297,27 @@ async function getStorefrontData(id: string) {
         media: {
           orderBy: { order: 'asc' }
         },
-        establishment: true,
+        establishment: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            city: true,
+            region: true,
+            country: true,
+            startingPrice: true,
+            currency: true,
+            maxCapacity: true,
+            rating: true,
+            reviewCount: true,
+            venueType: true,
+            hasParking: true,
+            hasTerrace: true,
+            hasKitchen: true,
+            hasAccommodation: true,
+            images: true // Inclure le tableau images qui contient les URLs Vercel Blob
+          }
+        },
         partner: {
           select: {
             id: true,
@@ -63,12 +362,29 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
     return notFound()
   }
 
-  const allImages = storefront.media
-  const galleryImages = storefront.media.slice(6) // Images pour la galerie (après les 6 premières)
-
   // Déterminer le type de prestataire et ses informations
   const isVenue = storefront.type === 'VENUE'
   const isPartner = storefront.type === 'PARTNER'
+  
+  // Récupérer les images selon le type de storefront
+  let allImages = storefront.media
+  if (isVenue && storefront.establishment?.images && storefront.establishment.images.length > 0) {
+    // Pour les lieux, transformer les images de l'établissement vers Vercel Blob Storage
+    const transformedEstablishment = transformEstablishmentImages({
+      ...storefront.establishment,
+      originalId: storefront.establishment.id
+    })
+    
+    allImages = transformedEstablishment.images.map((url, index) => ({
+      id: `img-${index}`,
+      url: url,
+      type: 'IMAGE',
+      title: null,
+      description: null,
+      order: index
+    }))
+  }
+  const galleryImages = allImages.slice(6) // Images pour la galerie (après les 6 premières)
   
   let serviceType = ''
   let companyName = ''
@@ -218,6 +534,7 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                 rating={rating}
                 numberOfReviews={12}
                 description={description}
+                imageUrl={allImages[0]?.url || '/placeholder-venue.jpg'}
                 showText={true}
                 className="bg-pink-600 text-white hover:bg-pink-700"
               />
@@ -295,7 +612,13 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
             {serviceOptions.length > 0 ? (
               serviceOptions.map((section: any, sectionIndex: number) => (
                 <div key={sectionIndex} className="mb-8 last:mb-0">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-800">{section.title}</h3>
+                  <div className="flex items-center gap-3 mb-4">
+                    {(() => {
+                      const SectionIconComponent = getSectionIcon(section.title)
+                      return <SectionIconComponent className="w-6 h-6 text-pink-600" />
+                    })()}
+                    <h3 className="text-lg font-semibold text-gray-800">{section.title}</h3>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {section.fields?.map((field: any, fieldIndex: number) => {
                       // Récupérer la valeur sauvegardée pour ce champ
@@ -386,10 +709,15 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                         }
                       }
                       
+                      const IconComponent = getFieldIcon(field.id, field.question)
+                      
                       return (
-                        <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                          <span className="text-sm text-gray-600">{field.question} :</span>
-                          <span className="font-semibold text-sm">
+                        <div key={fieldIndex} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0">
+                          <div className="flex items-center gap-3">
+                            <IconComponent className="w-5 h-5 text-pink-600" />
+                            <span className="text-sm text-gray-600">{field.question} :</span>
+                          </div>
+                          <span className="font-semibold text-sm text-gray-800">
                             {displayValue}
                           </span>
                         </div>

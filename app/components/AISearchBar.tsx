@@ -92,9 +92,21 @@ export default function AISearchBar() {
         
 
         
-        // Stocker les résultats dans sessionStorage au lieu de les passer dans l'URL
-        sessionStorage.setItem('searchResults', JSON.stringify(data.results))
-        sessionStorage.setItem('searchCriteria', JSON.stringify(data.criteria))
+        // Stocker les résultats dans sessionStorage avec limitation de taille
+        try {
+          // Limiter les résultats à 50 éléments pour éviter le dépassement de quota
+          const limitedResults = data.results.slice(0, 50)
+          const limitedCriteria = {
+            ...data.criteria,
+            totalResults: data.results.length // Garder le total original
+          }
+          
+          sessionStorage.setItem('searchResults', JSON.stringify(limitedResults))
+          sessionStorage.setItem('searchCriteria', JSON.stringify(limitedCriteria))
+        } catch (storageError) {
+          console.warn('Impossible de stocker les résultats dans sessionStorage:', storageError)
+          // En cas d'erreur, on continue sans stocker les résultats
+        }
         
         // Rediriger vers les résultats avec seulement la requête
         router.push(`/results?q=${encodeURIComponent(searchQuery)}`)
@@ -221,7 +233,7 @@ export default function AISearchBar() {
             <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
             <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
           </div>
-          <span>Écoute en cours...</span>
+          <span>Écoute en cours... (arrêt automatique après 2s d'inactivité)</span>
         </div>
       )}
 

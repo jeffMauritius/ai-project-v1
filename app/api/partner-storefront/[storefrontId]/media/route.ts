@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { put } from '@vercel/blob'
+import { transformImageUrlWithEntity } from '@/lib/image-url-transformer'
 
 const prisma = new PrismaClient()
 
@@ -35,7 +36,13 @@ export async function GET(
       return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
 
-    return NextResponse.json(storefront.media)
+    // Transformer les URLs des médias
+    const transformedMedia = storefront.media.map((media, index) => ({
+      ...media,
+      url: transformImageUrlWithEntity(media.url, storefrontId, 'partners', index + 1)
+    }))
+    
+    return NextResponse.json(transformedMedia)
 
   } catch (error) {
     console.error('Erreur lors de la récupération des médias:', error)

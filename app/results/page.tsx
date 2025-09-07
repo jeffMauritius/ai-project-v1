@@ -7,6 +7,15 @@ import { StarIcon } from '@heroicons/react/24/solid'
 import { MapPinIcon, BanknotesIcon, CalendarDaysIcon, UsersIcon } from '@heroicons/react/24/outline'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 
 interface SearchResult {
   id: string
@@ -26,12 +35,15 @@ interface SearchResult {
   searchableOptions?: any
 }
 
+const ITEMS_PER_PAGE = 9
+
 export default function Results() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     // Récupérer la requête depuis l'URL
@@ -49,11 +61,14 @@ export default function Results() {
       hasStoredCriteria: !!storedCriteria
     })
     
-    if (storedResults) {
+    if (storedResults && storedCriteria) {
       try {
         const results = JSON.parse(storedResults)
+        const criteria = JSON.parse(storedCriteria)
+        
         console.log('📊 Résultats parsés:', {
           count: results.length,
+          totalResults: criteria.totalResults,
           firstResult: results[0] ? {
             id: results[0].id,
             companyName: results[0].companyName,
@@ -75,8 +90,19 @@ export default function Results() {
         }
         
         setSearchResults(validResults.length > 0 ? validResults : results)
+        
+        // Si les résultats stockés sont limités (50) mais qu'on sait qu'il y en a plus, faire une requête complète
+        if (results.length === 50 && criteria.totalResults > 50) {
+          console.log('📊 Résultats limités détectés, recherche complète en cours...')
+          performSearch(query)
+        }
       } catch (error) {
         console.error('Erreur parsing results:', error)
+        // En cas d'erreur de parsing, faire une nouvelle recherche
+        if (query) {
+          console.log('🔍 Erreur parsing, recherche en cours...')
+          performSearch(query)
+        }
       }
     } else if (query) {
       // Si pas de résultats stockés mais une requête, faire la recherche
@@ -199,10 +225,19 @@ export default function Results() {
     router.push(`/storefront/${result.id}`)
   }
 
+  // Calculer la pagination
+  const totalPages = Math.ceil(searchResults.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const paginatedResults = searchResults.slice(startIndex, endIndex)
+
   // Debug: afficher l'état actuel
   console.log('🔍 État actuel:', {
     isLoading,
     searchResultsCount: searchResults.length,
+    paginatedResultsCount: paginatedResults.length,
+    currentPage,
+    totalPages,
     searchQuery
   })
 
@@ -241,12 +276,13 @@ export default function Results() {
           {/* Debug: afficher le nombre de résultats */}
           <div className="mb-4 p-4 bg-blue-100 rounded">
             <p>🔍 Debug: {searchResults.length} résultats trouvés</p>
+            <p>📄 Page {currentPage} sur {totalPages} ({paginatedResults.length} résultats affichés)</p>
             <p>Query: {searchQuery}</p>
             <p>Loading: {isLoading ? 'Oui' : 'Non'}</p>
           </div>
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {searchResults.map((result, index) => {
+            {paginatedResults.map((result, index) => {
               // Debug: log de chaque résultat
               console.log('🎯 Carte résultat:', {
                 id: result.id,
@@ -287,9 +323,10 @@ export default function Results() {
                     {result.name || result.companyName}
                   </h3>
                   
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                    {result.description}
-                  </p>
+                  <div 
+                    className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2"
+                    dangerouslySetInnerHTML={{ __html: result.description }}
+                  />
                   
                   <div className="space-y-2 mb-4">
                     {result.location && (
@@ -330,6 +367,61 @@ export default function Results() {
             )
             })}
           </div>
+
+          {/* Pagination */}
+          {searchResults.length > 0 && totalPages > 1 && (
+            <div className="mt-8">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(pageNumber)}
+                            isActive={currentPage === pageNumber}
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (
+                      pageNumber === currentPage - 2 ||
+                      pageNumber === currentPage + 2
+                    ) {
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      className={
+                        currentPage === totalPages ? "pointer-events-none opacity-50" : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
 
           {searchResults.length === 0 && (
             <div className="text-center py-12">

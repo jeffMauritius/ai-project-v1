@@ -168,6 +168,9 @@ model Partner {
   latitude          Float?  // Latitude de la ville de facturation
   longitude         Float?  // Longitude de la ville de facturation
   
+  // Images du partenaire
+  images            String[] @default([]) // URLs des images du partenaire
+  
   // Services et tarifs
   basePrice         Float?
   priceRange        Json?   // {min: 100, max: 1000}

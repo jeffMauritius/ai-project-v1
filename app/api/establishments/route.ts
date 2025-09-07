@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { transformEstablishmentImages } from "@/lib/image-url-transformer";
 
 export async function GET(request: Request) {
   try {
@@ -29,13 +30,12 @@ export async function GET(request: Request) {
           maxCapacity: true,
           rating: true,
           reviewCount: true,
-          Images: {
-            orderBy: {
-              order: "asc"
-            },
+          images: true, // Utiliser le champ images qui contient les URLs Vercel Blob
+          storefronts: {
             select: {
-              url: true
-            }
+              id: true
+            },
+            take: 1
           }
         },
       }),
@@ -43,18 +43,25 @@ export async function GET(request: Request) {
     ]);
 
     // Transformer les données pour correspondre au format attendu par le frontend
-    const transformedEstablishments = establishments.map((e) => ({
-      id: e.id,
-      name: e.name,
-      location: `${e.city}, ${e.region}, ${e.country}`,
-      rating: e.rating || 0,
-      numberOfReviews: e.reviewCount || 0,
-      description: e.description || "",
-      priceRange: `${e.startingPrice || 0} ${e.currency || "€"}`,
-      capacity: `${e.maxCapacity || 0} personnes`,
-      imageUrl: e.Images[0]?.url || "/placeholder-venue.jpg",
-      images: e.Images.map(img => img.url),
-    }));
+    const transformedEstablishments = establishments.map((e) => {
+      const establishment = {
+        id: e.storefronts[0]?.id || e.id, // Utiliser l'ID du storefront si disponible, sinon l'ID de l'establishment
+        name: e.name,
+        location: `${e.city}, ${e.region}, ${e.country}`,
+        rating: e.rating || 0,
+        numberOfReviews: e.reviewCount || 0,
+        description: e.description || "",
+        priceRange: `${e.startingPrice || 0} ${e.currency || "€"}`,
+        capacity: `${e.maxCapacity || 0} personnes`,
+        // Utiliser le tableau images qui contient déjà les URLs Vercel Blob
+        images: e.images || [],
+        // Ajouter l'ID original pour la transformation
+        originalId: e.id
+      };
+      
+      // Appliquer la transformation des URLs d'images
+      return transformEstablishmentImages(establishment);
+    });
 
     console.log("Found establishments:", transformedEstablishments);
     console.log("Total count:", total);

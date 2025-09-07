@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { ServiceType, VenueType, StorefrontType } from "@prisma/client"
+import { transformPartnerImages } from "@/lib/image-url-transformer"
 
 const storefrontSchema = z.object({
   // Champs du storefront
@@ -174,7 +175,8 @@ export async function GET(request: Request) {
       updatedAt: storefront.updatedAt
     }
     
-    return NextResponse.json(responseData)
+    // Appliquer la transformation des URLs d'images
+    return NextResponse.json(transformPartnerImages(responseData))
   } catch (error) {
     console.error("[PARTNER_STOREFRONT_GET] Erreur:", error)
     return new NextResponse("Erreur interne", { status: 500 })
@@ -408,7 +410,8 @@ export async function PUT(request: Request) {
       updatedAt: updatedStorefront.updatedAt
     }
     
-    return NextResponse.json(responseData)
+    // Appliquer la transformation des URLs d'images
+    return NextResponse.json(transformPartnerImages(responseData))
   } catch (error) {
     console.error("[PARTNER_STOREFRONT_PUT] Erreur:", error)
     return new NextResponse("Erreur interne", { status: 500 })

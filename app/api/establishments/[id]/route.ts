@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { transformEstablishmentImages } from "@/lib/image-url-transformer";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const establishment = await prisma.establishment.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         name: true,
@@ -20,14 +22,7 @@ export async function GET(
         maxCapacity: true,
         rating: true,
         reviewCount: true,
-        Images: {
-          orderBy: {
-            order: "asc"
-          },
-          select: {
-            url: true
-          }
-        }
+        images: true // Utiliser le champ images qui contient les URLs Vercel Blob
       },
     });
 
@@ -39,7 +34,7 @@ export async function GET(
     }
 
     // Transformer les données pour correspondre au format attendu par le frontend
-    const transformedEstablishment = {
+    const establishmentData = {
       id: establishment.id,
       name: establishment.name,
       location: `${establishment.city}, ${establishment.region}, ${establishment.country}`,
@@ -48,9 +43,12 @@ export async function GET(
       description: establishment.description || "",
       priceRange: `${establishment.startingPrice || 0} ${establishment.currency || "€"}`,
       capacity: `${establishment.maxCapacity || 0} personnes`,
-      imageUrl: establishment.Images[0]?.url || "/placeholder-venue.jpg",
-      images: establishment.Images.map(img => img.url),
+      // Utiliser le tableau images qui contient déjà les URLs Vercel Blob
+      images: establishment.images || []
     };
+    
+    // Appliquer la transformation des URLs d'images
+    const transformedEstablishment = transformEstablishmentImages(establishmentData);
 
     return NextResponse.json(transformedEstablishment);
   } catch (error) {

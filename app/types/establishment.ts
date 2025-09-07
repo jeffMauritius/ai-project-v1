@@ -7,6 +7,6 @@ export type Establishment = {
   description: string;
   priceRange: string;
   capacity: string;
-  imageUrl: string;
-  images?: string[];
+  images: string[]; // Tableau d'URLs Vercel Blob Storage
+  imageUrl?: string; // Champ optionnel pour compatibilité
 };
