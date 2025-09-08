@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useGallery } from '@/components/ui/GlobalImageGallery'
 
 interface AlbumDTO {
   id: string
@@ -26,6 +28,7 @@ const albumSchema = z.object({
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
 const photosSchema = z.object({
+  albumId: z.string().min(1, 'Sélectionnez un album'),
   photos: z
     .array(z.instanceof(File))
     .min(1, 'Sélectionnez au moins une photo')
@@ -44,6 +47,7 @@ export default function Photos() {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null)
   const [isAlbumOpen, setIsAlbumOpen] = useState(false)
   const [isPhotosOpen, setIsPhotosOpen] = useState(false)
+  const { openGallery } = useGallery()
 
   const {
     register: registerAlbum,
@@ -59,10 +63,12 @@ export default function Photos() {
     control: controlPhotos,
     handleSubmit: handleSubmitPhotos,
     formState: { errors: photosErrors },
-    reset: resetPhotos
+    reset: resetPhotos,
+    setValue: setPhotosValue,
+    watch: watchPhotos
   } = useForm<PhotosFormValues>({
     resolver: zodResolver(photosSchema),
-    defaultValues: { photos: [] }
+    defaultValues: { photos: [], albumId: '' }
   })
 
   const fetchAlbums = async () => {
@@ -76,6 +82,12 @@ export default function Photos() {
   useEffect(() => {
     fetchAlbums()
   }, [])
+
+  useEffect(() => {
+    if (selectedAlbum) {
+      setPhotosValue('albumId', selectedAlbum)
+    }
+  }, [selectedAlbum, setPhotosValue])
 
   const onSubmitAlbum = async (values: AlbumFormValues) => {
     const res = await fetch('/api/user/photos/albums', {
@@ -93,7 +105,7 @@ export default function Photos() {
   const onSubmitPhotos = async (values: PhotosFormValues) => {
     const formData = new FormData()
     for (const f of values.photos) formData.append('files', f)
-    if (selectedAlbum) formData.append('albumId', selectedAlbum)
+    formData.append('albumId', values.albumId)
 
     const res = await fetch('/api/user/photos', {
       method: 'POST',
@@ -102,8 +114,16 @@ export default function Photos() {
 
     if (res.ok) {
       setIsPhotosOpen(false)
-      resetPhotos()
+      resetPhotos({ photos: [], albumId: values.albumId })
       fetchAlbums()
+    }
+  }
+
+  const handleOpenAlbum = (album: AlbumDTO) => {
+    setSelectedAlbum(album.id)
+    const images = album.photos.map((p) => ({ id: p.id, url: p.url }))
+    if (images.length > 0) {
+      openGallery(images, 0)
     }
   }
   
@@ -134,7 +154,7 @@ export default function Photos() {
           <div
             key={album.id}
             className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden group cursor-pointer"
-            onClick={() => setSelectedAlbum(album.id)}
+            onClick={() => handleOpenAlbum(album)}
           >
             <div className="relative h-48">
               <Image
@@ -166,7 +186,7 @@ export default function Photos() {
                   </div>
                 ))}
               </div>
-              <button className="mt-4 w-full text-sm text-pink-600 dark:text-pink-400 hover:text-pink-500">
+              <button className="mt-4 w-full text-sm text-pink-600 dark:text-pink-400 hover:text-pink-500" onClick={() => handleOpenAlbum(album)}>
                 Voir toutes les photos
               </button>
             </div>
@@ -187,7 +207,7 @@ export default function Photos() {
             className="space-y-4"
           >
             <div className="space-y-2">
-              <Label htmlFor="album-name">Nom de l'album</Label>
+              <Label htmlFor="album-name">Nom de l&apos;album</Label>
               <Input id="album-name" placeholder="Ex: Cérémonie" {...registerAlbum('name')} />
               {albumErrors.name && (
                 <p className="text-sm text-red-600">{albumErrors.name.message}</p>
@@ -205,7 +225,7 @@ export default function Photos() {
               <Button type="button" variant="secondary" onClick={() => setIsAlbumOpen(false)}>
                 Annuler
               </Button>
-              <Button type="submit">Créer l'album</Button>
+              <Button type="submit">Créer l&apos;album</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -220,6 +240,28 @@ export default function Photos() {
           </DialogHeader>
 
           <form onSubmit={handleSubmitPhotos(onSubmitPhotos)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="album">Album</Label>
+              <Controller
+                name="albumId"
+                control={controlPhotos}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez un album" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {albums.map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {photosErrors.albumId && (
+                <p className="text-sm text-red-600">{photosErrors.albumId.message as string}</p>
+              )}
+            </div>
             <div className="space-y-2">
               <Label htmlFor="photos">Photos</Label>
               <Controller
