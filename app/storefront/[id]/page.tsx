@@ -287,7 +287,7 @@ import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { FavoriteButton } from '@/components/ui/FavoriteButton'
 import { ShareButton } from '@/components/ui/ShareButton'
 import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
-import { getFieldIcon, getSectionIcon } from '@/lib/field-icons'
+import { getSectionIcon } from '@/lib/field-icons'
 
 async function getStorefrontData(id: string) {
   try {
@@ -709,14 +709,9 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                         }
                       }
                       
-                      const IconComponent = getFieldIcon(field.id, field.question)
-                      
                       return (
-                        <div key={fieldIndex} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0">
-                          <div className="flex items-center gap-3">
-                            <IconComponent className="w-5 h-5 text-pink-600" />
-                            <span className="text-sm text-gray-600">{field.question} :</span>
-                          </div>
+                        <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                          <span className="text-sm text-gray-600">{field.question} :</span>
                           <span className="font-semibold text-sm text-gray-800">
                             {displayValue}
                           </span>

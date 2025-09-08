@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline' 
-import ThemeToggle from './ThemeToggle' 
 import { BuildingStorefrontIcon } from '@heroicons/react/24/outline' 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" 
 import { useEffect, useState } from 'react'
@@ -63,10 +62,24 @@ export default function Navbar() {
     <nav className="bg-white dark:bg-gray-900 shadow-sm" suppressHydrationWarning>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
-          <div className="flex">
+          <div className="flex items-center space-x-8">
             <Link href="/" className="flex flex-shrink-0 items-center">
               <Image src="/monmariage-logo.png" alt="MonMariage.ai logo" height={40} width={180} className="h-10 w-auto" priority />
             </Link>
+            <div className="hidden md:flex space-x-6">
+              <Link 
+                href="/establishments" 
+                className="text-gray-700 hover:text-pink-600 px-3 py-2 text-sm font-medium transition-colors"
+              >
+                Lieux de mariages
+              </Link>
+              <Link 
+                href="/prestataires" 
+                className="text-gray-700 hover:text-pink-600 px-3 py-2 text-sm font-medium transition-colors"
+              >
+                Prestataires
+              </Link>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             {session?.user?.role === "PARTNER" && storefrontId && (
@@ -79,7 +92,6 @@ export default function Navbar() {
                 <BuildingStorefrontIcon className="h-5 w-5" />
               </Link>
             )}
-            <ThemeToggle />
             {status === "loading" ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (

@@ -35,7 +35,7 @@ interface SearchResult {
   searchableOptions?: any
 }
 
-const ITEMS_PER_PAGE = 9
+const ITEMS_PER_PAGE = 20
 
 export default function Results() {
   const searchParams = useSearchParams()
@@ -281,7 +281,7 @@ export default function Results() {
             <p>Loading: {isLoading ? 'Oui' : 'Non'}</p>
           </div>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedResults.map((result, index) => {
               // Debug: log de chaque résultat
               console.log('🎯 Carte résultat:', {

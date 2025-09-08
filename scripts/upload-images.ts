@@ -127,17 +127,23 @@ class ImageUploader {
       const batch = batches[i]
       console.log(`  📦 Batch ${i + 1}/${batches.length} (${batch.length} images)`)
       
-      const batchPromises = batch.map(async (imageUrl, index) => {
-        const imageIndex = i * this.maxConcurrent + index
-        return this.uploadSingleImage(imageUrl, folderPath, imageIndex, entityName)
-      })
-      
-      const batchResults = await Promise.all(batchPromises)
+      const batchResults = []
+      for (let j = 0; j < batch.length; j++) {
+        const imageUrl = batch[j]
+        const imageIndex = i * this.maxConcurrent + j
+        const result = await this.uploadSingleImage(imageUrl, folderPath, imageIndex, entityName)
+        batchResults.push(result)
+        
+        // Délai entre chaque image pour éviter le rate limiting
+        if (j < batch.length - 1) {
+          await this.delay(500)
+        }
+      }
       results.push(...batchResults)
       
       // Pause entre les batches pour éviter la surcharge
       if (i < batches.length - 1) {
-        await this.delay(1000)
+        await this.delay(2000)
       }
     }
     
@@ -198,7 +204,16 @@ class ImageUploader {
         return await new Promise<Buffer>((resolve, reject) => {
           const protocol = url.startsWith('https:') ? https : http
           
-          const request = protocol.get(url, (response) => {
+          const request = protocol.get(url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+              'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+              'Accept-Encoding': 'gzip, deflate, br',
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          }, (response) => {
             if (response.statusCode !== 200) {
               reject(new Error(`HTTP ${response.statusCode}`))
               return
@@ -224,8 +239,8 @@ class ImageUploader {
           return null
         }
         
-        // Attendre avant de réessayer
-        await this.delay(1000 * attempt)
+        // Attendre avant de réessayer (délai progressif)
+        await this.delay(2000 * attempt)
       }
     }
     

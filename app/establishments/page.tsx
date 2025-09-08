@@ -14,7 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type { Establishment } from "../types/establishment";
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 20;
 
 export default function EstablishmentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,7 +58,7 @@ export default function EstablishmentsPage() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="mb-8 text-3xl font-bold">Nos Établissements</h1>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data?.establishments.map((establishment) => (
           <EstablishmentCard
             key={establishment.id}
