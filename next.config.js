@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     unoptimized: true,
-    domains: ['images.unsplash.com']
+    domains: ['images.unsplash.com', 'blob.vercel-storage.com', 'pub-*.s3.amazonaws.com']
   },
 
   compiler: {

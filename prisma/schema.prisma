@@ -313,6 +313,8 @@ model User {
   guestGroups   GuestGroup[] // Groupes d'invités créés par l'utilisateur
   guests        Guest[] // Invités individuels associés à l'utilisateur
   tables        Table[] // Tables du plan de table créées par l'utilisateur
+  photoAlbums   PhotoAlbum[]
+  photos        UserPhoto[]
 
   @@map("users")
 }
@@ -348,6 +350,42 @@ model Image {
   establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
 
   @@map("images")
+}
+
+// ===== MODÈLES POUR LES ALBUMS ET PHOTOS UTILISATEUR =====
+model PhotoAlbum {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String @db.ObjectId
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos      UserPhoto[]
+
+  @@map("photo_albums")
+}
+
+model UserPhoto {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  size      Int
+  mimeType  String
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId    String @db.ObjectId
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  albumId   String? @db.ObjectId
+  album     PhotoAlbum? @relation(fields: [albumId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([albumId])
+  @@map("user_photos")
 }
 
 // ===== MODÈLES POUR LE SYSTÈME D'ABONNEMENT =====
