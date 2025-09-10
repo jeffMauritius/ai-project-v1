@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { GalleryProvider } from '@/components/ui/GlobalImageGallery'
+import { ConfirmationProvider } from '@/components/ui/confirmation-dialog'
 import { headers } from 'next/headers'
 
 const inter = Inter({ subsets: ['latin'] });
@@ -33,11 +34,13 @@ export default async function RootLayout({
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <Providers>
-          <GalleryProvider>
-            {!isAuthPage && <Navbar />}
-            {children}
-            {!isAuthPage && <Footer />}
-          </GalleryProvider>
+          <ConfirmationProvider>
+            <GalleryProvider>
+              {!isAuthPage && <Navbar />}
+              {children}
+              {!isAuthPage && <Footer />}
+            </GalleryProvider>
+          </ConfirmationProvider>
         </Providers>
       </body>
     </html>
