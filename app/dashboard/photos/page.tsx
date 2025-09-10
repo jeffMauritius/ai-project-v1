@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { PlusIcon, FolderIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, FolderIcon, PhotoIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +12,8 @@ import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useGallery } from '@/components/ui/GlobalImageGallery'
+import { Trash2, Edit3 } from 'lucide-react'
+import { useConfirmation } from '@/components/ui/confirmation-dialog'
 
 interface AlbumDTO {
   id: string
@@ -45,15 +46,30 @@ type PhotosFormValues = z.infer<typeof photosSchema>
 export default function Photos() {
   const [albums, setAlbums] = useState<AlbumDTO[]>([])
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null)
+  const [albumToView, setAlbumToView] = useState<AlbumDTO | null>(null)
+  const [albumToEdit, setAlbumToEdit] = useState<AlbumDTO | null>(null)
   const [isAlbumOpen, setIsAlbumOpen] = useState(false)
   const [isPhotosOpen, setIsPhotosOpen] = useState(false)
-  const { openGallery } = useGallery()
+  const [isAlbumGridOpen, setIsAlbumGridOpen] = useState(false)
+  const [isEditAlbumOpen, setIsEditAlbumOpen] = useState(false)
+  const { showConfirmation } = useConfirmation()
 
   const {
     register: registerAlbum,
     handleSubmit: handleSubmitAlbum,
     formState: { errors: albumErrors },
     reset: resetAlbum
+  } = useForm<AlbumFormValues>({
+    resolver: zodResolver(albumSchema),
+    defaultValues: { name: '', description: '' }
+  })
+
+  const {
+    register: registerEditAlbum,
+    handleSubmit: handleSubmitEditAlbum,
+    formState: { errors: editAlbumErrors },
+    reset: resetEditAlbum,
+    setValue: setEditAlbumValue
   } = useForm<AlbumFormValues>({
     resolver: zodResolver(albumSchema),
     defaultValues: { name: '', description: '' }
@@ -76,6 +92,11 @@ export default function Photos() {
     if (res.ok) {
       const data: AlbumDTO[] = await res.json()
       setAlbums(data)
+      // Mettre à jour l'album affiché si nécessaire
+      if (albumToView) {
+        const refreshed = data.find(a => a.id === albumToView.id) || null
+        setAlbumToView(refreshed)
+      }
     }
   }
 
@@ -102,6 +123,22 @@ export default function Photos() {
     }
   }
 
+  const onSubmitEditAlbum = async (values: AlbumFormValues) => {
+    if (!albumToEdit) return
+    
+    const res = await fetch(`/api/user/photos/albums/${albumToEdit.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values)
+    })
+    if (res.ok) {
+      setIsEditAlbumOpen(false)
+      setAlbumToEdit(null)
+      resetEditAlbum()
+      fetchAlbums()
+    }
+  }
+
   const onSubmitPhotos = async (values: PhotosFormValues) => {
     const formData = new FormData()
     for (const f of values.photos) formData.append('files', f)
@@ -119,12 +156,77 @@ export default function Photos() {
     }
   }
 
-  const handleOpenAlbum = (album: AlbumDTO) => {
+  const openAlbumGrid = (album: AlbumDTO) => {
     setSelectedAlbum(album.id)
-    const images = album.photos.map((p) => ({ id: p.id, url: p.url }))
-    if (images.length > 0) {
-      openGallery(images, 0)
+    setAlbumToView(album)
+    setIsAlbumGridOpen(true)
+  }
+
+  const openEditAlbum = (album: AlbumDTO) => {
+    setAlbumToEdit(album)
+    setEditAlbumValue('name', album.name)
+    setEditAlbumValue('description', album.description)
+    setIsEditAlbumOpen(true)
+  }
+
+  const handleDeletePhoto = async (photoId: string) => {
+    const confirmed = await showConfirmation({
+      title: 'Supprimer la photo',
+      description: 'Êtes-vous sûr de vouloir supprimer cette photo ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    })
+
+    if (!confirmed) return
+
+    const res = await fetch(`/api/user/photos/${photoId}`, { method: 'DELETE' })
+    if (res.ok) {
+      // Mettre à jour localement le contenu du modal
+      setAlbumToView(prev => prev ? { ...prev, photos: prev.photos.filter(p => p.id !== photoId) } : prev)
+      // Rafraîchir la liste globale
+      fetchAlbums()
     }
+  }
+
+  const handleDeleteAlbum = async (album: AlbumDTO) => {
+    const confirmed = await showConfirmation({
+      title: 'Supprimer l\'album',
+      description: `Êtes-vous sûr de vouloir supprimer l'album "${album.name}" et toutes ses ${album.photos.length} photos ? Cette action est irréversible.`,
+      confirmText: 'Supprimer l\'album',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    })
+
+    if (!confirmed) return
+
+    const res = await fetch(`/api/user/photos/albums/${album.id}`, { method: 'DELETE' })
+    if (res.ok) {
+      fetchAlbums()
+      if (albumToView?.id === album.id) {
+        setIsAlbumGridOpen(false)
+        setAlbumToView(null)
+      }
+    }
+  }
+
+  const getAlbumCoverImage = (album: AlbumDTO) => {
+    if (album.photos.length > 0) {
+      return album.photos[0].url
+    }
+    // Placeholder pour album vide
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTI1SDIyNVYxNzVIMTc1VjEyNVoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTE5NSAxNDVIMjA1VjE1NUgxOTVWMTQ1WiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTg1IDE1NUgyMTVWMTY1SDE4NVYxNTVaIiBmaWxsPSIjOUNBM0FGIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMjAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUNBM0FGIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0Ij5BbGJ1bSB2aWRlPC90ZXh0Pgo8L3N2Zz4K'
+  }
+
+  const getAlbumThumbnailImage = (album: AlbumDTO, index: number) => {
+    if (album.photos[index]) {
+      return album.photos[index].url
+    }
+    if (album.photos.length > 0) {
+      return album.photos[0].url
+    }
+    // Placeholder pour vignette vide
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCA0MEg2MFY2MEg0MFY0MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTQ1IDQ1SDU1VjU1SDQ1VjQ1WiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNNDAgNTBINjBWNTBINDBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo='
   }
   
   return (
@@ -153,12 +255,30 @@ export default function Photos() {
         {albums.map((album) => (
           <div
             key={album.id}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden group cursor-pointer"
-            onClick={() => handleOpenAlbum(album)}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden group cursor-pointer relative"
+            onClick={() => openAlbumGrid(album)}
           >
+            {/* Boutons d'action */}
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <button
+                onClick={(e) => { e.stopPropagation(); openEditAlbum(album) }}
+                className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-500"
+                title="Modifier l'album"
+              >
+                <Edit3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDeleteAlbum(album) }}
+                className="bg-red-600 text-white p-2 rounded-md hover:bg-red-500"
+                title="Supprimer l'album"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
             <div className="relative h-48">
               <Image
-                src={album.photos[0]?.url || 'https://images.unsplash.com/photo-1517817748490-58a9360b25a7?q=80&w=800&auto=format&fit=crop'}
+                src={getAlbumCoverImage(album)}
                 alt={album.name}
                 fill
                 className="w-full h-full object-cover"
@@ -177,7 +297,7 @@ export default function Photos() {
                 {[...Array(3)].map((_, index) => (
                   <div key={index} className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-md overflow-hidden">
                     <Image
-                      src={album.photos[index]?.url || album.photos[0]?.url || 'https://images.unsplash.com/photo-1517817748490-58a9360b25a7?q=80&w=300&auto=format&fit=crop'}
+                      src={getAlbumThumbnailImage(album, index)}
                       alt=""
                       width={100}
                       height={100}
@@ -186,7 +306,7 @@ export default function Photos() {
                   </div>
                 ))}
               </div>
-              <button className="mt-4 w-full text-sm text-pink-600 dark:text-pink-400 hover:text-pink-500" onClick={() => handleOpenAlbum(album)}>
+              <button className="mt-4 w-full text-sm text-pink-600 dark:text-pink-400 hover:text-pink-500" onClick={(e) => { e.stopPropagation(); openAlbumGrid(album) }}>
                 Voir toutes les photos
               </button>
             </div>
@@ -226,6 +346,43 @@ export default function Photos() {
                 Annuler
               </Button>
               <Button type="submit">Créer l&apos;album</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lightbox: Modifier album */}
+      <Dialog open={isEditAlbumOpen} onOpenChange={setIsEditAlbumOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier l&apos;album</DialogTitle>
+            <DialogDescription>Modifiez les informations de l&apos;album.</DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={handleSubmitEditAlbum(onSubmitEditAlbum)}
+            className="space-y-4"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="edit-album-name">Nom de l&apos;album</Label>
+              <Input id="edit-album-name" placeholder="Ex: Cérémonie" {...registerEditAlbum('name')} />
+              {editAlbumErrors.name && (
+                <p className="text-sm text-red-600">{editAlbumErrors.name.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-album-description">Description</Label>
+              <Textarea id="edit-album-description" placeholder="Décrivez cet album" {...registerEditAlbum('description')} />
+              {editAlbumErrors.description && (
+                <p className="text-sm text-red-600">{editAlbumErrors.description.message}</p>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="secondary" onClick={() => setIsEditAlbumOpen(false)}>
+                Annuler
+              </Button>
+              <Button type="submit">Modifier</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -290,6 +447,44 @@ export default function Photos() {
               <Button type="submit">Ajouter</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lightbox: Liste des photos de l'album */}
+      <Dialog open={isAlbumGridOpen} onOpenChange={setIsAlbumGridOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{albumToView?.name || 'Album'}</DialogTitle>
+            <DialogDescription>Photos de l&apos;album. Vous pouvez supprimer une photo.</DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {albumToView?.photos?.map((photo) => (
+              <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                <Image src={photo.url} alt="" fill className="object-cover" />
+                <button
+                  className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-md hover:bg-red-500"
+                  onClick={() => handleDeletePhoto(photo.id)}
+                  title="Supprimer la photo"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            {!albumToView?.photos?.length && (
+              <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
+                <div className="w-16 h-16 mb-4 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                  <PhotoIcon className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-lg font-medium mb-2">Aucune photo dans cet album</p>
+                <p className="text-sm">Ajoutez des photos pour commencer</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsAlbumGridOpen(false)}>Fermer</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
