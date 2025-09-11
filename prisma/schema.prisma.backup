@@ -45,147 +45,9 @@ enum VenueType {
   UNKNOWN
 }
 
-model Media {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  url         String
-  type        String   // "IMAGE" ou "VIDEO"
-  title       String?
-  description String?
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  storefront  PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
-  storefrontId String @db.ObjectId
-
-  @@index([storefrontId])
-}
-
-model ReceptionSpace {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  description     String
-  surface         Float
-  seatedCapacity  Int
-  standingCapacity Int
-  hasDanceFloor   Boolean  @default(false)
-  hasPmrAccess    Boolean  @default(false)
-  hasPrivateOutdoor Boolean @default(false)
-  storefrontId    String   @db.ObjectId
-  storefront      PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model ReceptionOptions {
-  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
-  rentalDuration         String
-  price                  Float
-  accommodationType      String
-  numberOfRooms          Int
-  numberOfBeds           Int
-  hasMandatoryCaterer    Boolean  @default(false)
-  providesCatering       Boolean  @default(false)
-  allowsOwnDrinks        Boolean  @default(false)
-  hasCorkageFee          Boolean  @default(false)
-  corkageFee             Float    @default(0)
-  hasTimeLimit           Boolean  @default(false)
-  timeLimit              String?
-  hasMandatoryPhotographer Boolean @default(false)
-  hasMusicExclusivity    Boolean  @default(false)
-  additionalServices     String?
-  includesCleaning       Boolean  @default(false)
-  allowsPets             Boolean  @default(false)
-  allowsMultipleEvents   Boolean  @default(false)
-  hasSecurityGuard       Boolean  @default(false)
-  storefrontId           String   @unique @db.ObjectId
-  storefront             PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-}
-
-model PartnerStorefront {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Informations de l'entreprise
-  companyName String
-  description String
-  logo        String?
-  isActive    Boolean @default(false)
-  serviceType ServiceType
-  venueType   VenueType? @default(UNKNOWN)
-
-  // Informations de facturation
-  billingStreet     String
-  billingCity       String
-  billingPostalCode String
-  billingCountry    String
-  siret             String
-  vatNumber         String
-
-  // Adresse du lieu
-  venueAddress   String?
-  venueLatitude  Float?
-  venueLongitude Float?
-
-  // Zone d'intervention
-  interventionType   String @default("all_france")
-  interventionRadius Int?   @default(50)
-
-  // Options dynamiques des prestataires
-  options Json? // Stockage des réponses du formulaire dynamique
-  searchableOptions Json? // Données structurées pour la recherche IA
-
-  // Relations
-  userId String @unique @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
-  media  Media[]
-  receptionSpaces    ReceptionSpace[]
-  receptionOptions   ReceptionOptions?
-  quoteRequests      QuoteRequest[]
-
-  @@map("partner_storefronts")
-}
-
-model User {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  name          String?
-  email         String?   @unique
-  password      String
-  emailVerified DateTime?
-  image         String?
-  role          String    @default("USER")
-  
-  // Relations
-  storefront    PartnerStorefront?
-  profile       Profile?
-  billingInfo   BillingInfo?
-  subscriptions Subscription[]
-
-  @@map("User")
-}
-
-model Profile {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  avatar      String?
-  phone       String?
-  address     String?
-  company     String?
-  website     String?
-  bio         String?
-  
-  // Relations
-  userId      String   @unique @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("profiles")
+enum StorefrontType {
+  VENUE
+  PARTNER
 }
 
 enum Role {
@@ -193,43 +55,6 @@ enum Role {
   PARTNER
   ADMIN
 }
-
-model Image {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  url             String
-  order           Int      @default(0)
-  establishmentId String   @db.ObjectId
-  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
-
-  @@map("Image")
-}
-
-model Establishment {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime @default("2025-04-06T03:35:25.436+00:00")
-  updatedAt     DateTime @default("2025-04-06T03:35:25.436+00:00")
-  type          String   @default("Domaine mariage")
-  name          String   @default("Domaine de la Maison de Colette")
-  description   String   @default("Face à la mer, sans voisins ni vis à vis, au centre d'un Domaine de se...")
-  startingPrice Float    @default(25)
-  currency      String   @default("EUR")
-  city          String   @default(". Saint-Coulomb")
-  region        String   @default("Ille et Vilaine")
-  country       String   @default("France")
-  maxCapacity   Int      @default(20)
-  rating        Float    @default(5)
-  reviewCount   Int      @default(0)
-  imageUrl      String   @default("/placeholder-venue.jpg")
-  images        String[] @default([])
-  featureIds    String[] @default([]) @db.ObjectId
-  amenityIds    String[] @default([]) @db.ObjectId
-  // Relation avec les images
-  Images        Image[]
-
-  @@map("Establishment")
-}
-
-// Modèles pour le système d'abonnement
 
 enum SubscriptionStatus {
   ACTIVE
@@ -251,6 +76,320 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum QuoteRequestStatus {
+  PENDING
+  CONTACTED
+  QUOTED
+  ACCEPTED
+  DECLINED
+}
+
+// ===== MODÈLE ESTABLISHMENT (LIEUX DE RÉCEPTION) =====
+model Establishment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+  
+  // Informations de base
+  name          String
+  description   String
+  type          String   @default("Domaine mariage")
+  
+  // Adresse et localisation
+  address       String
+  city          String
+  region        String
+  country       String   @default("France")
+  postalCode    String
+  latitude      Float?
+  longitude     Float?
+  
+  // Capacités et caractéristiques
+  maxCapacity   Int
+  minCapacity   Int?
+  surface       Float?   // Surface en m²
+  
+  // Tarifs
+  startingPrice Float
+  currency      String   @default("EUR")
+  
+  // Évaluations
+  rating        Float    @default(0)
+  reviewCount   Int      @default(0)
+  
+  // Images
+  imageUrl      String?
+  images        String[] @default([])
+  
+  // Caractéristiques spécifiques aux lieux
+  venueType     VenueType
+  hasParking    Boolean  @default(false)
+  hasGarden     Boolean  @default(false)
+  hasTerrace    Boolean  @default(false)
+  hasKitchen    Boolean  @default(false)
+  hasAccommodation Boolean @default(false)
+  
+  // Relations
+  storefronts   PartnerStorefront[]
+  receptionSpaces    ReceptionSpace[]
+  receptionOptions   ReceptionOptions?
+  Images        Image[]
+  
+  @@map("establishments")
+}
+
+// ===== MODÈLE PARTNER (PRESTATAIRES DE SERVICES) =====
+model Partner {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations de base
+  companyName String
+  description String
+  
+  // Type de service
+  serviceType ServiceType
+  
+  // Informations de facturation
+  billingStreet     String
+  billingCity       String
+  billingPostalCode String
+  billingCountry    String
+  siret             String
+  vatNumber         String
+  
+  // Zone d'intervention
+  interventionType   String @default("all_france")
+  interventionRadius Int?   @default(50)
+  interventionCities String[] @default([]) // Villes spécifiques d'intervention
+  
+  // Coordonnées géographiques (pour calcul de distance)
+  latitude          Float?  // Latitude de la ville de facturation
+  longitude         Float?  // Longitude de la ville de facturation
+  
+  // Images du partenaire
+  images            String[] @default([]) // URLs des images du partenaire
+  
+  // Services et tarifs
+  basePrice         Float?
+  priceRange        Json?   // {min: 100, max: 1000}
+  services          String[] // Liste des services proposés
+  
+  // Capacités (pour certains types comme traiteurs)
+  maxCapacity       Int?
+  minCapacity       Int?
+  
+  // Options dynamiques
+  options           Json? // Stockage des réponses du formulaire dynamique
+  searchableOptions Json? // Données structurées pour la recherche IA
+  
+  // Relations
+  userId            String @db.ObjectId
+  user              User   @relation(fields: [userId], references: [id])
+  storefronts       PartnerStorefront[]
+  
+  @@map("partners")
+}
+
+// ===== MODÈLE PARTNERSTOREFRONT (VITRINES PUBLIQUES) =====
+model PartnerStorefront {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Type de vitrine
+  type StorefrontType
+  
+  // Informations publiques
+  isActive    Boolean @default(false)
+  logo        String?
+  
+  // Relations (soit vers un lieu, soit vers un partenaire)
+  establishmentId String? @db.ObjectId
+  establishment   Establishment? @relation(fields: [establishmentId], references: [id])
+  
+  partnerId       String? @db.ObjectId
+  partner         Partner? @relation(fields: [partnerId], references: [id])
+  
+  // Relations
+  media           Media[]
+  quoteRequests   QuoteRequest[]
+  favorites       Favorite[]
+  
+  @@map("partner_storefronts")
+}
+
+// ===== MODÈLE MEDIA =====
+model Media {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  url         String
+  type        String   // "IMAGE" ou "VIDEO"
+  title       String?
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  storefront  PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
+  storefrontId String @db.ObjectId
+
+  @@index([storefrontId])
+}
+
+// ===== MODÈLE RECEPTIONSPACE =====
+model ReceptionSpace {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  description     String
+  surface         Float
+  seatedCapacity  Int
+  standingCapacity Int
+  hasDanceFloor   Boolean  @default(false)
+  hasPmrAccess    Boolean  @default(false)
+  hasPrivateOutdoor Boolean @default(false)
+  
+  // Relations
+  establishmentId String @db.ObjectId
+  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ===== MODÈLE RECEPTIONOPTIONS =====
+model ReceptionOptions {
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  rentalDuration         String
+  price                  Float
+  accommodationType      String
+  numberOfRooms          Int
+  numberOfBeds           Int
+  hasMandatoryCaterer    Boolean  @default(false)
+  providesCatering       Boolean  @default(false)
+  allowsOwnDrinks        Boolean  @default(false)
+  hasCorkageFee          Boolean  @default(false)
+  corkageFee             Float    @default(0)
+  hasTimeLimit           Boolean  @default(false)
+  timeLimit              String?
+  hasMandatoryPhotographer Boolean @default(false)
+  hasMusicExclusivity    Boolean  @default(false)
+  additionalServices     String?
+  includesCleaning       Boolean  @default(false)
+  allowsPets             Boolean  @default(false)
+  allowsMultipleEvents   Boolean  @default(false)
+  hasSecurityGuard       Boolean  @default(false)
+  
+  // Relations
+  establishmentId String @unique @db.ObjectId
+  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+  
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @default(now())
+}
+
+// ===== MODÈLE USER =====
+model User {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  name          String?
+  email         String?   @unique
+  password      String
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("USER")
+  
+  // Relations
+  partners      Partner[]
+  profile       Profile?
+  billingInfo   BillingInfo?
+  subscriptions Subscription[]
+  favorites     Favorite[]
+  searchHistory SearchHistory[]
+  consultedStorefronts ConsultedStorefront[] // Vitrines consultées par l'utilisateur
+  guestGroups   GuestGroup[] // Groupes d'invités créés par l'utilisateur
+  guests        Guest[] // Invités individuels associés à l'utilisateur
+  tables        Table[] // Tables du plan de table créées par l'utilisateur
+  photoAlbums   PhotoAlbum[]
+  photos        UserPhoto[]
+
+  @@map("users")
+}
+
+// ===== MODÈLE PROFILE =====
+model Profile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  
+  avatar      String?
+  phone       String?
+  address     String?
+  company     String?
+  website     String?
+  bio         String?
+  
+  // Relations
+  userId      String @unique @db.ObjectId
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// ===== MODÈLE IMAGE =====
+model Image {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  url             String
+  order           Int      @default(0)
+  
+  // Relations
+  establishmentId String @db.ObjectId
+  establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+
+  @@map("images")
+}
+
+// ===== MODÈLES POUR LES ALBUMS ET PHOTOS UTILISATEUR =====
+model PhotoAlbum {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String @db.ObjectId
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos      UserPhoto[]
+
+  @@map("photo_albums")
+}
+
+model UserPhoto {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  size      Int
+  mimeType  String
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId    String @db.ObjectId
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  albumId   String? @db.ObjectId
+  album     PhotoAlbum? @relation(fields: [albumId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([albumId])
+  @@map("user_photos")
+}
+
+// ===== MODÈLES POUR LE SYSTÈME D'ABONNEMENT =====
+
 model SubscriptionPlan {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String   // "Essentiel", "Pro", "Premium"
@@ -263,12 +402,37 @@ model SubscriptionPlan {
   isPopular   Boolean  @default(false)
   maxPhotos   Int?     // Limite de photos pour ce plan
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now())
 
   // Relations
   subscriptions Subscription[]
 
   @@map("subscription_plans")
+}
+
+// ===== MODÈLE FAVORITE =====
+model Favorite {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Relations
+  userId    String @db.ObjectId
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  storefrontId String @db.ObjectId
+  storefront   PartnerStorefront @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
+  
+  // Métadonnées du favori
+  name      String
+  location  String
+  rating    Float
+  numberOfReviews Int
+  description String
+  imageUrl  String?
+  
+  @@unique([userId, storefrontId])
+  @@map("favorites")
 }
 
 model BillingInfo {
@@ -288,11 +452,11 @@ model BillingInfo {
   stripeCustomerId String? // ID client Stripe
   stripePaymentMethodId String? // ID méthode de paiement Stripe
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime @default(now())
 
   // Relations
-  userId          String   @unique @db.ObjectId
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String @unique @db.ObjectId
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("billing_info")
 }
@@ -307,12 +471,12 @@ model Subscription {
   trialEnd          DateTime?
   stripeSubscriptionId String? // ID abonnement Stripe
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  updatedAt         DateTime @default(now())
 
   // Relations
-  userId            String   @unique @db.ObjectId
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  planId            String   @db.ObjectId
+  userId            String @unique @db.ObjectId
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId            String @db.ObjectId
   plan              SubscriptionPlan @relation(fields: [planId], references: [id])
   payments          Payment[]
 
@@ -329,27 +493,19 @@ model Payment {
   description       String
   paidAt            DateTime?
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  updatedAt         DateTime @default(now())
 
   // Relations
-  subscriptionId    String   @db.ObjectId
+  subscriptionId    String @db.ObjectId
   subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }
 
-enum QuoteRequestStatus {
-  PENDING
-  CONTACTED
-  QUOTED
-  ACCEPTED
-  DECLINED
-}
-
 model QuoteRequest {
   id            String            @id @default(auto()) @map("_id") @db.ObjectId
   createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  updatedAt     DateTime          @default(now())
 
   // Customer information
   firstName     String
@@ -371,4 +527,126 @@ model QuoteRequest {
   storefront    PartnerStorefront  @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
 
   @@map("quote_requests")
+}
+
+// ===== MODÈLE SEARCH HISTORY (HISTORIQUE DES RECHERCHES) =====
+model SearchHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  
+  // Informations de la recherche
+  query     String   // Requête de recherche (ex: "Château avec jardin près de Paris")
+  type      String   // Type de recherche: "LIEU", "PRESTATAIRE", etc.
+  
+  // Résultats de la recherche
+  results   Json     // Array des résultats trouvés avec leurs statuts
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("search_history")
+}
+
+// ===== MODÈLE CONSULTED STOREFRONT (VITRINES CONSULTÉES) =====
+model ConsultedStorefront {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations de la vitrine
+  storefrontId String   // ID de la vitrine consultée
+  name         String   // Nom de la vitrine
+  type         String   // Type: "VENUE", "PARTNER"
+  serviceType  String?  // Type de service (pour les partenaires)
+  
+  // Statut de consultation
+  status       String   @default("CONSULTED") // "CONSULTED", "SAVED", "CONTACTED"
+  
+  // Relations
+  userId       String   @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("consulted_storefronts")
+}
+
+// ===== MODÈLE GUEST GROUP (GROUPES D'INVITÉS) =====
+model GuestGroup {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations du groupe
+  name      String   // Nom du groupe (ex: "Famille Martin")
+  type      String   // Type: "family", "friends", "colleagues", "other"
+  count     Int      // Nombre d'invités dans le groupe
+  confirmed Boolean  @default(false) // Groupe confirmé ou non
+  notes     String   @default("") // Notes optionnelles
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guests    Guest[]  // Invités individuels dans ce groupe
+  
+  @@map("guest_groups")
+}
+
+// ===== MODÈLE GUEST (INVITÉS INDIVIDUELS) =====
+model Guest {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations personnelles
+  firstName String   // Prénom
+  lastName  String   // Nom
+  email     String   // Email
+  status    String   // Status: "pending", "confirmed", "declined"
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId   String   @db.ObjectId
+  group     GuestGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@map("guests")
+}
+
+// ===== MODÈLE TABLE (TABLES DU PLAN DE TABLE) =====
+model Table {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations de la table
+  name      String   // Nom de la table (ex: "Table des mariés")
+  seats     Int      // Nombre de places à la table
+  guests    String[] // Liste des noms des invités assignés à cette table
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("tables")
+}
+// ===== MODÈLE WEDDING PROVIDER (PRESTATAIRES DE MARIAGE) =====
+model WeddingProvider {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  // Informations du prestataire
+  name      String   // Nom du prestataire
+  type      String   // Type de prestataire (venues, caterers, photographers, etc.)
+  date      String   // Date du service au format dd/mm/yyyy
+  status    String   // Status: "confirmed", "pending", "cancelled"
+  price     String   // Prix total en string
+  deposit   String   // Acompte versé en string
+  notes     String   @default("") // Notes additionnelles
+  
+  // Relations
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("wedding_providers")
 }
