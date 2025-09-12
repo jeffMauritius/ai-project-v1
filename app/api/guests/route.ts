@@ -1,73 +1,65 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-// GET - Récupérer tous les groupes d'invités de l'utilisateur
-export async function GET() {
+// GET /api/guests - Récupérer les invités de l'utilisateur
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return new NextResponse("Non autorisé", { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const guestGroups = await prisma.guestGroup.findMany({
+    const guests = await prisma.guest.findMany({
       where: {
         userId: session.user.id
       },
       include: {
-        guests: {
-          orderBy: {
-            createdAt: 'asc'
-          }
-        }
+        group: true
       },
       orderBy: {
         createdAt: 'desc'
       }
     })
 
-    return NextResponse.json(guestGroups)
+    return NextResponse.json(guests)
   } catch (error) {
-    console.error("[GUESTS_GET] Erreur:", error)
-    return new NextResponse("Erreur interne du serveur", { status: 500 })
+    console.error('Error fetching guests:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// POST - Créer un nouveau groupe d'invités
-export async function POST(request: Request) {
+// POST /api/guests - Créer un nouvel invité
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return new NextResponse("Non autorisé", { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { name, type, count, confirmed, notes } = body
+    const { firstName, lastName, email, groupId, status = 'pending' } = await request.json()
 
-    if (!name || !type || !count) {
-      return new NextResponse("Nom, type et nombre d'invités requis", { status: 400 })
+    if (!firstName || !lastName || !email || !groupId) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const guestGroup = await prisma.guestGroup.create({
+    const guest = await prisma.guest.create({
       data: {
-        name,
-        type,
-        count: parseInt(count),
-        confirmed: confirmed || false,
-        notes: notes || "",
-        userId: session.user.id
-      },
-      include: {
-        guests: true
+        firstName,
+        lastName,
+        email,
+        status,
+        userId: session.user.id,
+        groupId
       }
     })
 
-    return NextResponse.json(guestGroup)
+    return NextResponse.json(guest)
   } catch (error) {
-    console.error("[GUESTS_POST] Erreur:", error)
-    return new NextResponse("Erreur interne du serveur", { status: 500 })
+    console.error('Error creating guest:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-} 
+}
