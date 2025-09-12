@@ -7,6 +7,33 @@ import * as argon2 from 'argon2'
 
 const prisma = new PrismaClient()
 
+// Fichier de sauvegarde du progrès
+const PROGRESS_FILE = path.join(__dirname, 'migration-progress.json')
+
+// Fonction pour sauvegarder le progrès
+function saveProgress(progress: MigrationProgress) {
+  fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2))
+}
+
+// Fonction pour charger le progrès
+function loadProgress(): MigrationProgress | null {
+  try {
+    if (fs.existsSync(PROGRESS_FILE)) {
+      return JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'))
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement du progrès:', error)
+  }
+  return null
+}
+
+// Fonction pour effacer le progrès
+function clearProgress() {
+  if (fs.existsSync(PROGRESS_FILE)) {
+    fs.unlinkSync(PROGRESS_FILE)
+  }
+}
+
 // Mapping des types de fichiers vers les ServiceType
 const TYPE_MAPPING: Record<string, string> = {
   'venues.json': 'LIEU',
@@ -46,6 +73,8 @@ interface MigrationProgress {
   uploadedImages: number
   failedUploads: number
   currentStep: 'preparation' | 'creation' | 'upload' | 'update' | 'complete'
+  lastProcessedFile?: string
+  lastProcessedIndex?: number
 }
 
 interface RawEntity {
@@ -70,7 +99,9 @@ class DataMigrator {
 
   constructor(config: MigrationConfig) {
     this.config = config
-    this.progress = {
+    // Charger le progrès existant ou initialiser
+    const savedProgress = loadProgress()
+    this.progress = savedProgress || {
       totalEntities: 0,
       processedEntities: 0,
       uploadedImages: 0,
@@ -92,19 +123,38 @@ class DataMigrator {
   async start() {
     console.log('🚀 Début de la migration des données...')
     
-    if (this.config.clearDatabaseFirst) {
+    // Vérifier s'il y a un progrès à reprendre
+    if (this.progress.currentStep !== 'preparation') {
+      console.log('🔄 Reprise de la migration depuis:', this.progress.currentStep)
+      console.log(`📊 Progrès: ${this.progress.processedEntities}/${this.progress.totalEntities} entités`)
+    }
+    
+    if (this.config.clearDatabaseFirst && this.progress.currentStep === 'preparation') {
       console.log('🗑️  Nettoyage de la base de données...')
       await clearDatabase()
+      clearProgress() // Effacer le progrès après nettoyage
     }
 
     try {
-      await this.prepareMigration()
-      await this.createEntities()
-      await this.uploadImages()
-      await this.updateImageUrls()
+      if (this.progress.currentStep === 'preparation') {
+        await this.prepareMigration()
+      }
+      
+      if (this.progress.currentStep === 'creation' || this.progress.currentStep === 'preparation') {
+        await this.createEntities()
+      }
+      
+      if (this.progress.currentStep === 'upload' || this.progress.currentStep === 'creation') {
+        await this.uploadImages()
+      }
+      
+      if (this.progress.currentStep === 'update' || this.progress.currentStep === 'upload') {
+        await this.updateImageUrls()
+      }
       
       console.log('✅ Migration terminée avec succès !')
       this.printFinalStats()
+      clearProgress() // Effacer le progrès à la fin
       
     } catch (error) {
       console.error('❌ Erreur lors de la migration:', error)
@@ -161,7 +211,15 @@ class DataMigrator {
 
     const entities = filename === 'venues.json' ? data.venues : data.vendors
     
-    for (const entity of entities) {
+    // Vérifier si on doit reprendre ce fichier
+    let startIndex = 0
+    if (this.progress.lastProcessedFile === filename && this.progress.lastProcessedIndex !== undefined) {
+      startIndex = this.progress.lastProcessedIndex + 1
+      console.log(`🔄 Reprise du fichier ${filename} à l'index ${startIndex}`)
+    }
+    
+    for (let i = startIndex; i < entities.length; i++) {
+      const entity = entities[i]
       try {
         if (serviceType === 'LIEU') {
           await this.createEstablishment(entity)
@@ -169,11 +227,20 @@ class DataMigrator {
           await this.createPartner(entity, serviceType)
         }
         
+        // Sauvegarder le progrès
+        this.progress.lastProcessedFile = filename
+        this.progress.lastProcessedIndex = i
         this.progress.processedEntities++
+        saveProgress(this.progress)
+        
         console.log(`✅ Entité créée: ${entity.name} (${this.progress.processedEntities}/${this.progress.totalEntities})`)
         
       } catch (error) {
         console.error(`❌ Erreur lors de la création de l'entité ${entity.name}:`, error)
+        // Sauvegarder le progrès même en cas d'erreur pour pouvoir reprendre
+        this.progress.lastProcessedFile = filename
+        this.progress.lastProcessedIndex = i
+        saveProgress(this.progress)
       }
     }
   }
@@ -238,6 +305,8 @@ class DataMigrator {
       data: {
         type: 'VENUE',
         isActive: true,
+        logo: images[0] || null,
+        images: images,
         establishmentId: establishment.id
       }
     })
@@ -299,6 +368,8 @@ class DataMigrator {
       data: {
         type: 'PARTNER',
         isActive: true,
+        logo: images[0] || null,
+        images: images,
         partnerId: partner.id
       }
     })
@@ -342,7 +413,7 @@ const defaultConfig: MigrationConfig = {
   maxConcurrentUploads: 5,
   retryAttempts: 3,
   imageCompression: true,
-  clearDatabaseFirst: true
+  clearDatabaseFirst: false // Ne pas vider la base par défaut pour permettre la reprise
 }
 
 // Exécution du script

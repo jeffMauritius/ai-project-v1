@@ -600,14 +600,14 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
           {/* Chat en temps réel */}
           <div className="lg:col-span-1">
             <div className="h-96">
-              <ChatCard companyName={companyName} />
+              <ChatCard companyName={companyName} storefrontId={id} />
             </div>
           </div>
         </div>
 
         {/* Options de réception - Utilise toute la largeur */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Options de réception</h2>
+          <h2 className="text-2xl font-bold mb-4">Les options {companyName}</h2>
           <div className="bg-white rounded-lg p-6 border">
             {serviceOptions.length > 0 ? (
               serviceOptions.map((section: any, sectionIndex: number) => (

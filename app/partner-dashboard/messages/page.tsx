@@ -81,30 +81,62 @@ export default function Messages() {
     fetchMessages()
   }, [toast])
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!selectedConversation || !newMessage.trim()) return
 
-    const message: Message = {
-      id: Math.max(0, ...selectedConversation.messages.map(m => m.id)) + 1,
-      sender: 'partner',
-      content: newMessage,
-      date: new Date().toISOString(),
-      read: true
+    try {
+      const response = await fetch('/api/partner-dashboard/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          conversationId: selectedConversation.id,
+          content: newMessage.trim(),
+          messageType: 'text'
+        })
+      })
+
+      if (response.ok) {
+        const sentMessage = await response.json()
+        
+        // Mettre à jour l'état local
+        const message: Message = {
+          id: sentMessage.id,
+          sender: 'partner',
+          content: sentMessage.content,
+          date: sentMessage.createdAt,
+          read: true
+        }
+
+        setConversations(conversations.map(conv =>
+          conv.id === selectedConversation.id
+            ? {
+                ...conv,
+                messages: [...conv.messages, message],
+                lastMessage: newMessage,
+                date: message.date,
+                unread: false
+              }
+            : conv
+        ))
+
+        setNewMessage('')
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible d'envoyer le message",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error('Error sending message:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible d'envoyer le message",
+        variant: "destructive",
+      })
     }
-
-    setConversations(conversations.map(conv =>
-      conv.id === selectedConversation.id
-        ? {
-            ...conv,
-            messages: [...conv.messages, message],
-            lastMessage: newMessage,
-            date: message.date,
-            unread: false
-          }
-        : conv
-    ))
-
-    setNewMessage('')
   }
 
   const filteredConversations = conversations.filter(conv =>
@@ -254,20 +286,26 @@ export default function Messages() {
                 {selectedConversation.messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.sender === 'partner' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex flex-col ${message.sender === 'partner' ? 'items-end' : 'items-start'}`}
                   >
+                    {/* Heure au-dessus du message */}
+                    <p className="text-xs text-gray-500 mb-1 px-2">
+                      {new Date(message.date).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    
+                    {/* Message */}
                     <div
-                      className={`rounded-lg p-3 max-w-md ${
+                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                         message.sender === 'partner'
-                          ? 'bg-pink-50 dark:bg-pink-900/20'
-                          : 'bg-gray-100 dark:bg-gray-700'
+                          ? 'bg-pink-600 text-white'
+                          : 'bg-gray-100 text-gray-900'
                       }`}
                     >
-                      <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
+                      <p className="text-sm whitespace-pre-wrap">
                         {message.content}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {new Date(message.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>

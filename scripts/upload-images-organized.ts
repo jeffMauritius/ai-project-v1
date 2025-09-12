@@ -42,13 +42,10 @@ class OrganizedImageUploader {
     console.log('📤 Début de l\'upload organisé des images sur Vercel Blob...')
     
     try {
-      // Upload des images d'établissements
+      // Upload des images d'établissements uniquement
       await this.uploadEstablishmentImages()
       
-      // Upload des images de partenaires
-      await this.uploadPartnerImages()
-      
-      console.log('✅ Upload organisé terminé !')
+      console.log('✅ Upload des établissements terminé !')
       this.printFinalStats()
       
     } catch (error) {

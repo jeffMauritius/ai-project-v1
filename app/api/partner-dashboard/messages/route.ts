@@ -1,86 +1,91 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
+// GET /api/partner-dashboard/messages - Récupérer les conversations du fournisseur
 export async function GET(request: NextRequest) {
   try {
-    // Vérifier que l'utilisateur est connecté et est un partenaire
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      );
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (session.user.role !== 'PARTNER') {
-      return NextResponse.json(
-        { error: 'Accès réservé aux partenaires' },
-        { status: 403 }
-      );
-    }
-
-    // Récupérer les demandes de devis pour ce partenaire
-    const quoteRequests = await prisma.quoteRequest.findMany({
+    // Récupérer les conversations où le fournisseur est impliqué
+    const conversations = await prisma.conversation.findMany({
       where: {
         storefront: {
-          userId: session.user.id
+          OR: [
+            { establishment: { userId: session.user.id } },
+            { partner: { userId: session.user.id } }
+          ]
         }
       },
       include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
         storefront: {
           select: {
-            companyName: true
+            id: true,
+            type: true,
+            establishment: {
+              select: { name: true }
+            },
+            partner: {
+              select: { companyName: true }
+            }
           }
+        },
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          take: 50 // Limiter à 50 derniers messages
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+      orderBy: { updatedAt: 'desc' }
+    })
 
-    // Transformer les données pour correspondre au format attendu par le frontend
-    const conversations = quoteRequests.map((request, index) => ({
-      id: request.id,
+    // Transformer les données pour l'interface
+    const formattedConversations = conversations.map(conv => ({
+      id: conv.id,
       client: {
-        name: `${request.firstName} ${request.lastName}`,
-        avatar: `https://images.unsplash.com/photo-${1500000000000 + index}?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&h=80&q=80`,
-        type: `${request.eventType} ${new Date(request.eventDate).getFullYear()}`
+        name: conv.user.name || 'Utilisateur',
+        avatar: conv.user.image || '',
+        type: conv.storefront.type === 'VENUE' ? 'Lieu de mariage' : 'Prestataire'
       },
-      messages: [
-        {
-          id: 1,
-          sender: 'client' as const,
-          content: `Demande de devis pour ${request.eventType} le ${new Date(request.eventDate).toLocaleDateString('fr-FR')} avec ${request.guestCount} invités.${request.message ? `\n\nMessage: ${request.message}` : ''}`,
-          date: request.createdAt.toISOString(),
-          read: request.status !== 'PENDING'
-        }
-      ],
-      lastMessage: `Demande de devis pour ${request.eventType} le ${new Date(request.eventDate).toLocaleDateString('fr-FR')} avec ${request.guestCount} invités.`,
-      date: request.createdAt.toISOString(),
-      unread: request.status === 'PENDING',
+      messages: conv.messages.map(msg => ({
+        id: msg.id,
+        sender: msg.senderType === 'user' ? 'client' : 'partner',
+        content: msg.content,
+        date: msg.createdAt.toISOString(),
+        read: !!msg.readAt
+      })),
+      lastMessage: conv.lastMessage ? (conv.lastMessage as any).content : 'Aucun message',
+      date: conv.updatedAt.toISOString(),
+      unread: (conv.unreadCount as any).provider > 0,
       quoteRequest: {
-        id: request.id,
-        status: request.status,
-        eventDate: request.eventDate,
-        guestCount: request.guestCount,
-        eventType: request.eventType,
-        venueLocation: request.venueLocation,
-        budget: request.budget,
-        message: request.message,
-        customerEmail: request.email,
-        customerName: `${request.firstName} ${request.lastName}`
+        id: conv.id,
+        status: conv.status,
+        eventDate: new Date().toISOString(), // À remplacer par des vraies données
+        guestCount: 'Non spécifié',
+        eventType: 'Mariage',
+        venueLocation: 'Non spécifié',
+        budget: 'Non spécifié',
+        message: conv.lastMessage ? (conv.lastMessage as any).content : null,
+        customerEmail: conv.user.email || '',
+        customerName: conv.user.name || 'Utilisateur'
       }
-    }));
+    }))
 
-    return NextResponse.json({ conversations });
-
+    return NextResponse.json({ conversations: formattedConversations })
   } catch (error) {
-    console.error('Error fetching messages:', error);
-    return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
-      { status: 500 }
-    );
+    console.error('Error fetching partner messages:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-} 
+}

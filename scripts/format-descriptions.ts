@@ -104,12 +104,12 @@ function addHtmlFormatting(text: string): string {
   return formattedParagraphs.join('\n')
 }
 
-async function formatAllDescriptions() {
+async function formatEstablishmentDescriptions() {
   try {
-    console.log('🎨 Formatage des descriptions...\n')
+    console.log('🎨 Formatage des descriptions des établissements...\n')
     
-    // Formater les descriptions des établissements
-    console.log('📋 Formatage des établissements...')
+    // Récupérer tous les établissements
+    console.log('📋 Récupération des établissements...')
     const establishments = await prisma.establishment.findMany({
       select: {
         id: true,
@@ -118,9 +118,28 @@ async function formatAllDescriptions() {
       }
     })
     
+    console.log(`📊 Total d'établissements trouvés: ${establishments.length}`)
+    
+    // Compter ceux avec description
+    const withDescription = establishments.filter(e => e.description && e.description.trim())
+    console.log(`📊 Établissements avec description: ${withDescription.length}`)
+    
+    if (withDescription.length === 0) {
+      console.log('ℹ️ Aucun établissement avec description trouvé')
+      return
+    }
+    
     let updatedEstablishments = 0
-    for (const establishment of establishments) {
-      if (establishment.description && establishment.description.trim()) {
+    let errorCount = 0
+    
+    console.log('\n🔄 Début du formatage...')
+    
+    for (let i = 0; i < withDescription.length; i++) {
+      const establishment = withDescription[i]
+      
+      try {
+        console.log(`\n[${i + 1}/${withDescription.length}] Traitement: ${establishment.name}`)
+        
         const formatted = formatDescription(establishment.description)
         const htmlFormatted = addHtmlFormatting(formatted)
         
@@ -131,38 +150,23 @@ async function formatAllDescriptions() {
         
         updatedEstablishments++
         console.log(`✅ ${establishment.name}: Description formatée`)
-      }
-    }
-    
-    // Formater les descriptions des partenaires
-    console.log('\n📋 Formatage des partenaires...')
-    const partners = await prisma.partner.findMany({
-      select: {
-        id: true,
-        companyName: true,
-        description: true
-      }
-    })
-    
-    let updatedPartners = 0
-    for (const partner of partners) {
-      if (partner.description && partner.description.trim()) {
-        const formatted = formatDescription(partner.description)
-        const htmlFormatted = addHtmlFormatting(formatted)
         
-        await prisma.partner.update({
-          where: { id: partner.id },
-          data: { description: htmlFormatted }
-        })
+        // Pause toutes les 10 mises à jour pour éviter la surcharge
+        if ((i + 1) % 10 === 0) {
+          console.log(`⏳ Pause de 1 seconde... (${i + 1}/${withDescription.length})`)
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
         
-        updatedPartners++
-        console.log(`✅ ${partner.companyName}: Description formatée`)
+      } catch (error) {
+        errorCount++
+        console.error(`❌ Erreur pour ${establishment.name}:`, error.message)
       }
     }
     
     console.log(`\n🎉 Formatage terminé !`)
+    console.log(`📊 Établissements traités: ${withDescription.length}`)
     console.log(`📊 Établissements mis à jour: ${updatedEstablishments}`)
-    console.log(`📊 Partenaires mis à jour: ${updatedPartners}`)
+    console.log(`📊 Erreurs: ${errorCount}`)
     
   } catch (error) {
     console.error('❌ Erreur lors du formatage:', error)
@@ -171,4 +175,4 @@ async function formatAllDescriptions() {
   }
 }
 
-formatAllDescriptions()
+formatEstablishmentDescriptions()
