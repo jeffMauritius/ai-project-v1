@@ -23,11 +23,11 @@ export async function GET(request: NextRequest) {
         billingCountry: true,
         basePrice: true,
         maxCapacity: true,
-        images: true,
         storefronts: {
           select: {
             id: true,
-            isActive: true
+            isActive: true,
+            images: true
           },
           take: 1
         }
@@ -43,6 +43,12 @@ export async function GET(request: NextRequest) {
     // Transformer les données
     const prestataires = partners.map(partner => {
       const storefront = partner.storefronts?.[0]
+      const images = storefront?.images || []
+      
+      // Transformer les URLs d'images
+      const transformedImages = images.map((url, index) => 
+        transformImageUrlWithEntity(url, storefront?.id || partner.id, 'partners', index + 1)
+      )
       
       return {
         id: storefront?.id || partner.id, // Utiliser l'ID du storefront si disponible
@@ -54,8 +60,8 @@ export async function GET(request: NextRequest) {
         rating: 4.5,
         price: partner.basePrice || 0,
         capacity: partner.maxCapacity || undefined,
-        images: partner.images || [],
-        imageUrl: partner.images && partner.images.length > 0 ? partner.images[0] : undefined,
+        images: transformedImages,
+        imageUrl: transformedImages.length > 0 ? transformedImages[0] : undefined,
         logo: null,
         isActive: storefront?.isActive || false
       }
