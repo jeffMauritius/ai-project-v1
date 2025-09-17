@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
-        const blob = await put(`user-${session.user.id}/${Date.now()}-${file.name}`, buffer, {
+        const blob = await put(`albums/${session.user.id}/${Date.now()}-${file.name}`, buffer, {
           access: 'public',
           contentType: file.type,
         })

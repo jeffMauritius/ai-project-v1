@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode, useState } from 'react'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 import { useImageGallery } from '@/hooks/useImageGallery'
 
 interface ImageItem {
@@ -14,7 +14,7 @@ interface ImageItem {
 }
 
 interface GalleryContextType {
-  openGallery: (images: ImageItem[], startIndex?: number) => void
+  openGallery: (images: ImageItem[], startIndex?: number, onDelete?: (deletedId?: string) => void) => void
 }
 
 const GalleryContext = createContext<GalleryContextType | undefined>(undefined)
@@ -33,6 +33,7 @@ interface GalleryProviderProps {
 
 export function GalleryProvider({ children }: GalleryProviderProps) {
   const [galleryImages, setGalleryImages] = useState<ImageItem[]>([])
+  const [onDeleteCb, setOnDeleteCb] = useState<((deletedId?: string) => void) | undefined>(undefined)
   const {
     isOpen,
     selectedImage,
@@ -43,9 +44,40 @@ export function GalleryProvider({ children }: GalleryProviderProps) {
     goToImage
   } = useImageGallery(galleryImages)
 
-  const openGallery = (images: ImageItem[], startIndex: number = 0) => {
+  const openGallery = (images: ImageItem[], startIndex: number = 0, onDelete?: (deletedId?: string) => void) => {
     setGalleryImages(images)
+    setOnDeleteCb(() => onDelete)
     openGalleryInternal(startIndex)
+  }
+
+  const handleDelete = async () => {
+    if (selectedImage === null) return
+    const image = galleryImages[selectedImage]
+    if (!image?.id) return
+
+    const confirmed = window.confirm('Supprimer cette photo ?')
+    if (!confirmed) return
+
+    try {
+      const res = await fetch(`/api/user/photos/${image.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Suppression échouée')
+
+      const newImages = galleryImages.filter((_, idx) => idx !== selectedImage)
+      setGalleryImages(newImages)
+
+      // Ajuster l'index courant
+      if (newImages.length === 0) {
+        closeGallery()
+      } else if (selectedImage >= newImages.length) {
+        goToImage(newImages.length - 1)
+      }
+
+      // Notifier parent
+      if (onDeleteCb) onDeleteCb(image.id)
+    } catch (e) {
+      console.error('[Gallery] Erreur de suppression', e)
+      alert("Impossible de supprimer la photo.")
+    }
   }
 
   return (
@@ -80,6 +112,18 @@ export function GalleryProvider({ children }: GalleryProviderProps) {
             >
               <X className="w-6 h-6" />
             </button>
+
+            {/* Bouton supprimer */}
+            {galleryImages[selectedImage]?.id && (
+              <button
+                onClick={handleDelete}
+                className="absolute top-4 left-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-500 transition-all z-10"
+                aria-label="Supprimer"
+                title="Supprimer cette photo"
+              >
+                <Trash2 className="w-6 h-6" />
+              </button>
+            )}
 
             {/* Boutons de navigation */}
             {galleryImages.length > 1 && (
