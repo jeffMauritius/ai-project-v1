@@ -52,11 +52,8 @@ export default function Photos() {
   const [isPhotosOpen, setIsPhotosOpen] = useState(false)
   const [isAlbumGridOpen, setIsAlbumGridOpen] = useState(false)
   const [isEditAlbumOpen, setIsEditAlbumOpen] = useState(false)
-<<<<<<< HEAD
   const [isUploading, setIsUploading] = useState(false)
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
-=======
->>>>>>> feature-photos
   const { showConfirmation } = useConfirmation()
 
   const {
@@ -135,8 +132,6 @@ export default function Photos() {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(values)
-<<<<<<< HEAD
-=======
     })
     if (res.ok) {
       setIsEditAlbumOpen(false)
@@ -146,25 +141,6 @@ export default function Photos() {
     }
   }
 
-  const onSubmitPhotos = async (values: PhotosFormValues) => {
-    const formData = new FormData()
-    for (const f of values.photos) formData.append('files', f)
-    formData.append('albumId', values.albumId)
-
-    const res = await fetch('/api/user/photos', {
-      method: 'POST',
-      body: formData
->>>>>>> feature-photos
-    })
-    if (res.ok) {
-      setIsEditAlbumOpen(false)
-      setAlbumToEdit(null)
-      resetEditAlbum()
-      fetchAlbums()
-    }
-  }
-
-<<<<<<< HEAD
   const onSubmitPhotos = async (values: PhotosFormValues) => {
     setIsUploading(true)
     try {
@@ -226,48 +202,10 @@ export default function Photos() {
 
   const handleDeleteAlbum = async (album: AlbumDTO) => {
     await showConfirmation({
-=======
-  const openAlbumGrid = (album: AlbumDTO) => {
-    setSelectedAlbum(album.id)
-    setAlbumToView(album)
-    setIsAlbumGridOpen(true)
-  }
-
-  const openEditAlbum = (album: AlbumDTO) => {
-    setAlbumToEdit(album)
-    setEditAlbumValue('name', album.name)
-    setEditAlbumValue('description', album.description)
-    setIsEditAlbumOpen(true)
-  }
-
-  const handleDeletePhoto = async (photoId: string) => {
-    const confirmed = await showConfirmation({
-      title: 'Supprimer la photo',
-      description: 'Êtes-vous sûr de vouloir supprimer cette photo ? Cette action est irréversible.',
-      confirmText: 'Supprimer',
-      cancelText: 'Annuler',
-      variant: 'destructive'
-    })
-
-    if (!confirmed) return
-
-    const res = await fetch(`/api/user/photos/${photoId}`, { method: 'DELETE' })
-    if (res.ok) {
-      // Mettre à jour localement le contenu du modal
-      setAlbumToView(prev => prev ? { ...prev, photos: prev.photos.filter(p => p.id !== photoId) } : prev)
-      // Rafraîchir la liste globale
-      fetchAlbums()
-    }
-  }
-
-  const handleDeleteAlbum = async (album: AlbumDTO) => {
-    const confirmed = await showConfirmation({
->>>>>>> feature-photos
       title: 'Supprimer l\'album',
       description: `Êtes-vous sûr de vouloir supprimer l'album "${album.name}" et toutes ses ${album.photos.length} photos ? Cette action est irréversible.`,
       confirmText: 'Supprimer l\'album',
       cancelText: 'Annuler',
-<<<<<<< HEAD
       variant: 'destructive',
       onConfirm: async () => {
         const res = await fetch(`/api/user/photos/albums/${album.id}`, { method: 'DELETE' })
@@ -280,21 +218,6 @@ export default function Photos() {
         }
       }
     })
-=======
-      variant: 'destructive'
-    })
-
-    if (!confirmed) return
-
-    const res = await fetch(`/api/user/photos/albums/${album.id}`, { method: 'DELETE' })
-    if (res.ok) {
-      fetchAlbums()
-      if (albumToView?.id === album.id) {
-        setIsAlbumGridOpen(false)
-        setAlbumToView(null)
-      }
-    }
->>>>>>> feature-photos
   }
 
   const getAlbumCoverImage = (album: AlbumDTO) => {
@@ -349,22 +272,14 @@ export default function Photos() {
             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <button
                 onClick={(e) => { e.stopPropagation(); openEditAlbum(album) }}
-<<<<<<< HEAD
                 className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 p-2 rounded-md hover:bg-white dark:hover:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-600"
-=======
-                className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-500"
->>>>>>> feature-photos
                 title="Modifier l'album"
               >
                 <Edit3 className="w-4 h-4" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); handleDeleteAlbum(album) }}
-<<<<<<< HEAD
                 className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 p-2 rounded-md hover:bg-white dark:hover:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-600"
-=======
-                className="bg-red-600 text-white p-2 rounded-md hover:bg-red-500"
->>>>>>> feature-photos
                 title="Supprimer l'album"
               >
                 <Trash2 className="w-4 h-4" />
@@ -568,7 +483,6 @@ export default function Photos() {
               <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
                 <Image src={photo.url} alt="" fill className="object-cover" />
                 <button
-<<<<<<< HEAD
                   className="absolute top-2 right-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 p-2 rounded-md hover:bg-white dark:hover:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-600 disabled:opacity-50"
                   onClick={() => handleDeletePhoto(photo.id)}
                   title="Supprimer la photo"
@@ -579,13 +493,6 @@ export default function Photos() {
                   ) : (
                     <Trash2 className="w-4 h-4" />
                   )}
-=======
-                  className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-md hover:bg-red-500"
-                  onClick={() => handleDeletePhoto(photo.id)}
-                  title="Supprimer la photo"
-                >
-                  <Trash2 className="w-4 h-4" />
->>>>>>> feature-photos
                 </button>
               </div>
             ))}
