@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { loginSchema, type LoginFormData } from '@/lib/validation-schemas'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { TestTube, AlertCircle } from 'lucide-react'
 
 export default function Login() {
   const router = useRouter()
@@ -76,9 +77,37 @@ export default function Login() {
     }
   }
 
+  // Fonction pour le mode test Stripe
+  const handleTestMode = () => {
+    // Rediriger directement vers la page d'abonnement en mode test
+    router.push('/partner-dashboard/subscription?test=true')
+  }
+
   return (
     <div className="sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        {/* Alerte pour le mode test */}
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center mb-2">
+            <TestTube className="h-5 w-5 text-blue-600 mr-2" />
+            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+              Mode Test Stripe Disponible
+            </h3>
+          </div>
+          <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+            La base de données a des problèmes de connexion, mais vous pouvez tester l'intégration Stripe directement.
+          </p>
+          <Button 
+            onClick={handleTestMode}
+            variant="outline"
+            size="sm"
+            className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-800"
+          >
+            <TestTube className="h-4 w-4 mr-2" />
+            Tester Stripe (Sans Connexion)
+          </Button>
+        </div>
+
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div>
             <Label htmlFor="email">Adresse email</Label>
@@ -118,12 +147,12 @@ export default function Login() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Checkbox 
-                id="remember" 
+              <Checkbox
+                id="remember"
                 checked={rememberMe}
-                onCheckedChange={(checked) => setValue('remember', checked as boolean)}
+                onCheckedChange={(checked) => setValue('remember', !!checked)}
               />
-              <Label htmlFor="remember" className="ml-2">
+              <Label htmlFor="remember" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                 Se souvenir de moi
               </Label>
             </div>
@@ -131,7 +160,7 @@ export default function Login() {
             <div className="text-sm">
               <Link
                 href="/auth/forgot-password"
-                className="font-medium text-pink-600 hover:text-pink-500"
+                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 Mot de passe oublié ?
               </Link>
@@ -139,7 +168,10 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm mt-2">{error}</div>
+            <div className="flex items-center p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+            </div>
           )}
 
           <div>
@@ -153,15 +185,30 @@ export default function Login() {
           </div>
         </form>
 
-        <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
-          Pas encore de compte ?{' '}
-          <Link
-            href="/auth/register"
-            className="font-medium text-pink-600 hover:text-pink-500"
-          >
-            Créez un compte gratuitement
-          </Link>
-        </p>
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                Ou
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+              Pas encore de compte ?{' '}
+              <Link
+                href="/auth/register"
+                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                Créer un compte
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

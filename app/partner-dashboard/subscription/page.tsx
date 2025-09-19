@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Check, CreditCard, Calendar, Building2, ArrowRight, Loader2 } from "lucide-react"
+import { Check, CreditCard, Calendar, Building2, ArrowRight, Loader2, AlertCircle, TestTube } from "lucide-react"
 import { useSubscription } from '@/hooks/useSubscription'
 import { useToast } from '@/hooks/useToast'
 import { SubscriptionErrorAlert } from '@/components/SubscriptionErrorAlert'
@@ -15,9 +16,19 @@ export default function Subscription() {
   const [showErrorAlert, setShowErrorAlert] = useState(false)
   const [errorAlertProps, setErrorAlertProps] = useState<any>(null)
   const [showPaymentInfo, setShowPaymentInfo] = useState(false)
+  const [testMode, setTestMode] = useState(false)
   const searchParams = useSearchParams()
-  const { subscription, billingInfo, plans, loading, createSubscriptionWithStripe, cancelSubscription } = useSubscription()
+  const { data: session, status } = useSession()
+  const { subscription, billingInfo, plans, loading, error, createSubscriptionWithStripe, cancelSubscription } = useSubscription()
   const { showSuccess, showSubscriptionError, showWarning, showSubscriptionAlert } = useToast()
+
+  // Détecter le mode test depuis l'URL
+  useEffect(() => {
+    const testParam = searchParams.get('test')
+    if (testParam === 'true') {
+      setTestMode(true)
+    }
+  }, [searchParams])
 
   // Gérer le retour de Stripe Checkout
   useEffect(() => {
@@ -81,7 +92,50 @@ export default function Subscription() {
     }
   }
 
-  if (loading) {
+  // Plans de test (simulés)
+  const testPlans = [
+    {
+      id: 'test-premium-monthly',
+      name: 'Premium',
+      description: 'Pour une organisation complète',
+      price: 19.99,
+      currency: 'EUR',
+      billingInterval: 'MONTHLY' as const,
+      features: [
+        'Toutes les fonctionnalités gratuites',
+        'Assistant IA avancé',
+        'Plan de table interactif',
+        'Liste de mariage et cagnotte',
+        'Messagerie illimitée',
+        'Support prioritaire'
+      ],
+      isActive: true,
+      isPopular: true,
+      maxPhotos: 100
+    },
+    {
+      id: 'test-pro-monthly',
+      name: 'Pro',
+      description: 'Pour les professionnels',
+      price: 49.99,
+      currency: 'EUR',
+      billingInterval: 'MONTHLY' as const,
+      features: [
+        'Toutes les fonctionnalités Premium',
+        'Multi-projets',
+        'Statistiques avancées',
+        'API d\'intégration',
+        'Support dédié 24/7',
+        'Formation personnalisée'
+      ],
+      isActive: true,
+      isPopular: false,
+      maxPhotos: 1000
+    }
+  ]
+
+  // Affichage de l'état de chargement
+  if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -89,11 +143,126 @@ export default function Subscription() {
     )
   }
 
-  // Filtrer les plans selon l'intervalle de facturation
-  const filteredPlans = plans.filter(plan => plan.billingInterval === billingInterval)
+  // Mode de test - affichage spécial
+  if (testMode || (error && error.includes('Vous devez être connecté'))) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center py-12">
+          <TestTube className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Mode Test - Intégration Stripe
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            La base de données a des problèmes de connexion, mais vous pouvez tester l'intégration Stripe directement.
+          </p>
+          
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8">
+            <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">
+              🧪 Test de l'Intégration Stripe
+            </h3>
+            <p className="text-blue-800 dark:text-blue-200 mb-4">
+              Vous pouvez tester les fonctionnalités de paiement Stripe même sans connexion à la base de données.
+            </p>
+            <Button 
+              onClick={() => setTestMode(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <TestTube className="h-4 w-4 mr-2" />
+              Activer le Mode Test
+            </Button>
+          </div>
+
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100 mb-4">
+              🔧 Résolution du Problème de Base de Données
+            </h3>
+            <p className="text-yellow-800 dark:text-yellow-200 mb-4">
+              Pour résoudre le problème d'authentification MongoDB :
+            </p>
+            <ul className="text-left text-yellow-800 dark:text-yellow-200 space-y-2">
+              <li>1. Allez sur <a href="https://cloud.mongodb.com/" target="_blank" className="underline">MongoDB Atlas</a></li>
+              <li>2. Vérifiez que l'utilisateur "aiproject" existe</li>
+              <li>3. Vérifiez que le mot de passe est correct</li>
+              <li>4. Vérifiez que l'IP est autorisée (0.0.0.0/0)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Affichage si l'utilisateur n'est pas connecté
+  if (status === 'unauthenticated') {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center py-12">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Connexion requise
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Vous devez être connecté pour accéder à vos abonnements.
+          </p>
+          <Button asChild>
+            <a href="/auth/login">Se connecter</a>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Affichage des erreurs
+  if (error && !testMode) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center py-12">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Erreur de chargement
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            {error}
+          </p>
+          <div className="space-x-4">
+            <Button onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+            <Button variant="outline" onClick={() => setTestMode(true)}>
+              <TestTube className="h-4 w-4 mr-2" />
+              Mode Test Stripe
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Utiliser les plans de test si en mode test
+  const displayPlans = testMode ? testPlans : plans
+  const filteredPlans = displayPlans.filter(plan => plan.billingInterval === billingInterval)
 
   return (
     <div className="max-w-7xl mx-auto">
+      {testMode && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <TestTube className="h-5 w-5 text-blue-600 mr-2" />
+              <span className="text-blue-800 dark:text-blue-200 font-medium">
+                Mode Test Stripe Activé
+              </span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setTestMode(false)}
+            >
+              Désactiver
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-12">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Abonnement et Paiement
@@ -129,7 +298,7 @@ export default function Subscription() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         {filteredPlans.map((plan) => {
           return (
             <Card 
@@ -191,223 +360,39 @@ export default function Subscription() {
         })}
       </div>
 
-      {/* Abonnement actuel */}
-      {subscription && (
+      {/* Guide de test Stripe */}
+      {testMode && (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Votre abonnement actuel</CardTitle>
-            <CardDescription>
-              Statut: {subscription.status === 'TRIAL' ? 'Essai gratuit' : 'Actif'}
-            </CardDescription>
+            <CardTitle className="flex items-center">
+              <TestTube className="h-5 w-5 mr-2" />
+              Guide de Test Stripe
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
               <div>
-                <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                  Plan actuel
-                </h3>
-                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {subscription.plan.name}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {subscription.plan.description}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {subscription.plan.price}€ / {subscription.plan.billingInterval === 'YEARLY' ? 'an' : 'mois'}
-                  </p>
-                </div>
+                <h3 className="font-semibold mb-2">Cartes de Test Stripe :</h3>
+                <ul className="space-y-2 text-sm">
+                  <li><strong>Succès :</strong> 4242 4242 4242 4242 (exp: 12/34, CVC: 123)</li>
+                  <li><strong>Échec :</strong> 4000 0000 0000 0002 (exp: 12/34, CVC: 123)</li>
+                  <li><strong>3D Secure :</strong> 4000 0025 0000 3155 (exp: 12/34, CVC: 123)</li>
+                </ul>
               </div>
               <div>
-                <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                  Période actuelle
-                </h3>
-                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                  <p className="text-sm text-gray-500">
-                    Du {new Date(subscription.currentPeriodStart).toLocaleDateString('fr-FR')}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Au {new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR')}
-                  </p>
-                  {subscription.cancelAtPeriodEnd && (
-                    <p className="text-sm text-orange-600 mt-2">
-                      ⚠️ Annulé à la fin de la période
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-            {!subscription.cancelAtPeriodEnd && (
-              <div className="mt-6">
-                <Button 
-                  variant="outline" 
-                  onClick={handleCancelSubscription}
-                  className="text-red-600 border-red-600 hover:bg-red-50"
-                >
-                  Annuler l&apos;abonnement
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Informations de paiement */}
-      {showPaymentInfo && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Informations de paiement</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                    Carte de crédit
-                  </h3>
-                  <div className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <CreditCard className="h-6 w-6 text-gray-400" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        •••• •••• •••• 4242
-                      </p>
-                      <p className="text-sm text-gray-500">Expire le 12/24</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="ml-auto">
-                      Modifier
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                    Facturation
-                  </h3>
-                  <div className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <Building2 className="h-6 w-6 text-gray-400" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Château de Vaux-le-Vicomte
-                      </p>
-                      <p className="text-sm text-gray-500">FR 12 345 678 901</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="ml-auto">
-                      Modifier
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-                  Prochain paiement
-                </h3>
-                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <Calendar className="h-6 w-6 text-gray-400" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        15 février 2024
-                      </p>
-                      <p className="text-sm text-gray-500">Prochain renouvellement</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Plan Pro</span>
-                      <span className="text-gray-900 dark:text-white">79,00 €</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">TVA (20%)</span>
-                      <span className="text-gray-900 dark:text-white">15,80 €</span>
-                    </div>
-                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex justify-between text-sm font-medium">
-                        <span className="text-gray-900 dark:text-white">Total</span>
-                        <span className="text-gray-900 dark:text-white">94,80 €</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <h3 className="font-semibold mb-2">Étapes de Test :</h3>
+                <ol className="space-y-1 text-sm list-decimal list-inside">
+                  <li>Cliquez sur "S'abonner avec Stripe"</li>
+                  <li>Vous serez redirigé vers Stripe Checkout</li>
+                  <li>Remplissez les informations de carte</li>
+                  <li>Confirmez le paiement</li>
+                  <li>Vous serez redirigé vers la page de succès</li>
+                </ol>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
-
-      {/* Historique des paiements */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Historique des paiements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Montant
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Statut
-                  </th>
-                  <th scope="col" className="relative px-6 py-3">
-                    <span className="sr-only">Action</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    15 Jan 2024
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    Plan Pro - Janvier 2024
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    94,80 €
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                      Payé
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button variant="ghost" size="sm">
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    15 Déc 2023
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    Plan Pro - Décembre 2023
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    94,80 €
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                      Payé
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button variant="ghost" size="sm">
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Alert Dialog pour les erreurs importantes */}
       {showErrorAlert && errorAlertProps && (

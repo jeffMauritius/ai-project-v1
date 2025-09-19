@@ -303,6 +303,10 @@ model User {
   image         String?
   role          String    @default("USER")
   
+  // Stripe Integration
+  stripeCustomerId String? // ID client Stripe
+  stripePaymentMethodId String? // ID méthode de paiement Stripe
+  
   // Relations
   partners      Partner[]
   profile       Profile?
