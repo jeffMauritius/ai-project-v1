@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
@@ -45,12 +46,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Mettre à jour l'abonnement
+    if (subscription.stripeSubscriptionId) {
+      // Annuler l'abonnement dans Stripe
+      await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+        cancel_at_period_end: cancelAtPeriodEnd
+      })
+    }
+
+    // Mettre à jour l'abonnement dans notre base de données
     const updatedSubscription = await prisma.subscription.update({
       where: { id: subscription.id },
       data: {
-        cancelAtPeriodEnd,
-        status: cancelAtPeriodEnd ? subscription.status : 'CANCELLED'
+        cancelAtPeriodEnd: cancelAtPeriodEnd
       },
       include: {
         plan: true
@@ -58,10 +65,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
-      subscription: updatedSubscription,
-      message: cancelAtPeriodEnd 
-        ? 'L\'abonnement sera annulé à la fin de la période actuelle'
-        : 'L\'abonnement a été annulé immédiatement'
+      subscription: updatedSubscription
     })
   } catch (error) {
     console.error('Erreur lors de l\'annulation de l\'abonnement:', error)
@@ -70,4 +74,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}

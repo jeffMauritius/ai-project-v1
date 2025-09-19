@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check, CreditCard, Calendar, Building2, ArrowRight, Loader2 } from "lucide-react"
@@ -14,12 +15,28 @@ export default function Subscription() {
   const [showErrorAlert, setShowErrorAlert] = useState(false)
   const [errorAlertProps, setErrorAlertProps] = useState<any>(null)
   const [showPaymentInfo, setShowPaymentInfo] = useState(false)
-  const { subscription, billingInfo, plans, loading, createSubscription, cancelSubscription } = useSubscription()
+  const searchParams = useSearchParams()
+  const { subscription, billingInfo, plans, loading, createSubscriptionWithStripe, cancelSubscription } = useSubscription()
   const { showSuccess, showSubscriptionError, showWarning, showSubscriptionAlert } = useToast()
+
+  // Gérer le retour de Stripe Checkout
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const canceled = searchParams.get('canceled')
+    const sessionId = searchParams.get('session_id')
+
+    if (success && sessionId) {
+      showSuccess("Votre abonnement a été créé avec succès ! Vous bénéficiez d'un essai gratuit de 14 jours.", {
+        title: "✅ Abonnement créé"
+      })
+    } else if (canceled) {
+      showWarning("Le processus de paiement a été annulé. Vous pouvez réessayer à tout moment.")
+    }
+  }, [searchParams, showSuccess, showWarning])
 
   const handleCreateSubscription = async (planId: string) => {
     try {
-      // Pour l'instant, on utilise des données de facturation par défaut
+      // Données de facturation par défaut (à remplacer par un formulaire)
       const defaultBillingInfo = {
         billingName: "Château de Vaux-le-Vicomte",
         billingEmail: "contact@vaux-le-vicomte.com",
@@ -30,24 +47,21 @@ export default function Subscription() {
         siret: "12345678901234"
       } as const
 
-      await createSubscription(planId, billingInterval, defaultBillingInfo)
-      showSuccess("Votre abonnement a été créé avec succès. Vous bénéficiez d'un essai gratuit de 14 jours.", {
-        title: "✅ Abonnement créé"
-      })
+      await createSubscriptionWithStripe(planId, billingInterval, defaultBillingInfo)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Erreur lors de la création de l'abonnement"
       
       // Pour l'erreur d'abonnement existant, on peut utiliser l'alerte dialog
       if (errorMessage.includes("Un abonnement actif existe déjà")) {
-        const alertProps = showSubscriptionAlert({
-          errorType: 'existing_subscription',
+        const alertProps = {
+          errorType: 'existing_subscription' as const,
           errorMessage: errorMessage,
           onAction: () => {
             setShowErrorAlert(false)
             // Ici vous pourriez naviguer vers la gestion de l'abonnement
           },
           actionLabel: "Gérer mon abonnement"
-        })
+        }
         setErrorAlertProps(alertProps)
         setShowErrorAlert(true)
       } else {
@@ -74,8 +88,6 @@ export default function Subscription() {
       </div>
     )
   }
-
-
 
   // Filtrer les plans selon l'intervalle de facturation
   const filteredPlans = plans.filter(plan => plan.billingInterval === billingInterval)
@@ -157,9 +169,21 @@ export default function Subscription() {
                   onClick={() => handleCreateSubscription(plan.id)}
                   className="w-full"
                   variant={subscription?.planId === plan.id ? 'default' : 'outline'}
-                  disabled={subscription?.planId === plan.id}
+                  disabled={subscription?.planId === plan.id || loading}
                 >
-                  {subscription?.planId === plan.id ? 'Plan actuel' : 'Sélectionner'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Traitement...
+                    </>
+                  ) : subscription?.planId === plan.id ? (
+                    'Plan actuel'
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      S'abonner avec Stripe
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>

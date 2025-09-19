@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Subscription, SubscriptionPlan, BillingInfo } from '@/types/subscription'
+import { useStripe } from './useStripe'
 
 // Types pour les données de facturation
 interface BillingInfoData {
@@ -19,6 +20,7 @@ interface UseSubscriptionReturn {
   plans: SubscriptionPlan[]
   loading: boolean
   createSubscription: (planId: string, billingInterval: 'MONTHLY' | 'YEARLY', billingInfo: BillingInfoData) => Promise<void>
+  createSubscriptionWithStripe: (planId: string, billingInterval: 'MONTHLY' | 'YEARLY', billingInfo: BillingInfoData) => Promise<void>
   cancelSubscription: (cancelAtPeriodEnd?: boolean) => Promise<void>
   updateBillingInfo: (billingInfo: Partial<BillingInfoData>) => Promise<void>
   refreshSubscription: () => Promise<void>
@@ -29,6 +31,7 @@ export function useSubscription(): UseSubscriptionReturn {
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null)
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
   const [loading, setLoading] = useState(true)
+  const { createCheckoutSession } = useStripe()
 
   const fetchSubscription = async () => {
     try {
@@ -83,6 +86,17 @@ export function useSubscription(): UseSubscriptionReturn {
       const data = await response.json()
       setSubscription(data.subscription)
       setBillingInfo(data.billingInfo)
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createSubscriptionWithStripe = async (planId: string, billingInterval: 'MONTHLY' | 'YEARLY', billingInfo: BillingInfoData) => {
+    try {
+      setLoading(true)
+      await createCheckoutSession(planId, billingInterval, billingInfo)
     } catch (err) {
       throw err
     } finally {
@@ -159,8 +173,9 @@ export function useSubscription(): UseSubscriptionReturn {
     plans,
     loading,
     createSubscription,
+    createSubscriptionWithStripe,
     cancelSubscription,
     updateBillingInfo,
     refreshSubscription
   }
-} 
+}
