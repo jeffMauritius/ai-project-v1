@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { loginSchema, type LoginFormData } from '@/lib/validation-schemas'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { TestTube, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 
 export default function Login() {
   const router = useRouter()
@@ -77,36 +77,10 @@ export default function Login() {
     }
   }
 
-  // Fonction pour le mode test Stripe
-  const handleTestMode = () => {
-    // Rediriger directement vers la page d'abonnement en mode test
-    router.push('/partner-dashboard/subscription?test=true')
-  }
 
   return (
     <div className="sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        {/* Alerte pour le mode test */}
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <div className="flex items-center mb-2">
-            <TestTube className="h-5 w-5 text-blue-600 mr-2" />
-            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-              Mode Test Stripe Disponible
-            </h3>
-          </div>
-          <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-            La base de données a des problèmes de connexion, mais vous pouvez tester l'intégration Stripe directement.
-          </p>
-          <Button 
-            onClick={handleTestMode}
-            variant="outline"
-            size="sm"
-            className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-800"
-          >
-            <TestTube className="h-4 w-4 mr-2" />
-            Tester Stripe (Sans Connexion)
-          </Button>
-        </div>
 
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div>
