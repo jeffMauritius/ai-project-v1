@@ -293,11 +293,7 @@ async function getStorefrontData(id: string) {
   try {
     const storefront = await prisma.partnerStorefront.findUnique({
       where: { id },
-      select: {
-        id: true,
-        type: true,
-        isActive: true,
-        images: true, // Inclure le tableau images du storefront
+      include: {
         media: {
           orderBy: { order: 'asc' }
         },
@@ -372,19 +368,6 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
   
   // Récupérer les images selon le type de storefront
   let allImages = storefront.media
-  
-  // Si pas de médias dans la table relationnelle, utiliser les images du storefront
-  if (allImages.length === 0 && storefront.images && storefront.images.length > 0) {
-    allImages = storefront.images.map((url, index) => ({
-      id: `img-${index}`,
-      url: url,
-      type: 'IMAGE',
-      title: null,
-      description: null,
-      order: index
-    }))
-  }
-  
   if (isVenue && storefront.establishment?.images && storefront.establishment.images.length > 0) {
     // Pour les lieux, transformer les images de l'établissement vers Vercel Blob Storage
     const transformedEstablishment = transformEstablishmentImages({

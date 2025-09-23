@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
 export async function PUT(request: NextRequest) {
@@ -35,7 +36,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Mettre à jour ou créer les informations de facturation
+    // Mettre à jour les informations de facturation
     const updatedBillingInfo = await prisma.billingInfo.upsert({
       where: { userId: user.id },
       update: {
@@ -48,9 +49,22 @@ export async function PUT(request: NextRequest) {
       }
     })
 
+    // Si l'utilisateur a un customer Stripe, mettre à jour les informations
+    if (user.stripeCustomerId) {
+      await stripe.customers.update(user.stripeCustomerId, {
+        name: billingInfo.billingName,
+        email: billingInfo.billingEmail,
+        address: {
+          line1: billingInfo.billingAddress,
+          city: billingInfo.billingCity,
+          postal_code: billingInfo.billingPostalCode,
+          country: billingInfo.billingCountry
+        }
+      })
+    }
+
     return NextResponse.json({
-      billingInfo: updatedBillingInfo,
-      message: 'Informations de facturation mises à jour'
+      billingInfo: updatedBillingInfo
     })
   } catch (error) {
     console.error('Erreur lors de la mise à jour des informations de facturation:', error)
@@ -59,4 +73,4 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}

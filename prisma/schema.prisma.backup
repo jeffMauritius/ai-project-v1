@@ -204,6 +204,7 @@ model PartnerStorefront {
   // Informations publiques
   isActive    Boolean @default(false)
   logo        String?
+  images      String[] @default([]) // URLs des images de la vitrine
   
   // Relations (soit vers un lieu, soit vers un partenaire)
   establishmentId String? @db.ObjectId
@@ -315,6 +316,7 @@ model User {
   tables        Table[] // Tables du plan de table créées par l'utilisateur
   photoAlbums   PhotoAlbum[]
   photos        UserPhoto[]
+  weddingProviders WeddingProvider[] // Prestataires de mariage de l'utilisateur
 
   @@map("users")
 }
