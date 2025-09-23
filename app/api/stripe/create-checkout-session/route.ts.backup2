@@ -92,25 +92,11 @@ export async function POST(request: NextRequest) {
     const billingInfoData = await prisma.billingInfo.upsert({
       where: { userId: user.id },
       update: {
-        billingName: billingInfo.billingName || billingInfo.companyName || user.name || 'Non renseigné',
-        billingEmail: billingInfo.billingEmail || user.email,
-        billingAddress: billingInfo.billingAddress || billingInfo.street || 'Non renseigné',
-        billingCity: billingInfo.billingCity || billingInfo.city || 'Non renseigné',
-        billingPostalCode: billingInfo.billingPostalCode || billingInfo.postalCode || '00000',
-        billingCountry: billingInfo.billingCountry || billingInfo.country || 'France',
-        siret: billingInfo.siret || null,
-        vatNumber: billingInfo.vatNumber || null,
+        ...billingInfo,
         updatedAt: new Date()
       },
       create: {
-        billingName: billingInfo.billingName || billingInfo.companyName || user.name || 'Non renseigné',
-        billingEmail: billingInfo.billingEmail || user.email,
-        billingAddress: billingInfo.billingAddress || billingInfo.street || 'Non renseigné',
-        billingCity: billingInfo.billingCity || billingInfo.city || 'Non renseigné',
-        billingPostalCode: billingInfo.billingPostalCode || billingInfo.postalCode || '00000',
-        billingCountry: billingInfo.billingCountry || billingInfo.country || 'France',
-        siret: billingInfo.siret || null,
-        vatNumber: billingInfo.vatNumber || null,
+        ...billingInfo,
         userId: user.id
       }
     })

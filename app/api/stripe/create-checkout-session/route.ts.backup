@@ -88,33 +88,6 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Créer ou mettre à jour les informations de facturation
-    const billingInfoData = await prisma.billingInfo.upsert({
-      where: { userId: user.id },
-      update: {
-        billingName: billingInfo.billingName || billingInfo.companyName || user.name || 'Non renseigné',
-        billingEmail: billingInfo.billingEmail || user.email,
-        billingAddress: billingInfo.billingAddress || billingInfo.street || 'Non renseigné',
-        billingCity: billingInfo.billingCity || billingInfo.city || 'Non renseigné',
-        billingPostalCode: billingInfo.billingPostalCode || billingInfo.postalCode || '00000',
-        billingCountry: billingInfo.billingCountry || billingInfo.country || 'France',
-        siret: billingInfo.siret || null,
-        vatNumber: billingInfo.vatNumber || null,
-        updatedAt: new Date()
-      },
-      create: {
-        billingName: billingInfo.billingName || billingInfo.companyName || user.name || 'Non renseigné',
-        billingEmail: billingInfo.billingEmail || user.email,
-        billingAddress: billingInfo.billingAddress || billingInfo.street || 'Non renseigné',
-        billingCity: billingInfo.billingCity || billingInfo.city || 'Non renseigné',
-        billingPostalCode: billingInfo.billingPostalCode || billingInfo.postalCode || '00000',
-        billingCountry: billingInfo.billingCountry || billingInfo.country || 'France',
-        siret: billingInfo.siret || null,
-        vatNumber: billingInfo.vatNumber || null,
-        userId: user.id
-      }
-    })
-
     // Créer le produit et le prix dans Stripe
     let stripePriceId: string
 
@@ -169,29 +142,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Créer l'abonnement dans notre base de données AVANT la session Stripe
-    // Cela garantit que l'abonnement existe même si le webhook échoue
-    const now = new Date()
-    const trialEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) // 14 jours d'essai
-
-    const dbSubscription = await prisma.subscription.create({
-      data: {
-        userId: user.id,
-        planId: planId,
-        status: 'TRIAL',
-        currentPeriodStart: now,
-        currentPeriodEnd: trialEnd,
-        trialStart: now,
-        trialEnd: trialEnd,
-        cancelAtPeriodEnd: false
-      },
-      include: {
-        plan: true
-      }
-    })
-
-    console.log('[CHECKOUT] Abonnement créé dans la base de données:', dbSubscription.id)
-
     // Créer la session de checkout
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -210,24 +160,19 @@ export async function POST(request: NextRequest) {
         metadata: {
           userId: user.id,
           planId: plan.id,
-          billingInterval: billingInterval,
-          dbSubscriptionId: dbSubscription.id // Ajouter l'ID de l'abonnement DB
+          billingInterval: billingInterval
         }
       },
       metadata: {
         userId: user.id,
         planId: plan.id,
-        billingInterval: billingInterval,
-        dbSubscriptionId: dbSubscription.id // Ajouter l'ID de l'abonnement DB
+        billingInterval: billingInterval
       }
     })
 
-    console.log('[CHECKOUT] Session de checkout créée:', checkoutSession.id)
-
     return NextResponse.json({
       sessionId: checkoutSession.id,
-      url: checkoutSession.url,
-      subscription: dbSubscription // Retourner l'abonnement créé
+      url: checkoutSession.url
     })
   } catch (error) {
     console.error('Erreur lors de la création de la session de checkout:', error)

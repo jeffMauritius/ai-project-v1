@@ -107,47 +107,79 @@ export async function POST(request: NextRequest) {
 
       case 'customer.subscription.created': {
         console.log('[WEBHOOK] Traitement customer.subscription.created')
+      case 'customer.subscription.created': {
+        console.log('[WEBHOOK] Traitement customer.subscription.created')
         const subscription = event.data.object as Stripe.Subscription
         const userId = subscription.metadata?.userId
         const planId = subscription.metadata?.planId
+        const dbSubscriptionId = subscription.metadata?.dbSubscriptionId
 
-        console.log('[WEBHOOK] Données de subscription:', { 
+        console.log('[WEBHOOK] Données de subscription:, { 
           subscriptionId: subscription.id,
           userId, 
           planId,
+          dbSubscriptionId,
           status: subscription.status 
         })
 
         if (userId && planId) {
-          // Mettre à jour l'abonnement existant ou en créer un nouveau
-          await prisma.subscription.upsert({
-            where: {
-              stripeSubscriptionId: subscription.id
-            },
-            update: {
-              status: subscription.status === 'active' ? 'ACTIVE' : 'TRIAL',
-              currentPeriodStart: new Date(subscription.current_period_start * 1000),
-              currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-              trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-              trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
-            },
-            create: {
-              userId: userId,
-              planId: planId,
-              status: subscription.status === 'active' ? 'ACTIVE' : 'TRIAL',
-              currentPeriodStart: new Date(subscription.current_period_start * 1000),
-              currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-              trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-              trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-              stripeSubscriptionId: subscription.id
+          // Mettre à jour l'abonnement existant en utilisant l'ID de la base de données
+          if (dbSubscriptionId) {
+            await prisma.subscription.update({
+              where: { id: dbSubscriptionId },
+              data: {
+                stripeSubscriptionId: subscription.id,
+                status: subscription.status === 'active' ? 'ACTIVE' : 'TRIAL',
+                currentPeriodStart: new Date(subscription.current_period_start * 1000),
+                currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+                trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
+              }
+            })
+            console.log('[WEBHOOK] Abonnement mis à jour avec Stripe ID:, dbSubscriptionId, '->', subscription.id)
+          } else {
+            // Fallback: chercher par userId et planId si pas d'ID DB
+            const existingSubscription = await prisma.subscription.findFirst({
+              where: {
+                userId: userId,
+                planId: planId,
+                stripeSubscriptionId: null
+              }
+            })
+            
+            if (existingSubscription) {
+              await prisma.subscription.update({
+                where: { id: existingSubscription.id },
+                data: {
+                  stripeSubscriptionId: subscription.id,
+                  status: subscription.status === 'active' ? 'ACTIVE' : 'TRIAL',
+                  currentPeriodStart: new Date(subscription.current_period_start * 1000),
+                  currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                  trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+                  trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
+                }
+              })
+              console.log('[WEBHOOK] Abonnement trouvé et mis à jour:, existingSubscription.id, '->', subscription.id)
+            } else {
+              // Dernier recours: créer un nouvel abonnement
+              await prisma.subscription.create({
+                data: {
+                  userId: userId,
+                  planId: planId,
+                  status: subscription.status === 'active' ? 'ACTIVE' : 'TRIAL',
+                  currentPeriodStart: new Date(subscription.current_period_start * 1000),
+                  currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                  trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+                  trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+                  stripeSubscriptionId: subscription.id
+                }
+              })
+              console.log('[WEBHOOK] Nouvel abonnement créé:, subscription.id)
             }
-          })
-
-          console.log('[WEBHOOK] Abonnement synchronisé:', subscription.id)
+          }
         }
         break
       }
-
       case 'customer.subscription.updated': {
         console.log('[WEBHOOK] Traitement customer.subscription.updated')
         const subscription = event.data.object as Stripe.Subscription
