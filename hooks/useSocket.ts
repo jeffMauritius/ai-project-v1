@@ -1,137 +1,167 @@
-'use client'
-
-import { useEffect, useState, useRef } from 'react'
-import { Socket } from 'socket.io-client'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { io, Socket } from 'socket.io-client'
 import { useSession } from 'next-auth/react'
-import { getSocket, disconnectSocket } from '@/lib/socket-client'
 
 interface Message {
   id: string
   conversationId: string
   content: string
   senderType: 'user' | 'provider'
-  senderId: string
-  senderName?: string
-  messageType: string
-  metadata?: any
+  senderName: string
+  senderEmail: string
   createdAt: string
 }
 
-interface UseSocketReturn {
-  socket: Socket | null
-  isConnected: boolean
-  sendMessage: (conversationId: string, content: string, messageType?: string, metadata?: any) => void
-  joinConversation: (conversationId: string) => void
-  leaveConversation: (conversationId: string) => void
-  onNewMessage: (callback: (message: Message) => void) => void
-  onTyping: (callback: (data: { userId: string; userName: string; isTyping: boolean }) => void) => void
-  emitTyping: (conversationId: string, isTyping: boolean) => void
-}
-
-export function useSocket(): UseSocketReturn {
+export const useSocket = () => {
   const { data: session } = useSession()
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const socketRef = useRef<Socket | null>(null)
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const reconnectAttempts = useRef(0)
+  const maxReconnectAttempts = 5
 
+  // Initialiser la connexion Socket.IO
   useEffect(() => {
     if (!session?.user?.id) return
 
-    // Créer la connexion Socket.io
-    const newSocket = getSocket()
-    if (!newSocket) return
+    console.log('🔌 Initialisation Socket.IO...')
+    
+    const newSocket = io(process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000', {
+      path: '/api/socketio',
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      forceNew: true,
+    })
+
+    // Connexion établie
+    newSocket.on('connect', () => {
+      console.log('✅ Connexion Socket.IO établie:', newSocket.id)
+      setIsConnected(true)
+      reconnectAttempts.current = 0
+      
+      // Rejoindre la conversation actuelle si elle existe
+      if (currentConversationId) {
+        newSocket.emit('join-conversation', currentConversationId)
+      }
+    })
+
+    // Déconnexion
+    newSocket.on('disconnect', (reason) => {
+      console.log('❌ Connexion Socket.IO fermée:', reason)
+      setIsConnected(false)
+      
+      // Tentative de reconnexion automatique
+      if (reconnectAttempts.current < maxReconnectAttempts) {
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 10000)
+        console.log(`🔄 Tentative de reconnexion ${reconnectAttempts.current + 1}/${maxReconnectAttempts} dans ${delay}ms`)
+        
+        reconnectTimeoutRef.current = setTimeout(() => {
+          reconnectAttempts.current++
+          newSocket.connect()
+        }, delay)
+      }
+    })
+
+    // Erreur de connexion
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Erreur de connexion Socket.IO:', error)
+      setIsConnected(false)
+    })
 
     socketRef.current = newSocket
     setSocket(newSocket)
 
-    // Gestion des événements de connexion
-    newSocket.on('connect', () => {
-      console.log('Socket connected:', newSocket.id)
-      setIsConnected(true)
-      
-      // Authentifier la socket
-      newSocket.emit('authenticate', {
-        userId: session.user.id,
-        userName: session.user.name,
-        userEmail: session.user.email
-      })
-    })
-
-    newSocket.on('disconnect', () => {
-      console.log('Socket disconnected')
-      setIsConnected(false)
-    })
-
-    newSocket.on('authenticated', (data) => {
-      console.log('Socket authenticated:', data)
-    })
-
-    newSocket.on('auth_error', (error) => {
-      console.error('Socket authentication error:', error)
-    })
-
-    newSocket.on('error', (error) => {
-      console.error('Socket error:', error)
-    })
-
-    // Nettoyage à la déconnexion
     return () => {
-      disconnectSocket()
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
+      newSocket.disconnect()
       socketRef.current = null
       setSocket(null)
       setIsConnected(false)
     }
   }, [session?.user?.id])
 
-  const sendMessage = (conversationId: string, content: string, messageType = 'text', metadata?: any) => {
-    if (socket && isConnected) {
-      socket.emit('send_message', {
-        conversationId,
-        content,
-        messageType,
-        metadata
-      })
+  // Rejoindre une conversation
+  const joinConversation = useCallback((conversationId: string) => {
+    if (!socket || !isConnected) {
+      console.log('⚠️ Socket non connecté, impossible de rejoindre la conversation')
+      return
     }
-  }
 
-  const joinConversation = (conversationId: string) => {
-    if (socket && isConnected) {
-      socket.emit('join_conversation', { conversationId })
-    }
-  }
+    console.log('🔌 Rejoindre la conversation:', conversationId)
+    socket.emit('join-conversation', conversationId)
+    setCurrentConversationId(conversationId)
+  }, [socket, isConnected])
 
-  const leaveConversation = (conversationId: string) => {
-    if (socket && isConnected) {
-      socket.leave(`conversation:${conversationId}`)
-    }
-  }
+  // Quitter une conversation
+  const leaveConversation = useCallback((conversationId: string) => {
+    if (!socket || !isConnected) return
 
-  const onNewMessage = (callback: (message: Message) => void) => {
-    if (socket) {
-      socket.on('new_message', callback)
-    }
-  }
+    console.log('🔌 Quitter la conversation:', conversationId)
+    socket.emit('leave-conversation', conversationId)
+    setCurrentConversationId(null)
+  }, [socket, isConnected])
 
-  const onTyping = (callback: (data: { userId: string; userName: string; isTyping: boolean }) => void) => {
-    if (socket) {
-      socket.on('user_typing', callback)
+  // Envoyer un message
+  const sendMessage = useCallback((conversationId: string, content: string, senderType: 'user' | 'provider', senderName: string, senderEmail: string) => {
+    if (!socket || !isConnected) {
+      console.log('⚠️ Socket non connecté, impossible d\'envoyer le message')
+      return
     }
-  }
 
-  const emitTyping = (conversationId: string, isTyping: boolean) => {
-    if (socket && isConnected) {
-      socket.emit('typing', { conversationId, isTyping })
+    console.log('💬 Envoi du message via Socket.IO:', { conversationId, content, senderType })
+    
+    socket.emit('new-message', {
+      conversationId,
+      content,
+      senderType,
+      senderName,
+      senderEmail
+    })
+  }, [socket, isConnected])
+
+  // Écouter les nouveaux messages
+  const onNewMessage = useCallback((callback: (message: Message) => void) => {
+    if (!socket) return () => {}
+
+    const handleMessage = (message: Message) => {
+      console.log('💬 Nouveau message reçu via Socket.IO:', message)
+      callback(message)
     }
-  }
+
+    socket.on('message-received', handleMessage)
+    
+    return () => {
+      socket.off('message-received', handleMessage)
+    }
+  }, [socket])
+
+  // Écouter les erreurs
+  const onError = useCallback((callback: (error: Error) => void) => {
+    if (!socket) return () => {}
+
+    const handleError = (error: Error) => {
+      console.error('❌ Erreur Socket.IO:', error)
+      callback(error)
+    }
+
+    socket.on('connect_error', handleError)
+    
+    return () => {
+      socket.off('connect_error', handleError)
+    }
+  }, [socket])
 
   return {
     socket,
     isConnected,
-    sendMessage,
     joinConversation,
     leaveConversation,
+    sendMessage,
     onNewMessage,
-    onTyping,
-    emitTyping
+    onError,
   }
 }

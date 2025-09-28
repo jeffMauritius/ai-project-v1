@@ -38,10 +38,11 @@ export default function ChatCard({ companyName, storefrontId }: ChatCardProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Auto-scroll vers le bas (désactivé pour éviter la descente vers le footer)
+  // Auto-scroll vers le bas
   const scrollToBottom = () => {
-    // Désactivé pour éviter les problèmes de scroll
-    // messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
   }
 
   const loadMessages = useCallback(async () => {
