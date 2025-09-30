@@ -322,7 +322,6 @@ model User {
   photoAlbums   PhotoAlbum[]
   photos        UserPhoto[]
   weddingProviders WeddingProvider[] // Prestataires de mariage de l'utilisateur
-  recommendedPartners RecommendedPartner[] // Partenaires recommandés par l'utilisateur
 
   @@map("users")
 }
