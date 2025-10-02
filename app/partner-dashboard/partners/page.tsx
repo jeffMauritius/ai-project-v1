@@ -265,10 +265,7 @@ export default function Partners() {
           </DialogTrigger>
           <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
             <DialogHeader className="flex-shrink-0">
-              <DialogTitle>Choisir un partenaire à recommander</DialogTitle>
-              <DialogDescription>
-                Sélectionnez un partenaire du système pour l'ajouter à vos recommandations.
-              </DialogDescription>
+              <DialogTitle>Selectionner un partenaire</DialogTitle>
             </DialogHeader>
             
             {/* Filtres - Fixes en haut */}
@@ -288,7 +285,7 @@ export default function Partners() {
                   </div>
                 </div>
                 <div className="w-64">
-                  <Label htmlFor="type">Type de prestataire</Label>
+                  <Label htmlFor="type">Types de Partenaire</Label>
                   <Select value={selectedType} onValueChange={setSelectedType}>
                     <SelectTrigger>
                       <SelectValue placeholder="Tous les types" />

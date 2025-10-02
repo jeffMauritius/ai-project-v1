@@ -273,13 +273,6 @@ export default function Results() {
             </div>
           </div>
 
-          {/* Debug: afficher le nombre de résultats */}
-          <div className="mb-4 p-4 bg-blue-100 rounded">
-            <p>🔍 Debug: {searchResults.length} résultats trouvés</p>
-            <p>📄 Page {currentPage} sur {totalPages} ({paginatedResults.length} résultats affichés)</p>
-            <p>Query: {searchQuery}</p>
-            <p>Loading: {isLoading ? 'Oui' : 'Non'}</p>
-          </div>
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedResults.map((result, index) => {
