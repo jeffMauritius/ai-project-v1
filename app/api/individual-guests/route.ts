@@ -65,6 +65,22 @@ export async function POST(request: Request) {
       return new NextResponse("Groupe non trouvé", { status: 404 })
     }
 
+    // Vérifier si un invité avec ce nom complet existe déjà pour cet utilisateur
+    const existingGuest = await prisma.guest.findFirst({
+      where: {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        userId: session.user.id
+      }
+    })
+
+    if (existingGuest) {
+      return new NextResponse(
+        `Un invité avec le nom "${firstName.trim()} ${lastName.trim()}" existe déjà`, 
+        { status: 409 }
+      )
+    }
+
     // Vérifier que le groupe n'a pas atteint sa limite d'invités
     const currentGuestCount = await prisma.guest.count({
       where: {
@@ -81,9 +97,9 @@ export async function POST(request: Request) {
 
     const individualGuest = await prisma.guest.create({
       data: {
-        firstName,
-        lastName,
-        email,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
         status,
         userId: session.user.id,
         groupId
@@ -104,4 +120,4 @@ export async function POST(request: Request) {
     console.error("[INDIVIDUAL_GUESTS_POST] Erreur:", error)
     return new NextResponse("Erreur interne du serveur", { status: 500 })
   }
-} 
+}

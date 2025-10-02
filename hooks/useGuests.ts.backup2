@@ -117,20 +117,10 @@ export function useGuests() {
         })
         return newGroup
       } else {
-        // Essayer de parser l'erreur comme JSON d'abord
-        let errorMessage = "Impossible de créer le groupe"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          // Si ce n'est pas du JSON, utiliser le texte brut
-          const errorText = await response.text()
-          errorMessage = errorText || errorMessage
-        }
-        
+        const error = await response.text()
         toast({
           title: "Erreur",
-          description: errorMessage,
+          description: error || "Impossible de créer le groupe",
           variant: "destructive"
         })
         return null
@@ -173,20 +163,10 @@ export function useGuests() {
         })
         return updatedGroup
       } else {
-        // Essayer de parser l'erreur comme JSON d'abord
-        let errorMessage = "Impossible de mettre à jour le groupe"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          // Si ce n'est pas du JSON, utiliser le texte brut
-          const errorText = await response.text()
-          errorMessage = errorText || errorMessage
-        }
-        
+        const error = await response.text()
         toast({
           title: "Erreur",
-          description: errorMessage,
+          description: error || "Impossible de mettre à jour le groupe",
           variant: "destructive"
         })
         return null
@@ -223,20 +203,10 @@ export function useGuests() {
         })
         return true
       } else {
-        // Essayer de parser l'erreur comme JSON d'abord
-        let errorMessage = "Impossible de supprimer le groupe"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          // Si ce n'est pas du JSON, utiliser le texte brut
-          const errorText = await response.text()
-          errorMessage = errorText || errorMessage
-        }
-        
+        const error = await response.text()
         toast({
           title: "Erreur",
-          description: errorMessage,
+          description: error || "Impossible de supprimer le groupe",
           variant: "destructive"
         })
         return false
@@ -275,20 +245,10 @@ export function useGuests() {
         })
         return newGuest
       } else {
-        // Essayer de parser l'erreur comme JSON d'abord
-        let errorMessage = "Impossible d'ajouter l'invité"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          // Si ce n'est pas du JSON, utiliser le texte brut
-          const errorText = await response.text()
-          errorMessage = errorText || errorMessage
-        }
-        
+        const error = await response.text()
         toast({
           title: "Erreur",
-          description: errorMessage,
+          description: error || "Impossible d'ajouter l'invité",
           variant: "destructive"
         })
         return null
@@ -331,20 +291,10 @@ export function useGuests() {
         })
         return updatedGuest
       } else {
-        // Essayer de parser l'erreur comme JSON d'abord
-        let errorMessage = "Impossible de mettre à jour l'invité"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          // Si ce n'est pas du JSON, utiliser le texte brut
-          const errorText = await response.text()
-          errorMessage = errorText || errorMessage
-        }
-        
+        const error = await response.text()
         toast({
           title: "Erreur",
-          description: errorMessage,
+          description: error || "Impossible de mettre à jour l'invité",
           variant: "destructive"
         })
         return null
@@ -379,20 +329,10 @@ export function useGuests() {
         })
         return true
       } else {
-        // Essayer de parser l'erreur comme JSON d'abord
-        let errorMessage = "Impossible de supprimer l'invité"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          // Si ce n'est pas du JSON, utiliser le texte brut
-          const errorText = await response.text()
-          errorMessage = errorText || errorMessage
-        }
-        
+        const error = await response.text()
         toast({
           title: "Erreur",
-          description: errorMessage,
+          description: error || "Impossible de supprimer l'invité",
           variant: "destructive"
         })
         return false
@@ -430,4 +370,4 @@ export function useGuests() {
     fetchGuestGroups,
     fetchIndividualGuests
   }
-}
+} 
