@@ -12,7 +12,7 @@ const navigation = [
   { name: 'Messages', href: '/partner-dashboard/messages', icon: MessageSquare },
   { name: 'Leads', href: '/partner-dashboard/leads', icon: Inbox },
   { name: 'Statistiques', href: '/partner-dashboard/analytics', icon: LineChart },
-  { name: 'Partenaires recommandés', href: '/partner-dashboard/partners', icon: Users2 },
+  { name: 'Nos Partenaires', href: '/partner-dashboard/partners', icon: Users2 },
   { name: 'Ma vitrine', href: '/partner-dashboard/storefront', icon: Store },
   { name: 'Paramètres', href: '/partner-dashboard/settings', icon: Settings },
 ]

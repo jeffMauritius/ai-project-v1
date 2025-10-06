@@ -112,7 +112,15 @@ export function useSubscription(): UseSubscriptionReturn {
       setError(null)
       await createCheckoutSession(planId, billingInterval, billingInfo)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la création de l\'abonnement')
+      const error = err as Error & { isSubscriptionConflict?: boolean; existingSubscription?: any }
+      
+      if (error.isSubscriptionConflict) {
+        // Ne pas définir d'erreur pour les conflits d'abonnement, on les gère dans l'UI
+        setError(null)
+      } else {
+        setError(error.message || 'Erreur lors de la création de l\'abonnement')
+      }
+      
       throw err
     } finally {
       setLoading(false)

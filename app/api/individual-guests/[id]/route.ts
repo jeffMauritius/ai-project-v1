@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma"
 // PUT - Mettre à jour un invité individuel
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,6 +15,7 @@ export async function PUT(
       return new NextResponse("Non autorisé", { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { firstName, lastName, email, groupId, status } = body
 
@@ -25,13 +26,32 @@ export async function PUT(
     // Vérifier que l'invité appartient à l'utilisateur
     const existingGuest = await prisma.guest.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
 
     if (!existingGuest) {
       return new NextResponse("Invité non trouvé", { status: 404 })
+    }
+
+    // Si le nom est modifié, vérifier qu'il n'existe pas déjà
+    if ((firstName.trim() !== existingGuest.firstName) || (lastName.trim() !== existingGuest.lastName)) {
+      const duplicateGuest = await prisma.guest.findFirst({
+        where: {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          userId: session.user.id,
+          id: { not: id } // Exclure l'invité actuel
+        }
+      })
+
+      if (duplicateGuest) {
+        return new NextResponse(
+          `Un invité avec le nom "${firstName.trim()} ${lastName.trim()}" existe déjà`, 
+          { status: 409 }
+        )
+      }
     }
 
     // Vérifier que le nouveau groupe appartient à l'utilisateur
@@ -48,12 +68,12 @@ export async function PUT(
 
     const updatedGuest = await prisma.guest.update({
       where: {
-        id: params.id
+        id
       },
       data: {
-        firstName,
-        lastName,
-        email,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
         status,
         groupId
       },
@@ -78,7 +98,7 @@ export async function PUT(
 // DELETE - Supprimer un invité individuel
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -87,10 +107,12 @@ export async function DELETE(
       return new NextResponse("Non autorisé", { status: 401 })
     }
 
+    const { id } = await params
+
     // Vérifier que l'invité appartient à l'utilisateur
     const existingGuest = await prisma.guest.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -101,7 +123,7 @@ export async function DELETE(
 
     await prisma.guest.delete({
       where: {
-        id: params.id
+        id
       }
     })
 
@@ -110,4 +132,4 @@ export async function DELETE(
     console.error("[INDIVIDUAL_GUESTS_DELETE] Erreur:", error)
     return new NextResponse("Erreur interne du serveur", { status: 500 })
   }
-} 
+}

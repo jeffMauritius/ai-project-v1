@@ -1,0 +1,4 @@
+  weddingProviders WeddingProvider[] // Prestataires de mariage de l'utilisateur
+  recommendedPartners RecommendedPartner[] // Partenaires recommandés par l'utilisateur
+
+  @@map("users")

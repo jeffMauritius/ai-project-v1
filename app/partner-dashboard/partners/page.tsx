@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Star, Filter, Plus, X } from "lucide-react"
+import { Star, Filter, Plus, X, Search, MapPin, Users, Euro } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -22,9 +23,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type Partner = {
-  id: number
+  id: string
   name: string
   type: string
   image: string
@@ -32,35 +40,204 @@ type Partner = {
   description: string
   website: string
   featured: boolean
+  originalPartnerId?: string
 }
 
-const mockPartners: Partner[] = [
-  {
-    id: 1,
-    name: "Traiteur Royal",
-    type: "Traiteur",
-    image: "https://images.unsplash.com/photo-1555244162-803834f70033?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-    rating: 4.8,
-    description: "Service de traiteur haut de gamme spécialisé dans la gastronomie française.",
-    website: "www.traiteur-royal.fr",
-    featured: true
-  },
-  {
-    id: 2,
-    name: "Fleurs & Passion",
-    type: "Fleuriste",
-    image: "https://images.unsplash.com/photo-1507290439931-a861b5a38200?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-    rating: 4.9,
-    description: "Artisan fleuriste créant des compositions uniques pour votre mariage.",
-    website: "www.fleurs-passion.fr",
-    featured: true
-  }
+type SystemPartner = {
+  id: string
+  name: string
+  type: string
+  description: string
+  location: string
+  images: string[]
+  basePrice?: number
+  priceRange?: any
+  maxCapacity?: number
+  minCapacity?: number
+  isActive: boolean
+  storefrontId?: string
+  createdAt: string
+  updatedAt: string
+}
+
+// Types exactement comme dans le schéma Prisma
+const partnerTypes = [
+  "LIEU",
+  "TRAITEUR", 
+  "FAIRE_PART",
+  "CADEAUX_INVITES",
+  "PHOTOGRAPHE",
+  "MUSIQUE",
+  "VOITURE",
+  "BUS",
+  "DECORATION",
+  "CHAPITEAU",
+  "ANIMATION",
+  "FLORISTE",
+  "LISTE",
+  "ORGANISATION",
+  "VIDEO",
+  "LUNE_DE_MIEL",
+  "WEDDING_CAKE",
+  "OFFICIANT",
+  "FOOD_TRUCK",
+  "VIN"
 ]
 
+const serviceTypeLabels: { [key: string]: string } = {
+  "LIEU": "Lieu de réception",
+  "TRAITEUR": "Traiteur",
+  "FAIRE_PART": "Faire-part",
+  "CADEAUX_INVITES": "Cadeaux invités",
+  "PHOTOGRAPHE": "Photographe",
+  "MUSIQUE": "Musique",
+  "VOITURE": "Voiture",
+  "BUS": "Bus",
+  "DECORATION": "Décorateur",
+  "CHAPITEAU": "Chapiteau",
+  "ANIMATION": "Animation",
+  "FLORISTE": "Fleuriste",
+  "LISTE": "Liste de mariage",
+  "ORGANISATION": "Organisation",
+  "VIDEO": "Vidéaste",
+  "LUNE_DE_MIEL": "Lune de miel",
+  "WEDDING_CAKE": "Gâteau de mariage",
+  "OFFICIANT": "Officiant",
+  "FOOD_TRUCK": "Food truck",
+  "VIN": "Vin"
+}
+
+// Fonction utilitaire pour tronquer la description à la première ligne
+const truncateDescription = (description: string, maxLength: number = 100) => {
+  if (description.length <= maxLength) return description
+  
+  // Trouver le premier point, point d'exclamation ou point d'interrogation
+  const firstSentenceEnd = description.search(/[.!?]/)
+  if (firstSentenceEnd > 0 && firstSentenceEnd <= maxLength) {
+    return description.substring(0, firstSentenceEnd + 1)
+  }
+  
+  // Sinon, tronquer à la longueur maximale
+  return description.substring(0, maxLength) + '...'
+}
+
 export default function Partners() {
-  const [partners, setPartners] = useState<Partner[]>(mockPartners)
+  const [partners, setPartners] = useState<Partner[]>([])
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null)
   const [filter, setFilter] = useState<'all' | 'featured'>('all')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
+  // États pour la liste des partenaires du système
+  const [systemPartners, setSystemPartners] = useState<SystemPartner[]>([])
+  const [loading, setLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedType, setSelectedType] = useState('all')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
+  // Charger les partenaires recommandés depuis la base de données
+  const fetchRecommendedPartners = async () => {
+    try {
+      const response = await fetch('/api/recommended-partners')
+      const data = await response.json()
+      
+      if (response.ok) {
+        setPartners(data.partners)
+      } else {
+        console.error('Erreur lors du chargement des partenaires recommandés:', data.error)
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des partenaires recommandés:', error)
+    }
+  }
+
+  // Charger les partenaires du système
+  const fetchSystemPartners = async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '12',
+        ...(selectedType !== 'all' && { serviceType: selectedType }),
+        ...(searchTerm && { search: searchTerm })
+      })
+      
+      console.log('Fetching with params:', params.toString())
+      
+      const response = await fetch(`/api/partners?${params}`)
+      const data = await response.json()
+      
+      if (response.ok) {
+        setSystemPartners(data.partners)
+        setTotalPages(data.totalPages)
+        console.log('Received partners:', data.partners.map(p => ({ name: p.name, type: p.type })))
+      } else {
+        console.error('Erreur lors du chargement des partenaires:', data.error)
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des partenaires:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRecommendedPartners()
+  }, [])
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      fetchSystemPartners()
+    }
+  }, [isDialogOpen, selectedType, searchTerm, page])
+
+  const handleAddPartner = async (systemPartner: SystemPartner) => {
+    try {
+      const response = await fetch('/api/recommended-partners', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: systemPartner.name,
+          type: serviceTypeLabels[systemPartner.type] || systemPartner.type,
+          image: systemPartner.images[0] || "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+          rating: 4.5,
+          description: systemPartner.description,
+          website: `www.${systemPartner.name.toLowerCase().replace(/\s+/g, '-')}.fr`,
+          featured: false,
+          originalPartnerId: systemPartner.id
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setPartners([...partners, data.partner])
+      } else {
+        const errorData = await response.json()
+        console.error('Erreur lors de l\'ajout du partenaire:', errorData.error)
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du partenaire:', error)
+    }
+  }
+
+  const handleRemovePartner = async (id: string) => {
+    try {
+      const response = await fetch(`/api/recommended-partners/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setPartners(partners.filter(p => p.id !== id))
+      } else {
+        const errorData = await response.json()
+        console.error('Erreur lors de la suppression du partenaire:', errorData.error)
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression du partenaire:', error)
+    }
+  }
 
   const filteredPartners = filter === 'all' 
     ? partners 
@@ -71,16 +248,163 @@ export default function Partners() {
       <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Partenaires recommandés
+            Nos Partenaires
           </h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Gérez vos partenariats et recommandations
           </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un partenaire
-        </Button>
+        
+        {/* Modal de sélection des partenaires */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter un partenaire
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
+            <DialogHeader className="flex-shrink-0">
+              <DialogTitle>Selectionner un partenaire</DialogTitle>
+            </DialogHeader>
+            
+            {/* Filtres - Fixes en haut */}
+            <div className="flex-shrink-0 space-y-4 border-b pb-4">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="search">Rechercher</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="search"
+                      placeholder="Nom, description, ville..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="w-64">
+                  <Label htmlFor="type">Types de Partenaire</Label>
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tous les types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les types</SelectItem>
+                      {partnerTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {serviceTypeLabels[type] || type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Zone de contenu scrollable */}
+            <div className="flex-1 overflow-y-auto min-h-0">
+              {loading ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="text-gray-500">Chargement...</div>
+                </div>
+              ) : systemPartners.length === 0 ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="text-gray-500">Aucun partenaire trouvé</div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
+                  {systemPartners.map((partner) => (
+                    <Card key={partner.id} className="hover:shadow-md transition-shadow">
+                      <div className="relative h-32">
+                        <Image
+                          src={partner.images[0] || "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"}
+                          alt={partner.name}
+                          fill
+                          className="object-cover rounded-t-lg"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                        {partner.isActive && (
+                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                            Actif
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="pt-4">
+                        <div className="space-y-2">
+                          <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                            {partner.name}
+                          </h3>
+                          <p className="text-sm text-pink-600 dark:text-pink-400">
+                            {serviceTypeLabels[partner.type] || partner.type}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                            {truncateDescription(partner.description)}
+                          </p>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {partner.location}
+                          </div>
+                          {partner.maxCapacity && (
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Users className="h-3 w-3 mr-1" />
+                              Jusqu&apos;à {partner.maxCapacity} personnes
+                            </div>
+                          )}
+                          {partner.basePrice && (
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Euro className="h-3 w-3 mr-1" />
+                              À partir de {partner.basePrice}€
+                            </div>
+                          )}
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="w-full mt-3"
+                          onClick={() => handleAddPartner(partner)}
+                        >
+                          Ajouter aux recommandations
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Pagination - Fixe en bas */}
+            {totalPages > 1 && (
+              <div className="flex-shrink-0 flex justify-center items-center gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  disabled={page === 1}
+                >
+                  Précédent
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {page} sur {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(Math.min(totalPages, page + 1))}
+                  disabled={page === totalPages}
+                >
+                  Suivant
+                </Button>
+              </div>
+            )}
+
+            <DialogFooter className="flex-shrink-0">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Fermer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filtres */}
@@ -146,8 +470,8 @@ export default function Partners() {
                   </span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                {partner.description}
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-1">
+                {truncateDescription(partner.description)}
               </p>
               <div className="flex justify-between items-center">
                 <a
@@ -158,7 +482,12 @@ export default function Partners() {
                 >
                   {partner.website}
                 </a>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => handleRemovePartner(partner.id)}
+                >
                   <X className="h-4 w-4" />
                   Retirer
                 </Button>

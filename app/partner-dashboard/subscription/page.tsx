@@ -10,14 +10,17 @@ import { Check, CreditCard, Calendar, Building2, ArrowRight, Loader2, AlertCircl
 import { useSubscription } from '@/hooks/useSubscription'
 import { useToast } from '@/hooks/useToast'
 import { SubscriptionErrorAlert } from '@/components/SubscriptionErrorAlert'
+import { SubscriptionChangeDialog } from '@/components/ui/SubscriptionChangeDialog'
 
 export default function Subscription() {
   const [selectedPlan, setSelectedPlan] = useState<string>('Pro')
-  const [billingInterval, setBillingInterval] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY')
+  const [billingInterval] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY')
   const [showErrorAlert, setShowErrorAlert] = useState(false)
   const [errorAlertProps, setErrorAlertProps] = useState<any>(null)
   const [showPaymentInfo, setShowPaymentInfo] = useState(false)
   const [testMode, setTestMode] = useState(false)
+  const [showChangeDialog, setShowChangeDialog] = useState(false)
+  const [pendingPlanChange, setPendingPlanChange] = useState<{planId: string, planName: string, price: number} | null>(null)
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
   const { subscription, billingInfo, plans, loading, error, createSubscriptionWithStripe, cancelSubscription } = useSubscription()
@@ -62,7 +65,51 @@ export default function Subscription() {
       await createSubscriptionWithStripe(planId, billingInterval, defaultBillingInfo)
     } catch (error) {
       console.error('Erreur lors de la création de l\'abonnement:', error)
+      
+      // Vérifier si c'est un conflit d'abonnement
+      const subscriptionError = error as Error & { isSubscriptionConflict?: boolean; existingSubscription?: any }
+      
+      if (subscriptionError.isSubscriptionConflict) {
+        // Trouver le plan actuel et le nouveau plan
+        const currentPlan = subscriptionError.existingSubscription
+        const newPlan = plans.find(p => p.id === planId)
+        
+        if (newPlan) {
+          setPendingPlanChange({
+            planId,
+            planName: newPlan.name,
+            price: newPlan.price
+          })
+          setShowChangeDialog(true)
+          return
+        }
+      }
+      
       showSubscriptionError(error instanceof Error ? error.message : "Erreur lors de la création de l'abonnement")
+    }
+  }
+
+  const handleConfirmPlanChange = async () => {
+    if (!pendingPlanChange) return
+    
+    try {
+      // Données de facturation par défaut
+      const defaultBillingInfo = {
+        street: "123 Rue de Test",
+        city: "Paris",
+        postalCode: "75001",
+        country: "France",
+        companyName: "Test Company",
+        siret: "12345678901234",
+        vatNumber: "FR12345678901"
+      }
+
+      await createSubscriptionWithStripe(pendingPlanChange.planId, billingInterval, defaultBillingInfo)
+      setShowChangeDialog(false)
+      setPendingPlanChange(null)
+    } catch (error) {
+      console.error('Erreur lors du changement d\'abonnement:', error)
+      showSubscriptionError(error instanceof Error ? error.message : "Erreur lors du changement d'abonnement")
     }
   }
 
@@ -179,7 +226,7 @@ export default function Subscription() {
 
   // Utiliser les plans de test si en mode test
   const displayPlans = testMode ? testPlans : plans
-  const filteredPlans = displayPlans.filter(plan => plan.billingInterval === billingInterval)
+  const filteredPlans = displayPlans.filter(plan => plan.billingInterval === 'MONTHLY')
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -211,31 +258,6 @@ export default function Subscription() {
           Choisissez le plan qui correspond le mieux à vos besoins. Tous nos plans incluent un essai gratuit de 14 jours.
         </p>
 
-        {/* Toggle Mensuel/Annuel */}
-        <div className="mt-6 flex justify-center">
-          <div className="relative flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-            <button
-              onClick={() => setBillingInterval('MONTHLY')}
-              className={`${
-                billingInterval === 'MONTHLY'
-                  ? 'bg-white dark:bg-gray-700 shadow'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-600'
-              } px-4 py-2 text-sm font-medium rounded-md transition-colors`}
-            >
-              Mensuel
-            </button>
-            <button
-              onClick={() => setBillingInterval('YEARLY')}
-              className={`${
-                billingInterval === 'YEARLY'
-                  ? 'bg-white dark:bg-gray-700 shadow'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-600'
-              } px-4 py-2 text-sm font-medium rounded-md transition-colors`}
-            >
-              Annuel (-20%)
-            </button>
-          </div>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -292,10 +314,10 @@ export default function Subscription() {
                   ))}
                 </ul>
                 <Button
-                  onClick={() => handleCreateSubscription(plan.id)}
+                  onClick={isCurrentPlan ? handleCancelSubscription : () => handleCreateSubscription(plan.id)}
                   className="w-full"
-                  variant={isCurrentPlan ? 'default' : 'outline'}
-                  disabled={isCurrentPlan || loading}
+                  variant={isCurrentPlan ? 'destructive' : 'outline'}
+                  disabled={loading}
                 >
                   {loading ? (
                     <>
@@ -304,8 +326,8 @@ export default function Subscription() {
                     </>
                   ) : isCurrentPlan ? (
                     <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Plan actuel
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Annuler
                     </>
                   ) : (
                     <>
@@ -357,17 +379,6 @@ export default function Subscription() {
               </div>
             </div>
           </div>
-          {subscription.status === 'ACTIVE' && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <Button
-                onClick={handleCancelSubscription}
-                variant="outline"
-                className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/20"
-              >
-                Annuler l'abonnement
-              </Button>
-            </div>
-          )}
         </div>
       )}
 
@@ -396,6 +407,29 @@ export default function Subscription() {
         <SubscriptionErrorAlert
           {...errorAlertProps}
           onClose={() => setShowErrorAlert(false)}
+        />
+      )}
+
+      {/* Dialogue de changement d'abonnement */}
+      {showChangeDialog && pendingPlanChange && subscription && (
+        <SubscriptionChangeDialog
+          isOpen={showChangeDialog}
+          onClose={() => {
+            setShowChangeDialog(false)
+            setPendingPlanChange(null)
+          }}
+          onConfirm={handleConfirmPlanChange}
+          currentPlan={{
+            name: subscription.plan?.name || 'Inconnu',
+            price: subscription.plan?.price || 0,
+            billingInterval: billingInterval
+          }}
+          newPlan={{
+            name: pendingPlanChange.planName,
+            price: pendingPlanChange.price,
+            billingInterval: billingInterval
+          }}
+          loading={loading}
         />
       )}
     </div>

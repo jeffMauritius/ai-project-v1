@@ -135,12 +135,10 @@ export default function Guests() {
       const validatedData = guestGroupSchema.parse(newGuest)
       
       if (editingGuest) {
-        const result = await updateGuestGroup(editingGuest.id, validatedData)
-        if (!result) return
+        await updateGuestGroup(editingGuest.id, validatedData)
         setEditingGuest(null)
       } else {
-        const result = await createGuestGroup(validatedData)
-        if (!result) return
+        await createGuestGroup(validatedData)
       }
       
       setIsAddingGuest(false)
@@ -180,12 +178,10 @@ export default function Guests() {
       }
       
       if (editingIndividualGuest) {
-        const result = await updateIndividualGuest(editingIndividualGuest.id, validatedData)
-        if (!result) return
+        await updateIndividualGuest(editingIndividualGuest.id, validatedData)
         setEditingIndividualGuest(null)
       } else {
-        const result = await createIndividualGuest(validatedData)
-        if (!result) return
+        await createIndividualGuest(validatedData)
       }
       
       setIsAddingIndividualGuest(false)

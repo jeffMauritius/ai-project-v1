@@ -48,24 +48,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Vérifier s'il y a déjà un abonnement actif
+    // Vérifier s'il y a déjà un abonnement (quel que soit le statut)
     const existingSubscription = await prisma.subscription.findFirst({
       where: {
-        userId: user.id,
-        status: {
-          in: ['ACTIVE', 'TRIAL']
-        }
+        userId: user.id
+      },
+      include: {
+        plan: true
       }
     })
 
     if (existingSubscription) {
-      return NextResponse.json(
-        { 
-          error: 'Un abonnement actif existe déjà',
-          details: 'Vous avez déjà un abonnement en cours.'
-        },
-        { status: 400 }
-      )
+      console.log('[CHECKOUT] Abonnement existant trouvé:', existingSubscription.id, 'Status:', existingSubscription.status)
+      
+      // Vérifier si c'est le même plan
+      const isSamePlan = existingSubscription.planId === planId
+      
+      // Si l'abonnement est actif ou en essai et c'est le même plan, on refuse
+      if ((existingSubscription.status === 'ACTIVE' || existingSubscription.status === 'TRIAL') && isSamePlan) {
+        return NextResponse.json(
+          { 
+            error: 'Abonnement identique déjà actif',
+            details: `Vous avez déjà un abonnement actif pour le plan "${existingSubscription.plan?.name}".`,
+            existingSubscription: {
+              id: existingSubscription.id,
+              status: existingSubscription.status,
+              planName: existingSubscription.plan?.name
+            }
+          },
+          { status: 400 }
+        )
+      }
+      
+      // Si c'est un changement de plan, on autorise
+      if (existingSubscription.status === 'ACTIVE' || existingSubscription.status === 'TRIAL') {
+        console.log('[CHECKOUT] Changement de plan autorisé:', {
+          from: existingSubscription.plan?.name,
+          to: plan.name,
+          currentStatus: existingSubscription.status
+        })
+      } else {
+        // Si l'abonnement est annulé ou expiré, on peut le mettre à jour
+        console.log('[CHECKOUT] Mise à jour de l\'abonnement existant:', existingSubscription.id)
+      }
     }
 
     // Créer ou récupérer le customer Stripe
@@ -169,26 +194,65 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Créer l'abonnement dans notre base de données AVANT la session Stripe
+    // Créer ou mettre à jour l'abonnement dans notre base de données AVANT la session Stripe
     // Cela garantit que l'abonnement existe même si le webhook échoue
     const now = new Date()
     const trialEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) // 14 jours d'essai
 
-    const dbSubscription = await prisma.subscription.create({
-      data: {
-        userId: user.id,
-        planId: planId,
-        status: 'TRIAL',
-        currentPeriodStart: now,
-        currentPeriodEnd: trialEnd,
-        trialStart: now,
-        trialEnd: trialEnd,
-        cancelAtPeriodEnd: false
-      },
-      include: {
-        plan: true
-      }
-    })
+    let dbSubscription
+
+    if (existingSubscription && (existingSubscription.status === 'ACTIVE' || existingSubscription.status === 'TRIAL')) {
+      // Si changement de plan, on met à jour l'abonnement existant
+      console.log('[CHECKOUT] Mise à jour de l\'abonnement existant pour changement de plan')
+      dbSubscription = await prisma.subscription.update({
+        where: {
+          id: existingSubscription.id
+        },
+        data: {
+          planId: planId,
+          status: 'TRIAL', // Redémarrer l'essai pour le nouveau plan
+          currentPeriodStart: now,
+          currentPeriodEnd: trialEnd,
+          trialStart: now,
+          trialEnd: trialEnd,
+          cancelAtPeriodEnd: false,
+          updatedAt: now
+        },
+        include: {
+          plan: true
+        }
+      })
+    } else {
+      // Créer un nouvel abonnement ou mettre à jour un abonnement inactif
+      dbSubscription = await prisma.subscription.upsert({
+        where: {
+          userId: user.id
+        },
+        update: {
+          planId: planId,
+          status: 'TRIAL',
+          currentPeriodStart: now,
+          currentPeriodEnd: trialEnd,
+          trialStart: now,
+          trialEnd: trialEnd,
+          cancelAtPeriodEnd: false,
+          updatedAt: now
+        },
+        create: {
+          userId: user.id,
+          planId: planId,
+          status: 'TRIAL',
+          currentPeriodStart: now,
+          currentPeriodEnd: trialEnd,
+          trialStart: now,
+          trialEnd: trialEnd,
+          cancelAtPeriodEnd: false
+        },
+        include: {
+          plan: true
+        }
+      })
+    }
 
     console.log('[CHECKOUT] Abonnement créé dans la base de données:', dbSubscription.id)
 
