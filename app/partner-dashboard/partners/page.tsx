@@ -349,7 +349,7 @@ export default function Partners() {
                           {partner.maxCapacity && (
                             <div className="flex items-center text-xs text-gray-500">
                               <Users className="h-3 w-3 mr-1" />
-                              Jusqu'à {partner.maxCapacity} personnes
+                              Jusqu&apos;à {partner.maxCapacity} personnes
                             </div>
                           )}
                           {partner.basePrice && (

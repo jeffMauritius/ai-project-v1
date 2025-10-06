@@ -56,6 +56,15 @@ export function useStripe(): UseStripeReturn {
 
       if (!response.ok) {
         const errorData = await response.json()
+        
+        // Si c'est une erreur d'abonnement existant, on retourne des infos détaillées
+        if (response.status === 400 && errorData.existingSubscription) {
+          const error = new Error(errorData.error || 'Erreur lors de la création de la session de checkout')
+          ;(error as any).isSubscriptionConflict = true
+          ;(error as any).existingSubscription = errorData.existingSubscription
+          throw error
+        }
+        
         throw new Error(errorData.error || 'Erreur lors de la création de la session de checkout')
       }
 

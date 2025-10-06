@@ -16,6 +16,7 @@ import {
 import { Calendar, Users, MapPin, Mail, Phone, User, MessageSquare, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '@/hooks/useToast';
+import { useSession } from 'next-auth/react';
 
 interface QuoteRequestFormProps {
   storefrontId: string;
@@ -44,6 +45,7 @@ export function QuoteRequestForm({
   isOpen,
   onClose,
 }: QuoteRequestFormProps) {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState<FormData>({
     eventDate: '',
     guestCount: '',
@@ -182,20 +184,22 @@ export function QuoteRequestForm({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Mention pour créer un compte */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                Créez un compte gratuitement pour demander un devis
-              </p>
-              <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                Vous devez être connecté pour envoyer une demande de devis. C&apos;est rapide et gratuit !
-              </p>
+        {/* Mention pour créer un compte - seulement si non connecté */}
+        {!session && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                  Créez un compte gratuitement pour demander un devis
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                  Vous devez être connecté pour envoyer une demande de devis. C&apos;est rapide et gratuit !
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {isSubmitted ? (
           <div className="text-center py-8">

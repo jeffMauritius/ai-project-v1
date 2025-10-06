@@ -107,14 +107,12 @@ export async function POST(request: NextRequest) {
 
       case 'customer.subscription.created': {
         console.log('[WEBHOOK] Traitement customer.subscription.created')
-      case 'customer.subscription.created': {
-        console.log('[WEBHOOK] Traitement customer.subscription.created')
         const subscription = event.data.object as Stripe.Subscription
         const userId = subscription.metadata?.userId
         const planId = subscription.metadata?.planId
         const dbSubscriptionId = subscription.metadata?.dbSubscriptionId
 
-        console.log('[WEBHOOK] Données de subscription:, { 
+        console.log('[WEBHOOK] Données de subscription:', { 
           subscriptionId: subscription.id,
           userId, 
           planId,
@@ -136,7 +134,7 @@ export async function POST(request: NextRequest) {
                 trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
               }
             })
-            console.log('[WEBHOOK] Abonnement mis à jour avec Stripe ID:, dbSubscriptionId, '->', subscription.id)
+            console.log('[WEBHOOK] Abonnement mis à jour avec Stripe ID:', dbSubscriptionId, '->', subscription.id)
           } else {
             // Fallback: chercher par userId et planId si pas d'ID DB
             const existingSubscription = await prisma.subscription.findFirst({
@@ -159,7 +157,7 @@ export async function POST(request: NextRequest) {
                   trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
                 }
               })
-              console.log('[WEBHOOK] Abonnement trouvé et mis à jour:, existingSubscription.id, '->', subscription.id)
+              console.log('[WEBHOOK] Abonnement trouvé et mis à jour:', existingSubscription.id, '->', subscription.id)
             } else {
               // Dernier recours: créer un nouvel abonnement
               await prisma.subscription.create({
@@ -174,7 +172,7 @@ export async function POST(request: NextRequest) {
                   stripeSubscriptionId: subscription.id
                 }
               })
-              console.log('[WEBHOOK] Nouvel abonnement créé:, subscription.id)
+              console.log('[WEBHOOK] Nouvel abonnement créé:', subscription.id)
             }
           }
         }
