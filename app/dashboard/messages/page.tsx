@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { ChatBubbleLeftRightIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline'
 import { useSession } from 'next-auth/react'
@@ -37,37 +37,107 @@ interface Message {
 
 export default function Messages() {
   const { data: session } = useSession()
-  // const { socket, isConnected, sendMessage, joinConversation, onNewMessage } = useSocket()
-  const socket = null
-  const isConnected = false
-  const sendMessage = () => {}
-  const joinConversation = () => {}
-  const onNewMessage = () => {}
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Socket.IO
+  const { 
+    socket, 
+    isConnected, 
+    joinConversation, 
+    leaveConversation, 
+    sendMessage, 
+    onNewMessage, 
+    onError 
+  } = useSocket()
 
-  // Charger les conversations
+  // Charger les conversations au montage
   useEffect(() => {
     if (session?.user?.id) {
       loadConversations()
     }
   }, [session?.user?.id])
 
-  // Écouter les nouveaux messages
+  // Écouter les nouveaux messages via Socket.IO
   useEffect(() => {
-    if (socket) {
-      onNewMessage((message: Message) => {
-        if (message.conversationId === selectedConversation) {
-          setMessages(prev => [...prev, message])
+    const unsubscribe = onNewMessage((message) => {
+      console.log('💬 Nouveau message reçu côté utilisateur:', message)
+      
+      // Mettre à jour les messages de la conversation sélectionnée
+      if (selectedConversation === message.conversationId) {
+        const newMessage: Message = {
+          id: message.id,
+          content: message.content,
+          senderType: message.senderType,
+          senderName: message.senderName,
+          messageType: 'text',
+          createdAt: message.createdAt
         }
-        // Mettre à jour la liste des conversations
-        loadConversations()
+        
+        setMessages(prev => [...prev, newMessage])
+        
+        // Scroll vers le dernier message
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
+      }
+      
+      // Mettre à jour la liste des conversations
+      setConversations(prev => {
+        return prev.map(conv => {
+          if (conv.id === message.conversationId) {
+            return {
+              ...conv,
+              lastMessage: {
+                content: message.content,
+                timestamp: message.createdAt,
+                senderType: message.senderType
+              },
+              updatedAt: message.createdAt
+            }
+          }
+          return conv
+        })
       })
+    })
+
+    return unsubscribe
+  }, [onNewMessage, selectedConversation])
+
+  // Écouter les erreurs Socket.IO
+  useEffect(() => {
+    const unsubscribe = onError((error) => {
+      console.error('❌ Erreur Socket.IO côté utilisateur:', error)
+    })
+
+    return unsubscribe
+  }, [onError])
+
+  // Rejoindre/quitter les conversations via Socket.IO
+  useEffect(() => {
+    if (selectedConversation && isConnected) {
+      console.log('🔄 Rejoindre conversation Socket.IO:', selectedConversation)
+      joinConversation(selectedConversation)
+      
+      return () => {
+        console.log('🔄 Quitter conversation Socket.IO:', selectedConversation)
+        leaveConversation(selectedConversation)
+      }
     }
-  }, [socket, onNewMessage, selectedConversation])
+  }, [selectedConversation, isConnected, joinConversation, leaveConversation])
+
+  // Scroll automatique vers le bas quand les messages changent
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [messages])
 
   const loadConversations = async () => {
     try {
@@ -89,6 +159,11 @@ export default function Messages() {
       if (response.ok) {
         const data = await response.json()
         setMessages(data)
+        
+        // Scroll vers le dernier message après chargement
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, 300) // Délai plus long pour s'assurer que le DOM est rendu
       }
     } catch (error) {
       console.error('Error loading messages:', error)
@@ -98,45 +173,29 @@ export default function Messages() {
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversation(conversationId)
     loadMessages(conversationId)
-    joinConversation(conversationId)
   }
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newMessage.trim() || !selectedConversation) return
+    if (!newMessage.trim() || !selectedConversation || !isConnected) return
 
     try {
-      const response = await fetch('/api/chat/send-message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          conversationId: selectedConversation,
-          content: newMessage.trim(),
-          messageType: 'text'
-        })
-      })
-
-      if (response.ok) {
-        const sentMessage = await response.json()
-        // Ajouter le message localement
-        const userMessage: Message = {
-          id: sentMessage.id,
-          content: newMessage.trim(),
-          senderType: 'user',
-          senderName: session?.user?.name || 'Vous',
-          messageType: 'text',
-          createdAt: sentMessage.createdAt
-        }
-        setMessages(prev => [...prev, userMessage])
-        setNewMessage('')
-        
-        // Recharger les conversations pour mettre à jour la liste
-        loadConversations()
-      }
+      // Envoyer le message via Socket.IO
+      sendMessage(
+        selectedConversation, 
+        newMessage.trim(), 
+        'user',
+        session?.user?.name || session?.user?.email || 'Utilisateur',
+        session?.user?.email || ''
+      )
+      
+      // Vider le champ de saisie immédiatement
+      setNewMessage('')
+      
+      console.log('💬 Message envoyé via Socket.IO côté utilisateur')
     } catch (error) {
-      console.error('Error sending message:', error)
+      console.error('Erreur lors de l\'envoi du message:', error)
     }
   }
 
@@ -153,7 +212,15 @@ export default function Messages() {
 
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-9rem)]">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Messages</h1>
+    <div className="flex items-center justify-between mb-8">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
+      <div className="flex items-center space-x-2">
+        <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          {isConnected ? 'Connecté' : 'Déconnecté'}
+        </span>
+      </div>
+    </div>
       
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow h-full flex overflow-hidden">
         {/* Liste des conversations */}
@@ -238,7 +305,7 @@ export default function Messages() {
               </div>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4" ref={messagesEndRef}>
               <div className="space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
@@ -269,6 +336,8 @@ export default function Messages() {
                     </div>
                   ))
                 )}
+                {/* Point de référence pour le scroll automatique */}
+                <div ref={messagesEndRef} />
               </div>
             </div>
 

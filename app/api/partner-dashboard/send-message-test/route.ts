@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// POST /api/partner-dashboard/send-message-new - Envoyer une réponse du fournisseur
+// POST /api/partner-dashboard/send-message-test - Envoyer une réponse du fournisseur
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

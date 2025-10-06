@@ -1,68 +1,105 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-// Store des connexions SSE (en production, utiliser Redis)
+// Store des connexions SSE
 const connections = new Map<string, ReadableStreamDefaultController>()
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 })
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
-  const { searchParams } = new URL(request.url)
-  const conversationId = searchParams.get('conversationId')
+  const userId = session.user.id
+  const conversationId = request.nextUrl.searchParams.get('conversationId')
 
   if (!conversationId) {
-    return new Response('Conversation ID required', { status: 400 })
+    return new NextResponse('Missing conversationId', { status: 400 })
   }
 
-  // Créer un stream SSE
+  console.log(`🔌 Nouvelle connexion SSE pour ${userId} dans ${conversationId}`)
+
   const stream = new ReadableStream({
     start(controller) {
-      const connectionId = `${session.user.id}-${conversationId}`
-      connections.set(connectionId, controller)
+      const connectionKey = `${userId}-${conversationId}`
       
+      // Fermer l'ancienne connexion si elle existe
+      const existingConnection = connections.get(connectionKey)
+      if (existingConnection) {
+        try {
+          existingConnection.close()
+        } catch (error) {
+          console.log('Ancienne connexion déjà fermée')
+        }
+      }
+      
+      connections.set(connectionKey, controller)
+      console.log(`🔌 Connexion SSE stockée: ${connectionKey}`)
+
       // Envoyer un message de connexion
-      controller.enqueue(`data: ${JSON.stringify({ type: 'connected', conversationId })}\n\n`)
+      controller.enqueue(`data: ${JSON.stringify({
+        type: 'connected',
+        message: 'Connexion établie'
+      })}\n\n`)
 
       // Nettoyer la connexion quand elle se ferme
       request.signal.addEventListener('abort', () => {
-        connections.delete(connectionId)
-        controller.close()
+        console.log(`🔌 Connexion SSE fermée pour ${userId}`)
+        connections.delete(connectionKey)
       })
+    },
+    cancel() {
+      const connectionKey = `${userId}-${conversationId}`
+      console.log(`🔌 Connexion SSE annulée: ${connectionKey}`)
+      connections.delete(connectionKey)
     }
   })
 
-  return new Response(stream, {
+  return new NextResponse(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Cache-Control'
-    }
+      'Access-Control-Allow-Headers': 'Cache-Control',
+    },
   })
 }
 
-// Fonction pour envoyer un message à une conversation spécifique
-export function sendMessageToConversation(conversationId: string, message: any) {
-  const messageData = `data: ${JSON.stringify({ type: 'new_message', ...message })}\n\n`
+// Fonction pour diffuser un message à tous les participants d'une conversation
+export function broadcastMessage(conversationId: string, message: any) {
+  console.log(`📢 Diffusion du message dans ${conversationId}:`, message)
+  console.log(`🔍 Connexions actives AVANT diffusion:`, Array.from(connections.keys()))
   
-  // Envoyer à tous les clients connectés à cette conversation
-  for (const [connectionId, controller] of connections) {
-    if (connectionId.includes(conversationId)) {
+  const messageData = `data: ${JSON.stringify({
+    type: 'new-message',
+    ...message
+  })}\n\n`
+
+  // Diffuser à toutes les connexions de cette conversation
+  let broadcastCount = 0
+  
+  for (const [connectionKey, controller] of connections.entries()) {
+    console.log(`🔍 Vérification de la connexion: ${connectionKey}`)
+    // La clé est formatée comme "userId-conversationId"
+    if (connectionKey.endsWith(`-${conversationId}`)) {
       try {
         controller.enqueue(messageData)
+        broadcastCount++
+        console.log(`📤 Message diffusé à ${connectionKey}`)
       } catch (error) {
-        // Connexion fermée, la supprimer
-        connections.delete(connectionId)
+        console.error('Erreur lors de la diffusion:', error)
+        connections.delete(connectionKey)
       }
     }
   }
+  
+  console.log(`📊 Total de ${broadcastCount} connexions ont reçu le message`)
+  console.log(`🔍 Connexions actives APRÈS diffusion:`, Array.from(connections.keys()))
+  
+  if (broadcastCount === 0) {
+    console.log(`❌ Aucune connexion active pour la conversation ${conversationId}`)
+  }
 }
-
-
-

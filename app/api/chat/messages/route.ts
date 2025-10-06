@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { broadcastMessage } from '../events/route'
 
 // GET /api/chat/messages?conversationId=xxx - Récupérer les messages d'une conversation
 export async function GET(request: NextRequest) {
@@ -128,6 +129,17 @@ export async function POST(request: NextRequest) {
         },
         updatedAt: new Date()
       }
+    })
+
+    // Diffuser le message via SSE
+    broadcastMessage(conversationId, {
+      id: message.id,
+      conversationId: message.conversationId,
+      content: message.content,
+      senderType: message.senderType,
+      senderName: session.user.name || session.user.email || 'Utilisateur',
+      senderEmail: session.user.email || '',
+      createdAt: message.createdAt.toISOString(),
     })
 
     return NextResponse.json(message)

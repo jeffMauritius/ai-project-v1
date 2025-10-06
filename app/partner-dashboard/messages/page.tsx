@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Mic, Send, Upload, Calendar, Users, MapPin, DollarSign, MessageSquare, Mail } from "lucide-react"
 import { useToast } from '@/hooks/useToast'
+import { useSocket } from '@/hooks/useSocket'
 
 type Message = {
-  id: number
+  id: string
   sender: 'client' | 'partner'
   content: string
   date: string
@@ -50,85 +51,163 @@ export default function Messages() {
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
+  
+  // Socket.IO
+  const { 
+    socket, 
+    isConnected, 
+    joinConversation, 
+    leaveConversation, 
+    sendMessage, 
+    onNewMessage, 
+    onError 
+  } = useSocket()
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Récupérer les demandes de devis
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const response = await fetch('/api/partner-dashboard/messages')
-        if (response.ok) {
-          const data = await response.json()
+  // Fonction pour récupérer les messages
+  const fetchMessages = async () => {
+    try {
+      console.log('🔄 Chargement des messages partenaire...')
+      const response = await fetch('/api/partner-dashboard/messages')
+      console.log('📡 Réponse API:', response.status, response.ok)
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('📦 Données reçues:', data)
+        console.log('💬 Conversations:', data.conversations?.length || 0)
+        
+        if (data.conversations) {
           setConversations(data.conversations)
+          console.log('✅ Conversations mises à jour:', data.conversations.length)
         } else {
-          toast({
-            title: "Erreur",
-            description: "Impossible de charger les messages",
-            variant: "destructive",
-          })
+          console.log('⚠️ Aucune conversation dans la réponse')
         }
-      } catch (error) {
-        console.error('Error fetching messages:', error)
+      } else {
+        console.error('❌ Erreur API:', response.status, response.statusText)
         toast({
           title: "Erreur",
           description: "Impossible de charger les messages",
           variant: "destructive",
         })
-      } finally {
-        setLoading(false)
       }
-    }
-
-    fetchMessages()
-  }, [toast])
-
-  const handleSendMessage = async () => {
-    if (!selectedConversation || !newMessage.trim()) return
-
-    try {
-      const response = await fetch('/api/partner-dashboard/send-message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          conversationId: selectedConversation.id,
-          content: newMessage.trim(),
-          messageType: 'text'
-        })
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les messages",
+        variant: "destructive",
       })
+    } finally {
+      setLoading(false)
+    }
+  }
 
-      if (response.ok) {
-        const sentMessage = await response.json()
-        
-        // Mettre à jour l'état local
-        const message: Message = {
-          id: sentMessage.id,
-          sender: 'partner',
-          content: sentMessage.content,
-          date: sentMessage.createdAt,
+  // Charger les messages au montage
+  useEffect(() => {
+    fetchMessages()
+  }, [])
+
+  // Écouter les nouveaux messages via Socket.IO
+  useEffect(() => {
+    const unsubscribe = onNewMessage((message) => {
+      console.log('💬 Nouveau message reçu côté partenaire:', message)
+      
+      // Mettre à jour la conversation sélectionnée
+      if (selectedConversation?.id === message.conversationId) {
+        const newMessage: Message = {
+          id: message.id, // Utiliser directement l'ID string
+          sender: message.senderType === 'user' ? 'client' : 'partner',
+          content: message.content,
+          date: message.createdAt,
           read: true
         }
-
-        setConversations(conversations.map(conv =>
-          conv.id === selectedConversation.id
-            ? {
-                ...conv,
-                messages: [...conv.messages, message],
-                lastMessage: newMessage,
-                date: message.date,
-                unread: false
-              }
-            : conv
-        ))
-
-        setNewMessage('')
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Impossible d'envoyer le message",
-          variant: "destructive",
+        
+        setSelectedConversation(prev => {
+          if (!prev) return null
+          return {
+            ...prev,
+            messages: [...prev.messages, newMessage]
+          }
         })
+        
+        // Scroll vers le dernier message
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
       }
+      
+      // Mettre à jour la liste des conversations
+      setConversations(prev => {
+        return prev.map(conv => {
+          if (conv.id === message.conversationId) {
+            return {
+              ...conv,
+              lastMessage: message.content,
+              date: message.createdAt
+            }
+          }
+          return conv
+        })
+      })
+    })
+
+    return unsubscribe
+  }, [onNewMessage, selectedConversation])
+
+  // Écouter les erreurs Socket.IO
+  useEffect(() => {
+    const unsubscribe = onError((error) => {
+      console.error('❌ Erreur Socket.IO côté partenaire:', error)
+      toast({
+        title: "Erreur de connexion",
+        description: error.message,
+        variant: "destructive",
+      })
+    })
+
+    return unsubscribe
+  }, [onError, toast])
+
+  // Rejoindre/quitter les conversations via Socket.IO
+  useEffect(() => {
+    if (selectedConversation?.id && isConnected) {
+      console.log('🔄 Rejoindre conversation Socket.IO:', selectedConversation.id)
+      joinConversation(selectedConversation.id)
+      
+      return () => {
+        console.log('🔄 Quitter conversation Socket.IO:', selectedConversation.id)
+        leaveConversation(selectedConversation.id)
+      }
+    }
+  }, [selectedConversation?.id, isConnected, joinConversation, leaveConversation])
+
+  // Scroll automatique vers le bas quand les messages changent
+  useEffect(() => {
+    if (selectedConversation?.messages && selectedConversation.messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [selectedConversation?.messages])
+
+  const handleSendMessage = async () => {
+    if (!selectedConversation || !newMessage.trim() || !isConnected) return
+
+    try {
+      // Envoyer le message via Socket.IO
+      sendMessage(
+        selectedConversation.id, 
+        newMessage.trim(), 
+        'provider',
+        'Adeline Déco', // Nom du partenaire
+        'partner@monmariage.ai' // Email du partenaire
+      )
+      
+      // Vider le champ de saisie immédiatement
+      setNewMessage('')
+      
+      console.log('💬 Message envoyé via Socket.IO côté partenaire')
     } catch (error) {
       console.error('Error sending message:', error)
       toast({
@@ -136,6 +215,45 @@ export default function Messages() {
         description: "Impossible d'envoyer le message",
         variant: "destructive",
       })
+    }
+  }
+
+  const handleSelectConversation = async (conversationId: string) => {
+    const conversation = conversations.find(c => c.id === conversationId)
+    if (conversation) {
+      try {
+        // Charger les messages de cette conversation
+        const response = await fetch(`/api/partner-dashboard/messages?conversationId=${conversationId}`)
+        if (response.ok) {
+          const messages = await response.json()
+          
+          // Transformer les messages pour correspondre au format attendu
+          const formattedMessages: Message[] = messages.map((msg: any) => ({
+            id: msg.id, // Utiliser directement l'ID string de MongoDB
+            sender: msg.senderType === 'user' ? 'client' : 'partner',
+            content: msg.content,
+            date: msg.createdAt,
+            read: !!msg.readAt
+          }))
+          
+          // Mettre à jour la conversation avec les messages
+          const updatedConversation = {
+            ...conversation,
+            messages: formattedMessages
+          }
+          
+          setSelectedConversation(updatedConversation)
+          
+          // Scroll vers le dernier message après sélection
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+          }, 300) // Délai plus long pour s'assurer que le DOM est rendu
+        } else {
+          console.error('Error loading conversation messages')
+        }
+      } catch (error) {
+        console.error('Error loading conversation messages:', error)
+      }
     }
   }
 
@@ -160,7 +278,15 @@ export default function Messages() {
 
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-9rem)]">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Messages</h1>
+    <div className="flex items-center justify-between mb-8">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
+      <div className="flex items-center space-x-2">
+        <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          {isConnected ? 'Connecté' : 'Déconnecté'}
+        </span>
+      </div>
+    </div>
       
       <Card className="h-full flex overflow-hidden">
         {/* Liste des conversations */}
@@ -189,7 +315,7 @@ export default function Messages() {
                 filteredConversations.map((conversation) => (
                   <button
                     key={conversation.id}
-                    onClick={() => setSelectedConversation(conversation)}
+                    onClick={() => handleSelectConversation(conversation.id)}
                     className={`w-full p-4 flex items-start space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                       selectedConversation?.id === conversation.id ? 'bg-pink-50 dark:bg-pink-900/20' : ''
                     }`}
@@ -310,6 +436,8 @@ export default function Messages() {
                     </div>
                   </div>
                 ))}
+                {/* Point de référence pour le scroll automatique */}
+                <div ref={messagesEndRef} />
               </div>
             </div>
 

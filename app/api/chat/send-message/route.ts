@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { sendMessageToConversation } from '../events/route'
+import { broadcastMessage } from '../events/route'
 
 // POST /api/chat/send-message - Envoyer un message (simulation temps réel)
 export async function POST(request: NextRequest) {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!conversation) {
-      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Conversation not found or access denied' }, { status: 404 })
     }
 
     // Créer le message
@@ -60,6 +60,23 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Diffuser le message via SSE
+    console.log('📢 Diffusion du message utilisateur via SSE:', {
+      conversationId,
+      messageId: message.id,
+      content: message.content,
+      senderType: message.senderType
+    })
+    
+    broadcastMessage(conversationId, {
+      id: message.id,
+      conversationId: message.conversationId,
+      content: message.content,
+      senderType: message.senderType,
+      senderName: session.user.name || session.user.email || 'Utilisateur',
+      senderEmail: session.user.email || '',
+      createdAt: message.createdAt.toISOString(),
+    })
 
     return NextResponse.json(message)
   } catch (error) {
