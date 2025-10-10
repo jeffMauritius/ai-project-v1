@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { transformEstablishmentImages } from "@/lib/image-url-transformer";
 
 export async function GET(
   request: Request,
@@ -43,14 +42,11 @@ export async function GET(
       description: establishment.description || "",
       priceRange: `${establishment.startingPrice || 0} ${establishment.currency || "€"}`,
       capacity: `${establishment.maxCapacity || 0} personnes`,
-      // Utiliser le tableau images qui contient déjà les URLs Vercel Blob
+      // Utiliser directement les URLs 960p de la base de données
       images: establishment.images || []
     };
-    
-    // Appliquer la transformation des URLs d'images
-    const transformedEstablishment = transformEstablishmentImages(establishmentData);
 
-    return NextResponse.json(transformedEstablishment);
+    return NextResponse.json(establishmentData);
   } catch (error) {
     console.error("Erreur détaillée:", error);
     return NextResponse.json(

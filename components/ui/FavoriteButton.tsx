@@ -3,8 +3,9 @@
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface FavoriteButtonProps {
   storefrontId?: string;
@@ -34,28 +35,11 @@ export function FavoriteButton({
   showText = false,
 }: FavoriteButtonProps) {
   const { data: session } = useSession();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const [isLoading, setIsLoading] = useState(false);
 
-  const checkIfFavorite = useCallback(async () => {
-    try {
-      const response = await fetch('/api/favorites');
-      if (response.ok) {
-        const favorites = await response.json();
-        const isFav = favorites.some((fav: any) => fav.storefrontId === storefrontId);
-        setIsFavorite(isFav);
-      }
-    } catch (error) {
-      console.error('Erreur lors de la vérification des favoris:', error);
-    }
-  }, [storefrontId]);
-
-  // Vérifier si c'est déjà un favori au chargement
-  useEffect(() => {
-    if (session?.user && storefrontId) {
-      checkIfFavorite();
-    }
-  }, [session, storefrontId, checkIfFavorite]);
+  // Vérifier si cet élément est en favori
+  const isCurrentlyFavorite = isFavorite(storefrontId || '');
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,23 +56,22 @@ export function FavoriteButton({
       return;
     }
 
+    if (isLoading) return;
+
     setIsLoading(true);
 
     try {
-      if (isFavorite) {
+      if (isCurrentlyFavorite) {
         // Supprimer des favoris
-        const response = await fetch(`/api/favorites?storefrontId=${storefrontId}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          setIsFavorite(false);
+        const success = await removeFavorite(storefrontId);
+        
+        if (success) {
           showNotification('Retiré des favoris !', false);
           
           // Mettre à jour le statut de la vitrine consultée
           try {
-            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: remove, storefrontId:', storefrontId)
-            const response = await fetch('/api/consulted-storefronts/update-status', {
+            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: remove, storefrontId:', storefrontId);
+            const statusResponse = await fetch('/api/consulted-storefronts/update-status', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -99,39 +82,30 @@ export function FavoriteButton({
                 action: 'remove'
               }),
             });
-            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', response.status, response.ok)
+            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', statusResponse.status, statusResponse.ok);
           } catch (error) {
             console.error('Erreur lors de la mise à jour du statut:', error);
           }
-        } else {
-          console.error('Erreur lors de la suppression du favori');
         }
       } else {
         // Ajouter aux favoris
-        const response = await fetch('/api/favorites', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            storefrontId,
-            name,
-            location,
-            rating,
-            numberOfReviews,
-            description,
-            imageUrl,
-          }),
+        const success = await addFavorite({
+          storefrontId,
+          name: name || '',
+          location: location || '',
+          rating,
+          numberOfReviews,
+          description,
+          imageUrl: imageUrl || '',
         });
-
-        if (response.ok) {
-          setIsFavorite(true);
+        
+        if (success) {
           showNotification('Ajouté aux favoris !', true);
           
           // Mettre à jour le statut de la vitrine consultée
           try {
-            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: add, storefrontId:', storefrontId)
-            const response = await fetch('/api/consulted-storefronts/update-status', {
+            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: add, storefrontId:', storefrontId);
+            const statusResponse = await fetch('/api/consulted-storefronts/update-status', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -142,15 +116,10 @@ export function FavoriteButton({
                 action: 'add'
               }),
             });
-            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', response.status, response.ok)
+            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', statusResponse.status, statusResponse.ok);
           } catch (error) {
             console.error('Erreur lors de la mise à jour du statut:', error);
           }
-        } else if (response.status === 409) {
-          showNotification('Déjà dans vos favoris !', true);
-          setIsFavorite(true);
-        } else {
-          console.error('Erreur lors de l\'ajout aux favoris');
         }
       }
     } catch (error) {
@@ -219,28 +188,32 @@ export function FavoriteButton({
       disabled={isLoading}
       className={cn(
         'transition-all duration-200',
-        isFavorite && 'text-red-500 hover:text-red-600',
-        !isFavorite && 'text-gray-500 hover:text-red-500',
+        isCurrentlyFavorite && 'text-red-500 hover:text-red-600',
+        !isCurrentlyFavorite && 'text-gray-500 hover:text-red-500',
         variant === 'ghost' && 'hover:bg-white hover:text-black',
         variant === 'default' && 'hover:bg-red-500 hover:text-white',
         variant === 'outline' && 'hover:bg-red-500 hover:text-white hover:border-red-500',
         className
       )}
       onClick={handleClick}
-      aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+      aria-label={isCurrentlyFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
     >
       <Heart
         className={cn(
           'transition-all duration-200',
-          isFavorite ? 'fill-current' : 'fill-none',
-          showText && 'mr-2'
+          isCurrentlyFavorite ? 'fill-current' : 'fill-none',
+          showText && 'mr-2',
+          size === 'sm' && 'h-3 w-3',
+          size === 'default' && 'h-4 w-4',
+          size === 'lg' && 'h-5 w-5',
+          size === 'icon' && 'h-4 w-4'
         )}
       />
       {showText && (
         <span>
-          {isLoading ? '...' : 'Ajouter aux favoris'}
+          {isLoading ? '...' : (isCurrentlyFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris')}
         </span>
       )}
     </Button>
   );
-} 
+}

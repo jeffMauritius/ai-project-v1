@@ -386,13 +386,8 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
   }
   
   if (isVenue && storefront.establishment?.images && storefront.establishment.images.length > 0) {
-    // Pour les lieux, transformer les images de l'établissement vers Vercel Blob Storage
-    const transformedEstablishment = transformEstablishmentImages({
-      ...storefront.establishment,
-      originalId: storefront.establishment.id
-    })
-    
-    allImages = transformedEstablishment.images.map((url, index) => ({
+    // Pour les lieux, utiliser directement les URLs 960p de la base de données
+    allImages = storefront.establishment.images.map((url, index) => ({
       id: `img-${index}`,
       url: url,
       type: 'IMAGE',

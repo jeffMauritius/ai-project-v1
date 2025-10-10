@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { HeartIcon, MapPinIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
+import { useFavorites } from '@/hooks/useFavorites'
 
 // Type pour un favori
 interface Favorite {
@@ -25,43 +26,13 @@ interface Favorite {
 export default function Favorites() {
   const router = useRouter()
   const { data: session } = useSession()
-  const [favorites, setFavorites] = useState<Favorite[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Charger les favoris au montage du composant
-  useEffect(() => {
-    if (session?.user) {
-      loadFavorites()
-    }
-  }, [session])
-
-  const loadFavorites = async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetch('/api/favorites')
-      if (response.ok) {
-        const data = await response.json()
-        setFavorites(data)
-      } else {
-        console.error('Erreur lors du chargement des favoris')
-      }
-    } catch (error) {
-      console.error('Erreur:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { favorites, isLoading, removeFavorite } = useFavorites()
 
   const handleRemoveFavorite = async (storefrontId: string, name: string) => {
     try {
-      const response = await fetch(`/api/favorites?storefrontId=${storefrontId}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        // Mettre à jour la liste locale
-        setFavorites(prev => prev.filter(fav => fav.storefrontId !== storefrontId))
-        
+      const success = await removeFavorite(storefrontId)
+      
+      if (success) {
         // Mettre à jour le statut de la vitrine consultée
         try {
           console.log('[FAVORITES_PAGE] Mise à jour du statut - action: remove, storefrontId:', storefrontId)
@@ -80,8 +51,6 @@ export default function Favorites() {
         } catch (error) {
           console.error('Erreur lors de la mise à jour du statut:', error);
         }
-      } else {
-        console.error('Erreur lors de la suppression du favori')
       }
     } catch (error) {
       console.error('Erreur:', error)
@@ -122,105 +91,75 @@ export default function Favorites() {
       </div>
 
       {favorites.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <HeartIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Aucun favori pour le moment
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Commencez à explorer nos lieux et prestataires pour ajouter vos favoris
-            </p>
-          </CardContent>
-        </Card>
+        <div className="text-center py-12">
+          <HeartIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">Aucun favori</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Commencez à ajouter des lieux et prestataires à vos favoris.
+          </p>
+          <div className="mt-6">
+            <Button
+              onClick={() => router.push('/establishments')}
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+            >
+              Découvrir les établissements
+            </Button>
+          </div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {favorites.map((favorite) => (
-            <Card 
-              key={favorite.id} 
-              className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => handleViewDetails(favorite.storefrontId)}
-            >
-              <div className="relative h-48 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20">
-                {/* Image de la vitrine */}
-                {favorite.imageUrl && favorite.imageUrl !== '/placeholder-venue.jpg' ? (
-                  <Image
-                    src={favorite.imageUrl}
-                    alt={favorite.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                ) : (
-                  /* Placeholder joli avec bannière rose */
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20 flex items-center justify-center">
-                    <div className="text-center">
-                      <HeartIcon className="h-12 w-12 text-pink-300 dark:text-pink-600 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                        {favorite.name}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Badge "Favori" */}
-                <div className="absolute top-2 left-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-200">
-                    <HeartIcon className="h-3 w-3 mr-1" />
-                    Favori
-                  </span>
+            <Card key={favorite.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
+              <div className="relative h-48 w-full">
+                <Image
+                  src={favorite.imageUrl || '/placeholder-venue.jpg'}
+                  alt={favorite.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute top-2 right-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-white/80 hover:bg-white/90 rounded-full"
+                    onClick={() => handleRemoveFavorite(favorite.storefrontId, favorite.name)}
+                  >
+                    <TrashIcon className="h-4 w-4 text-red-500" />
+                  </Button>
                 </div>
-                
-                {/* Bouton supprimer */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 bg-white/80 hover:bg-white/90 text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleRemoveFavorite(favorite.storefrontId, favorite.name)
-                  }}
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </Button>
               </div>
               
               <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1">
-                    {favorite.name}
-                  </h3>
-                  <div className="flex items-center text-sm">
-                    <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-                    <span className="font-medium text-gray-900 dark:text-white">{favorite.rating}</span>
-                    <span className="text-gray-500 dark:text-gray-400">/5</span>
-                    <span className="text-gray-400 dark:text-gray-500 ml-1">({favorite.numberOfReviews})</span>
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <StarIcon className="h-4 w-4 text-yellow-400 fill-current" />
+                    <span className="text-sm font-medium">{favorite.rating}</span>
+                    <span className="text-xs text-gray-500">({favorite.numberOfReviews})</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  <MapPinIcon className="h-4 w-4 mr-1 flex-shrink-0" />
-                  <span className="line-clamp-1">{favorite.location}</span>
+                <h3 className="font-semibold text-lg mb-1 group-hover:text-pink-600 transition-colors">
+                  {favorite.name}
+                </h3>
+                
+                <div className="flex items-center gap-1 mb-2">
+                  <MapPinIcon className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm text-gray-600">{favorite.location}</span>
                 </div>
                 
-                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">
-                  {favorite.description}
+                <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                  {favorite.description.replace(/<[^>]*>/g, '')}
                 </p>
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Ajouté le {new Date(favorite.createdAt).toLocaleDateString('fr-FR')}
-                  </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-pink-600 border-pink-200 hover:bg-pink-50 dark:text-pink-400 dark:border-pink-800 dark:hover:bg-pink-900/20"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleViewDetails(favorite.storefrontId)
-                    }}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDetails(favorite.storefrontId)}
+                    className="flex-1"
                   >
-                    Voir détails
+                    Voir les détails
                   </Button>
                 </div>
               </CardContent>
@@ -230,4 +169,4 @@ export default function Favorites() {
       )}
     </div>
   )
-} 
+}

@@ -685,8 +685,9 @@ model RecommendedPartner {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("recommended_partners")
-// ===== MODÈLES POUR LE SYSTÈME DE CHAT =====
+}
 
+// ===== MODÈLES POUR LE SYSTÈME DE CHAT =====
 model Conversation {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt DateTime @default(now())
