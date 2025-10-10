@@ -9,7 +9,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return new NextResponse("Non autorisé", { status: 401 })
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
     const individualGuests = await prisma.guest.findMany({
@@ -33,7 +33,7 @@ export async function GET() {
     return NextResponse.json(individualGuests)
   } catch (error) {
     console.error("[INDIVIDUAL_GUESTS_GET] Erreur:", error)
-    return new NextResponse("Erreur interne du serveur", { status: 500 })
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -43,26 +43,42 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return new NextResponse("Non autorisé", { status: 401 })
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
     const body = await request.json()
     const { firstName, lastName, email, groupId, status } = body
 
-    if (!firstName || !lastName || !email || !groupId || !status) {
-      return new NextResponse("Tous les champs sont requis", { status: 400 })
+    if (!firstName || !lastName || !email || !status) {
+      return NextResponse.json({ error: "Les champs prénom, nom, email et statut sont requis" }, { status: 400 })
     }
 
-    // Vérifier que le groupe appartient à l'utilisateur
-    const group = await prisma.guestGroup.findFirst({
-      where: {
-        id: groupId,
-        userId: session.user.id
-      }
-    })
+    // Vérifier que le groupe appartient à l'utilisateur (seulement si un groupe est fourni)
+    if (groupId) {
+      const group = await prisma.guestGroup.findFirst({
+        where: {
+          id: groupId,
+          userId: session.user.id
+        }
+      })
 
-    if (!group) {
-      return new NextResponse("Groupe non trouvé", { status: 404 })
+      if (!group) {
+        return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 })
+      }
+      
+      // Vérifier que le groupe n'a pas atteint sa limite d'invités
+      const currentGuestCount = await prisma.guest.count({
+        where: {
+          groupId: groupId
+        }
+      })
+
+      if (currentGuestCount >= group.count) {
+        return NextResponse.json(
+          { error: `Ce groupe a atteint sa limite de ${group.count} invités. Impossible d'ajouter un invité supplémentaire.` }, 
+          { status: 400 }
+        )
+      }
     }
 
     // Vérifier si un invité avec ce nom complet existe déjà pour cet utilisateur
@@ -75,23 +91,9 @@ export async function POST(request: Request) {
     })
 
     if (existingGuest) {
-      return new NextResponse(
-        `Un invité avec le nom "${firstName.trim()} ${lastName.trim()}" existe déjà`, 
+      return NextResponse.json(
+        { error: `Un invité avec le nom "${firstName.trim()} ${lastName.trim()}" existe déjà` }, 
         { status: 409 }
-      )
-    }
-
-    // Vérifier que le groupe n'a pas atteint sa limite d'invités
-    const currentGuestCount = await prisma.guest.count({
-      where: {
-        groupId: groupId
-      }
-    })
-
-    if (currentGuestCount >= group.count) {
-      return new NextResponse(
-        `Ce groupe a atteint sa limite de ${group.count} invités. Impossible d'ajouter un invité supplémentaire.`, 
-        { status: 400 }
       )
     }
 
@@ -102,7 +104,7 @@ export async function POST(request: Request) {
         email: email.trim(),
         status,
         userId: session.user.id,
-        groupId
+        groupId: groupId || null
       },
       include: {
         group: {
@@ -116,8 +118,19 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json(individualGuest)
-  } catch (error) {
+  } catch (error: any) {
     console.error("[INDIVIDUAL_GUESTS_POST] Erreur:", error)
-    return new NextResponse("Erreur interne du serveur", { status: 500 })
+    
+    // Gérer les erreurs de contrainte unique Prisma
+    if (error.code === 'P2002') {
+      // Prisma unique constraint violation
+      const field = error.meta?.target?.[1] || 'email'
+      return NextResponse.json(
+        { error: `Un invité avec cet ${field} existe déjà` }, 
+        { status: 409 }
+      )
+    }
+    
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
