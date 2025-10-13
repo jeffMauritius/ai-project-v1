@@ -1,6 +1,6 @@
 'use client'
 
-import { Mic, Send, Upload, MicOff, Loader2 } from 'lucide-react'
+import { Mic, Send, Upload, MicOff, Loader2, ArrowRight } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { motion, useAnimationControls } from 'framer-motion'
@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition'
 import { useToast } from '@/hooks/useToast'
+import { useSession } from 'next-auth/react'
 
 export default function AISearchBar() {
   const router = useRouter()
   const pathname = usePathname()
+  const { data: session, status } = useSession()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -57,6 +59,17 @@ export default function AISearchBar() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Vérifier l'authentification
+    if (!session?.user?.id) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez être connecté pour utiliser la recherche IA.",
+        variant: "destructive"
+      })
+      return
+    }
+    
     if (searchQuery.trim()) {
       setIsSearching(true)
       
@@ -163,6 +176,49 @@ export default function AISearchBar() {
       setAnimatingTag(null)
       textareaRef.current?.focus()
     }, 2500)
+  }
+
+  // Si l'utilisateur n'est pas connecté, afficher la carte d'authentification
+  if (status === 'loading') {
+    return (
+      <div className="w-full max-w-4xl">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-300">Chargement...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!session?.user?.id) {
+    return (
+      <div className="w-full max-w-4xl">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Recherche IA
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Pour utiliser cette fonctionnalité, vous devez créer un compte gratuit.
+            </p>
+            <Button 
+              onClick={() => router.push('/auth/login')}
+              className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
+            >
+              Créer un compte
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

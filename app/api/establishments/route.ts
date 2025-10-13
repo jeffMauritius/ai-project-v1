@@ -7,11 +7,35 @@ export async function GET(request: Request) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.max(1, parseInt(searchParams.get("limit") || "9"));
     const skip = Math.max(0, (page - 1) * limit);
+    const type = searchParams.get("type");
+    const decodedType = type ? decodeURIComponent(type) : null;
 
-    console.log("Fetching establishments with:", { page, limit, skip });
+    console.log("Fetching establishments with:", { page, limit, skip, type, decodedType });
 
     const [establishments, total] = await Promise.all([
       prisma.establishment.findMany({
+        where: {
+          // Filtre par type spécifique si fourni, sinon tous les types mariage
+          type: decodedType ? {
+            equals: decodedType
+          } : {
+            contains: "mariage",
+            mode: "insensitive"
+          },
+          // Exclure les traiteurs et autres prestataires de services
+          NOT: {
+            OR: [
+              { name: { contains: "Traiteur", mode: "insensitive" } },
+              { name: { contains: "Caviste", mode: "insensitive" } },
+              { name: { contains: "Event", mode: "insensitive" } },
+              { name: { contains: "Réceptions", mode: "insensitive" } },
+              { description: { contains: "traiteur", mode: "insensitive" } },
+              { description: { contains: "caviste", mode: "insensitive" } },
+              { description: { contains: "prestation culinaire", mode: "insensitive" } },
+              { description: { contains: "service traiteur", mode: "insensitive" } }
+            ]
+          }
+        },
         skip,
         take: limit,
         orderBy: {
@@ -38,7 +62,30 @@ export async function GET(request: Request) {
           }
         },
       }),
-      prisma.establishment.count(),
+      prisma.establishment.count({
+        where: {
+          // Filtre par type spécifique si fourni, sinon tous les types mariage
+          type: decodedType ? {
+            equals: decodedType
+          } : {
+            contains: "mariage",
+            mode: "insensitive"
+          },
+          // Exclure les traiteurs et autres prestataires de services
+          NOT: {
+            OR: [
+              { name: { contains: "Traiteur", mode: "insensitive" } },
+              { name: { contains: "Caviste", mode: "insensitive" } },
+              { name: { contains: "Event", mode: "insensitive" } },
+              { name: { contains: "Réceptions", mode: "insensitive" } },
+              { description: { contains: "traiteur", mode: "insensitive" } },
+              { description: { contains: "caviste", mode: "insensitive" } },
+              { description: { contains: "prestation culinaire", mode: "insensitive" } },
+              { description: { contains: "service traiteur", mode: "insensitive" } }
+            ]
+          }
+        }
+      }),
     ]);
 
     // Transformer les données pour correspondre au format attendu par le frontend

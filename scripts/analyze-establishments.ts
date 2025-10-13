@@ -3,155 +3,115 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function analyzeEstablishments() {
-  console.log('🏢 ANALYSE DE LA COLLECTION ESTABLISHMENT\n')
-
   try {
-    // 1. Compter les établissements par type
-    console.log('📊 Nombre d\'établissements par type:')
-    const typeCounts = await prisma.establishment.groupBy({
-      by: ['type'],
-      _count: { type: true },
-      orderBy: { _count: { type: 'desc' } }
+    console.log('🔍 Analyse des établissements...')
+    
+    // Récupérer quelques établissements pour analyser
+    const establishments = await prisma.establishment.findMany({
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        city: true,
+        region: true,
+        storefronts: {
+          select: {
+            id: true,
+            type: true,
+            isActive: true
+          }
+        }
+      },
+      take: 20
     })
-
-    typeCounts.forEach(group => {
-      console.log(`  ${group.type}: ${group._count.type}`)
-    })
-
-    // 2. Analyser les types spécifiques
-    console.log('\n🔍 ANALYSE DÉTAILLÉE PAR TYPE:')
-    console.log('=' * 50)
-
-    for (const typeGroup of typeCounts) {
-      const type = typeGroup.type
-      const count = typeGroup._count.type
+    
+    console.log(`📊 ${establishments.length} établissements analysés`)
+    console.log('')
+    
+    let withStorefront = 0
+    let withoutStorefront = 0
+    let activeStorefronts = 0
+    
+    console.log('📋 DÉTAIL DES ÉTABLISSEMENTS:')
+    console.log('================================')
+    
+    establishments.forEach((establishment, index) => {
+      const hasStorefront = establishment.storefronts.length > 0
+      const activeStorefront = establishment.storefronts.find(s => s.isActive)
       
-      console.log(`\n📁 Type: ${type} (${count} établissements)`)
-
-      // Échantillon d'établissements pour ce type
-      const samples = await prisma.establishment.findMany({
-        where: { type },
-        select: {
-          id: true,
-          name: true,
-          type: true,
-          description: true,
-          city: true,
-          region: true
-        },
-        take: 3
-      })
-
-      console.log('  📋 Exemples:')
-      samples.forEach((establishment, index) => {
-        console.log(`    ${index + 1}. ${establishment.name}`)
-        console.log(`       Ville: ${establishment.city}`)
-        console.log(`       Description: ${establishment.description?.substring(0, 80)}...`)
-      })
-
-      // Vérifier la cohérence du type
-      if (type === 'CHATEAU') {
-        const inconsistentChateaux = await prisma.establishment.count({
-          where: {
-            type: 'CHATEAU',
-            OR: [
-              { name: { contains: 'restaurant', mode: 'insensitive' } },
-              { name: { contains: 'hotel', mode: 'insensitive' } },
-              { name: { contains: 'salle', mode: 'insensitive' } },
-              { description: { contains: 'restaurant', mode: 'insensitive' } }
-            ]
-          }
-        })
-        if (inconsistentChateaux > 0) {
-          console.log(`  ⚠️ ${inconsistentChateaux} châteaux potentiellement mal classés`)
+      if (hasStorefront) {
+        withStorefront++
+        if (activeStorefront) {
+          activeStorefronts++
         }
+      } else {
+        withoutStorefront++
       }
-
-      if (type === 'RESTAURANT') {
-        const inconsistentRestaurants = await prisma.establishment.count({
-          where: {
-            type: 'RESTAURANT',
-            OR: [
-              { name: { contains: 'château', mode: 'insensitive' } },
-              { name: { contains: 'domaine', mode: 'insensitive' } },
-              { description: { contains: 'château', mode: 'insensitive' } }
-            ]
-          }
+      
+      console.log(`${index + 1}. ${establishment.name}`)
+      console.log(`   Type: ${establishment.type}`)
+      console.log(`   Localisation: ${establishment.city}, ${establishment.region}`)
+      console.log(`   Storefronts: ${establishment.storefronts.length}`)
+      
+      if (hasStorefront) {
+        establishment.storefronts.forEach((storefront, i) => {
+          console.log(`     ${i + 1}. ID: ${storefront.id}, Type: ${storefront.type}, Actif: ${storefront.isActive}`)
         })
-        if (inconsistentRestaurants > 0) {
-          console.log(`  ⚠️ ${inconsistentRestaurants} restaurants potentiellement mal classés`)
-        }
+      } else {
+        console.log(`     ❌ Aucun storefront`)
       }
-    }
-
-    // 3. Statistiques générales
-    console.log('\n📈 STATISTIQUES GÉNÉRALES:')
-    console.log('=' * 30)
-
-    const totalEstablishments = await prisma.establishment.count()
-    const establishmentsWithImages = await prisma.establishment.count({
-      where: {
-        images: { isEmpty: false }
-      }
+      console.log('')
     })
-    const establishmentsWithPrices = await prisma.establishment.count({
-      where: {
-        startingPrice: { gt: 0 }
-      }
+    
+    console.log('📊 STATISTIQUES:')
+    console.log('================')
+    console.log(`Total établissements: ${establishments.length}`)
+    console.log(`Avec storefront: ${withStorefront}`)
+    console.log(`Sans storefront: ${withoutStorefront}`)
+    console.log(`Storefronts actifs: ${activeStorefronts}`)
+    console.log('')
+    
+    // Analyser les types d'établissements
+    console.log('🏷️ TYPES D\'ÉTABLISSEMENTS:')
+    console.log('============================')
+    const typeCounts: Record<string, number> = {}
+    establishments.forEach(est => {
+      typeCounts[est.type] = (typeCounts[est.type] || 0) + 1
     })
-    const establishmentsWithCapacity = await prisma.establishment.count({
-      where: {
-        maxCapacity: { gt: 0 }
-      }
+    
+    Object.entries(typeCounts).forEach(([type, count]) => {
+      console.log(`${type}: ${count}`)
     })
-
-    console.log(`📊 Total établissements: ${totalEstablishments}`)
-    console.log(`🖼️ Avec images: ${establishmentsWithImages} (${((establishmentsWithImages/totalEstablishments)*100).toFixed(1)}%)`)
-    console.log(`💰 Avec prix: ${establishmentsWithPrices} (${((establishmentsWithPrices/totalEstablishments)*100).toFixed(1)}%)`)
-    console.log(`👥 Avec capacité: ${establishmentsWithCapacity} (${((establishmentsWithCapacity/totalEstablishments)*100).toFixed(1)}%)`)
-
-    // 4. Vérifier les données manquantes
-    console.log('\n🚨 DONNÉES MANQUANTES:')
-    console.log('=' * 25)
-
-    const withoutImages = totalEstablishments - establishmentsWithImages
-    const withoutPrices = totalEstablishments - establishmentsWithPrices
-    const withoutCapacity = totalEstablishments - establishmentsWithCapacity
-
-    if (withoutImages > 0) {
-      console.log(`❌ ${withoutImages} établissements sans images`)
+    
+    // Vérifier s'il y a des établissements qui ne sont pas des lieux
+    console.log('')
+    console.log('🚨 ÉTABLISSEMENTS SUSPECTS (pas des lieux):')
+    console.log('============================================')
+    
+    const nonVenueTypes = establishments.filter(est => 
+      !est.type.toLowerCase().includes('mariage') && 
+      !est.type.toLowerCase().includes('château') &&
+      !est.type.toLowerCase().includes('domaine') &&
+      !est.type.toLowerCase().includes('salle') &&
+      !est.type.toLowerCase().includes('restaurant') &&
+      !est.type.toLowerCase().includes('hôtel') &&
+      !est.type.toLowerCase().includes('auberge') &&
+      !est.type.toLowerCase().includes('bateau')
+    )
+    
+    if (nonVenueTypes.length > 0) {
+      nonVenueTypes.forEach(est => {
+        console.log(`❌ ${est.name} - Type: ${est.type}`)
+      })
+    } else {
+      console.log('✅ Tous les établissements semblent être des lieux')
     }
-    if (withoutPrices > 0) {
-      console.log(`❌ ${withoutPrices} établissements sans prix`)
-    }
-    if (withoutCapacity > 0) {
-      console.log(`❌ ${withoutCapacity} établissements sans capacité`)
-    }
-
-    // 5. Recommandations
-    console.log('\n💡 RECOMMANDATIONS:')
-    console.log('=' * 20)
-
-    const mostCommonType = typeCounts[0]
-    console.log(`📊 Type le plus courant: ${mostCommonType.type} (${mostCommonType._count.type} établissements)`)
-
-    if (withoutImages > totalEstablishments * 0.1) {
-      console.log(`🔧 ${withoutImages} établissements ont besoin d'images`)
-    }
-
-    if (withoutPrices > totalEstablishments * 0.1) {
-      console.log(`🔧 ${withoutPrices} établissements ont besoin de prix`)
-    }
-
+    
   } catch (error) {
-    console.error('❌ Erreur lors de l\'analyse:', error)
+    console.error('❌ Erreur:', error)
   } finally {
     await prisma.$disconnect()
   }
 }
 
 analyzeEstablishments()
-
-
-
-

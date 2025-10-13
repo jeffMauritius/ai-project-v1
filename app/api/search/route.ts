@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // Types simplifiés
 interface SearchResult {
@@ -291,6 +293,13 @@ async function analyzeQueryWithAI(query: string): Promise<SearchCriteria> {
 
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier l'authentification
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { query, offset = 0, limit = 20 } = await request.json()
     console.log('🔍 Recherche:', query, `offset: ${offset}, limit: ${limit}`)
 
@@ -380,7 +389,13 @@ export async function POST(request: NextRequest) {
           hasParking: true,
           hasTerrace: true,
           hasKitchen: true,
-          hasAccommodation: true
+          hasAccommodation: true,
+          storefronts: {
+            select: {
+              id: true
+            },
+            take: 1
+          }
         },
         take: 2000 // Augmenter pour avoir tous les châteaux
       })
@@ -388,7 +403,7 @@ export async function POST(request: NextRequest) {
       console.log(`🏰 ${establishments.length} établissements trouvés`)
 
       results.push(...establishments.map(establishment => ({
-        id: establishment.id,
+        id: establishment.storefronts[0]?.id || establishment.id, // Utiliser l'ID du storefront si disponible
           type: 'VENUE' as const,
           name: establishment.name,
           serviceType: 'LIEU',

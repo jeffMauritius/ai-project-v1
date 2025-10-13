@@ -4,9 +4,13 @@ import { list } from '@vercel/blob'
 const prisma = new PrismaClient()
 
 async function fixImageUrlsSmart() {
+  const startTime = new Date()
+  console.log('🚀 ================================================')
+  console.log('🔧 CORRECTION INTELLIGENTE DES URLs D\'IMAGES')
+  console.log('🚀 ================================================')
+  console.log(`⏰ Début: ${startTime.toLocaleString()}`)
+  
   try {
-    console.log('🔧 Correction intelligente des URLs d\'images des établissements...')
-    
     // Récupérer tous les établissements avec leurs images
     const establishments = await prisma.establishment.findMany({
       select: {
@@ -17,18 +21,43 @@ async function fixImageUrlsSmart() {
     })
     
     console.log(`📊 ${establishments.length} établissements à vérifier`)
+    console.log(`🎯 Objectif: Corriger toutes les URLs d'images incorrectes`)
+    console.log('')
     
     let fixedCount = 0
     let totalChecked = 0
+    let skippedCount = 0
+    let errorCount = 0
     
     for (const establishment of establishments) {
       totalChecked++
       
+      // Logs de progrès détaillés
       if (totalChecked % 50 === 0) {
-        console.log(`📈 Progrès: ${totalChecked}/${establishments.length} établissements vérifiés`)
+        const elapsed = new Date().getTime() - startTime.getTime()
+        const elapsedMinutes = Math.floor(elapsed / 60000)
+        const elapsedSeconds = Math.floor((elapsed % 60000) / 1000)
+        const rate = totalChecked / (elapsed / 1000) // établissements par seconde
+        const estimatedTotal = establishments.length / rate // temps total estimé en secondes
+        const remaining = Math.max(0, estimatedTotal - elapsed / 1000)
+        const remainingMinutes = Math.floor(remaining / 60)
+        const remainingSeconds = Math.floor(remaining % 60)
+        
+        console.log('')
+        console.log('📈 ========== RAPPORT DE PROGRÈS ==========')
+        console.log(`⏱️  Temps écoulé: ${elapsedMinutes}m ${elapsedSeconds}s`)
+        console.log(`📊 Progrès: ${totalChecked}/${establishments.length} (${((totalChecked/establishments.length)*100).toFixed(1)}%)`)
+        console.log(`✅ Corrigés: ${fixedCount}`)
+        console.log(`⏭️  Ignorés: ${skippedCount}`)
+        console.log(`❌ Erreurs: ${errorCount}`)
+        console.log(`🚀 Vitesse: ${rate.toFixed(2)} établissements/seconde`)
+        console.log(`⏳ Temps restant estimé: ${remainingMinutes}m ${remainingSeconds}s`)
+        console.log('==========================================')
+        console.log('')
       }
       
       if (!establishment.images || establishment.images.length === 0) {
+        skippedCount++
         continue
       }
       
@@ -43,7 +72,8 @@ async function fixImageUrlsSmart() {
         })
         
         if (blobs.length === 0) {
-          console.log(`⚠️  Aucun fichier trouvé pour ${establishment.name}`)
+          console.log(`⚠️  [${totalChecked}/${establishments.length}] Aucun fichier trouvé pour ${establishment.name}`)
+          skippedCount++
           continue
         }
         
@@ -98,26 +128,45 @@ async function fixImageUrlsSmart() {
             fixedCount++
             
             if (fixedCount % 10 === 0) {
-              console.log(`✅ ${fixedCount} établissements corrigés`)
+              console.log(`✅ [${totalChecked}/${establishments.length}] ${fixedCount} établissements corrigés`)
             }
           } catch (error) {
-            console.error(`❌ Erreur lors de la mise à jour de ${establishment.name}:`, error)
+            console.error(`❌ [${totalChecked}/${establishments.length}] Erreur lors de la mise à jour de ${establishment.name}:`, error)
+            errorCount++
           }
         }
         
       } catch (error) {
-        console.error(`❌ Erreur lors de la vérification de ${establishment.name}:`, error)
+        console.error(`❌ [${totalChecked}/${establishments.length}] Erreur lors de la vérification de ${establishment.name}:`, error)
+        errorCount++
       }
       
       // Délai pour éviter de surcharger l'API
       await new Promise(resolve => setTimeout(resolve, 200))
     }
     
-    console.log(`\n🎉 Correction terminée !`)
-    console.log(`📊 ${fixedCount} établissements corrigés sur ${establishments.length} vérifiés`)
+    const endTime = new Date()
+    const totalTime = endTime.getTime() - startTime.getTime()
+    const totalMinutes = Math.floor(totalTime / 60000)
+    const totalSeconds = Math.floor((totalTime % 60000) / 1000)
+    
+    console.log('')
+    console.log('🎉 ========== CORRECTION TERMINÉE ==========')
+    console.log(`⏰ Début: ${startTime.toLocaleString()}`)
+    console.log(`⏰ Fin: ${endTime.toLocaleString()}`)
+    console.log(`⏱️  Durée totale: ${totalMinutes}m ${totalSeconds}s`)
+    console.log(`📊 Résultats:`)
+    console.log(`   • Total vérifiés: ${totalChecked}/${establishments.length}`)
+    console.log(`   • Corrigés: ${fixedCount}`)
+    console.log(`   • Ignorés: ${skippedCount}`)
+    console.log(`   • Erreurs: ${errorCount}`)
+    console.log(`📈 Taux de succès: ${((fixedCount/totalChecked)*100).toFixed(1)}%`)
+    console.log(`🚀 Vitesse moyenne: ${(totalChecked/(totalTime/1000)).toFixed(2)} établissements/seconde`)
+    console.log('==========================================')
+    console.log('')
     
   } catch (error) {
-    console.error('❌ Erreur:', error)
+    console.error('❌ Erreur fatale:', error)
   } finally {
     await prisma.$disconnect()
   }
