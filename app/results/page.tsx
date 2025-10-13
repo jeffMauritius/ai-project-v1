@@ -5,17 +5,8 @@ import AISearchBar from '../components/AISearchBar'
 import { PageNavigation } from '../components/PageNavigation'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { MapPinIcon, BanknotesIcon, CalendarDaysIcon, UsersIcon } from '@heroicons/react/24/outline'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
 
 interface SearchResult {
   id: string
@@ -36,14 +27,19 @@ interface SearchResult {
 }
 
 const ITEMS_PER_PAGE = 20
+const INITIAL_LOAD = 20
 
 export default function Results() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [currentOffset, setCurrentOffset] = useState(0)
+  const [totalResults, setTotalResults] = useState(0)
+  const observerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Récupérer la requête depuis l'URL
@@ -52,81 +48,75 @@ export default function Results() {
     
     console.log('🔍 Page Results - Requête:', query)
     
-    // Récupérer les résultats depuis sessionStorage
-    const storedResults = sessionStorage.getItem('searchResults')
-    const storedCriteria = sessionStorage.getItem('searchCriteria')
+    // Reset pour nouvelle recherche
+    setSearchResults([])
+    setCurrentOffset(0)
+    setHasMore(true)
     
-    console.log('💾 Données stockées:', {
-      hasStoredResults: !!storedResults,
-      hasStoredCriteria: !!storedCriteria
-    })
-    
-    if (storedResults && storedCriteria) {
-      try {
-        const results = JSON.parse(storedResults)
-        const criteria = JSON.parse(storedCriteria)
-        
-        console.log('📊 Résultats parsés:', {
-          count: results.length,
-          totalResults: criteria.totalResults,
-          firstResult: results[0] ? {
-            id: results[0].id,
-            companyName: results[0].companyName,
-            serviceType: results[0].serviceType
-          } : 'Aucun résultat'
-        })
-        
-        // Vérifier que les IDs sont valides (format MongoDB ObjectId)
-        const validResults = results.filter((result: any) => 
-          result.id && result.id.length === 24 && /^[0-9a-fA-F]{24}$/.test(result.id)
-        )
-        
-        if (validResults.length !== results.length) {
-          console.warn('⚠️ Certains résultats ont des IDs invalides:', {
-            total: results.length,
-            valid: validResults.length,
-            invalid: results.length - validResults.length
-          })
-        }
-        
-        setSearchResults(validResults.length > 0 ? validResults : results)
-        
-        // Si les résultats stockés sont limités (50) mais qu'on sait qu'il y en a plus, faire une requête complète
-        if (results.length === 50 && criteria.totalResults > 50) {
-          console.log('📊 Résultats limités détectés, recherche complète en cours...')
-          performSearch(query)
-        }
-      } catch (error) {
-        console.error('Erreur parsing results:', error)
-        // En cas d'erreur de parsing, faire une nouvelle recherche
-        if (query) {
-          console.log('🔍 Erreur parsing, recherche en cours...')
-          performSearch(query)
-        }
-      }
-    } else if (query) {
-      // Si pas de résultats stockés mais une requête, faire la recherche
-      console.log('🔍 Aucun résultat stocké, recherche en cours...')
-      performSearch(query)
+    // Toujours faire une recherche directe pour éviter les problèmes de sessionStorage
+    if (query) {
+      console.log('🔍 Recherche directe en cours...')
+      performSearch(query, 0, true)
     } else {
-      console.log('⚠️ Aucun résultat stocké et aucune requête')
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }, [searchParams])
 
-  // Fonction pour effectuer la recherche
-  const performSearch = async (searchQuery: string) => {
+  // Observer pour le lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        console.log('🔍 IntersectionObserver triggered:', {
+          isIntersecting: entries[0].isIntersecting,
+          hasMore: hasMore,
+          isLoadingMore: isLoadingMore,
+          currentOffset: currentOffset,
+          searchResultsCount: searchResults.length
+        })
+        
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          console.log('🚀 Chargement de plus de résultats...')
+          loadMoreResults()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (observerRef.current) {
+      console.log('👁️ Observer attaché à l\'élément')
+      observer.observe(observerRef.current)
+    } else {
+      console.log('❌ observerRef.current est null')
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current)
+      }
+    }
+  }, [hasMore, isLoadingMore, currentOffset, searchResults.length])
+
+  // Fonction pour effectuer la recherche avec pagination
+  const performSearch = async (searchQuery: string, offset: number = 0, isInitial: boolean = false) => {
     try {
-      setIsLoading(true)
-      console.log('🔍 Recherche en cours pour:', searchQuery)
+      if (isInitial) {
+        setIsLoading(true)
+      } else {
+        setIsLoadingMore(true)
+      }
+      
+      console.log('🔍 Recherche en cours pour:', searchQuery, `offset: ${offset}`)
       
       const response = await fetch('/api/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: searchQuery }),
+        body: JSON.stringify({ 
+          query: searchQuery,
+          offset: offset,
+          limit: ITEMS_PER_PAGE
+        }),
       })
       
       if (!response.ok) {
@@ -136,6 +126,8 @@ export default function Results() {
       const data = await response.json()
       console.log('📊 Résultats de recherche reçus:', {
         count: data.results?.length || 0,
+        offset: offset,
+        hasMore: data.hasMore,
         firstResult: data.results?.[0] ? {
           id: data.results[0].id,
           name: data.results[0].name,
@@ -144,23 +136,52 @@ export default function Results() {
       })
       
       if (data.results && data.results.length > 0) {
-        // Stocker les résultats dans sessionStorage
-        sessionStorage.setItem('searchResults', JSON.stringify(data.results))
-        sessionStorage.setItem('searchCriteria', JSON.stringify(data.criteria))
+        if (isInitial) {
+          setSearchResults(data.results)
+          setTotalResults(data.total || 0) // Stocker le total pour l'affichage
+        } else {
+          setSearchResults(prev => [...prev, ...data.results])
+        }
         
-        // Mettre à jour l'état
-        setSearchResults(data.results)
+        setHasMore(data.hasMore || false)
+        setCurrentOffset(offset + ITEMS_PER_PAGE)
       } else {
-        console.log('⚠️ Aucun résultat trouvé pour la requête')
-        setSearchResults([])
+        if (isInitial) {
+          setSearchResults([])
+        }
+        setHasMore(false)
       }
     } catch (error) {
       console.error('❌ Erreur lors de la recherche:', error)
-      setSearchResults([])
+      if (isInitial) {
+        setSearchResults([])
+      }
+      setHasMore(false)
     } finally {
-      setIsLoading(false)
+      if (isInitial) {
+        setIsLoading(false)
+      } else {
+        setIsLoadingMore(false)
+      }
     }
   }
+
+  // Fonction pour charger plus de résultats
+  const loadMoreResults = useCallback(() => {
+    console.log('🔄 loadMoreResults appelé:', {
+      isLoadingMore,
+      hasMore,
+      currentOffset,
+      searchQuery
+    })
+    
+    if (!isLoadingMore && hasMore) {
+      console.log('✅ Conditions remplies, lancement de performSearch')
+      performSearch(searchQuery, currentOffset, false)
+    } else {
+      console.log('❌ Conditions non remplies pour charger plus')
+    }
+  }, [searchQuery, currentOffset, isLoadingMore, hasMore])
 
   // Plus de données mock - utilisation uniquement des vraies données de la base
 
@@ -225,19 +246,13 @@ export default function Results() {
     router.push(`/storefront/${result.id}`)
   }
 
-  // Calculer la pagination
-  const totalPages = Math.ceil(searchResults.length / ITEMS_PER_PAGE)
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const paginatedResults = searchResults.slice(startIndex, endIndex)
-
   // Debug: afficher l'état actuel
   console.log('🔍 État actuel:', {
     isLoading,
+    isLoadingMore,
     searchResultsCount: searchResults.length,
-    paginatedResultsCount: paginatedResults.length,
-    currentPage,
-    totalPages,
+    hasMore,
+    currentOffset,
     searchQuery
   })
 
@@ -266,7 +281,7 @@ export default function Results() {
               Résultats pour &quot;{searchQuery}&quot;
             </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              {searchResults.length} prestataire{searchResults.length > 1 ? 's' : ''} trouvé{searchResults.length > 1 ? 's' : ''} correspondant à votre recherche
+              {totalResults} prestataire{totalResults > 1 ? 's' : ''} trouvé{totalResults > 1 ? 's' : ''} correspondant à votre recherche
             </p>
             <div className="mt-6">
               <AISearchBar />
@@ -275,7 +290,7 @@ export default function Results() {
 
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paginatedResults.map((result, index) => {
+            {searchResults.map((result, index) => {
               // Debug: log de chaque résultat
               console.log('🎯 Carte résultat:', {
                 id: result.id,
@@ -361,58 +376,24 @@ export default function Results() {
             })}
           </div>
 
-          {/* Pagination */}
-          {searchResults.length > 0 && totalPages > 1 && (
-            <div className="mt-8">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                  {[...Array(totalPages)].map((_, index) => {
-                    const pageNumber = index + 1;
-                    if (
-                      pageNumber === 1 ||
-                      pageNumber === totalPages ||
-                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                    ) {
-                      return (
-                        <PaginationItem key={pageNumber}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(pageNumber)}
-                            isActive={currentPage === pageNumber}
-                          >
-                            {pageNumber}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    } else if (
-                      pageNumber === currentPage - 2 ||
-                      pageNumber === currentPage + 2
-                    ) {
-                      return (
-                        <PaginationItem key={pageNumber}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      );
-                    }
-                    return null;
-                  })}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                      }
-                      className={
-                        currentPage === totalPages ? "pointer-events-none opacity-50" : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+          {/* Lazy Loading Trigger */}
+          {hasMore && (
+            <div ref={observerRef} className="mt-8 flex flex-col items-center space-y-4">
+              {isLoadingMore && (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Chargement...</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Fin des résultats */}
+          {!hasMore && searchResults.length > 0 && (
+            <div className="mt-8 text-center">
+              <div className="text-gray-500 dark:text-gray-400 text-sm">
+                Tous les résultats ont été chargés ({searchResults.length} résultats)
+              </div>
             </div>
           )}
 

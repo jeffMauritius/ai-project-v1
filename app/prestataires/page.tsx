@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import TypeFilter from "@/components/TypeFilter";
 import {
   Pagination,
   PaginationContent,
@@ -36,6 +37,7 @@ const ITEMS_PER_PAGE = 20;
 
 export default function PrestatairesPage() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedServiceType, setSelectedServiceType] = useState<string>('');
   const router = useRouter();
 
   const { data, isLoading, error } = useQuery<{
@@ -45,17 +47,60 @@ export default function PrestatairesPage() {
     limit: number;
     totalPages: number;
   }>({
-    queryKey: ["prestataires", currentPage],
+    queryKey: ["prestataires", currentPage, selectedServiceType],
     queryFn: async () => {
-      const response = await fetch(
-        `/api/prestataires?page=${currentPage}&limit=${ITEMS_PER_PAGE}`
-      );
-      if (!response.ok) {
-        throw new Error("Erreur lors du chargement des prestataires");
+      if (selectedServiceType) {
+        // Utiliser l'API de recherche avec POST
+        const response = await fetch('/api/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: selectedServiceType,
+            offset: (currentPage - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error("Erreur lors du chargement des prestataires");
+        }
+        
+        const searchData = await response.json();
+        return {
+          prestataires: searchData.results || [],
+          total: searchData.total || 0,
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+          totalPages: Math.ceil((searchData.total || 0) / ITEMS_PER_PAGE)
+        };
+      } else {
+        // Utiliser l'API des prestataires normale
+        const response = await fetch(`/api/prestataires?page=${currentPage}&limit=${ITEMS_PER_PAGE}`);
+        if (!response.ok) {
+          throw new Error("Erreur lors du chargement des prestataires");
+        }
+        return response.json();
       }
-      return response.json();
     },
   });
+
+  // Types de services avec leurs compteurs (LIEU supprimé car doublon avec établissements)
+  const serviceTypes = [
+    { type: 'DECORATION', label: 'Décoration', count: 6414 },
+    { type: 'TRAITEUR', label: 'Traiteur', count: 3771 },
+    { type: 'ANIMATION', label: 'Animation', count: 3111 },
+    { type: 'FLORISTE', label: 'Fleuriste', count: 2179 },
+    { type: 'MUSIQUE', label: 'Musique', count: 1218 },
+    { type: 'VOITURE', label: 'Transport', count: 1157 },
+    { type: 'PHOTOGRAPHE', label: 'Photographe', count: 892 },
+    { type: 'OFFICIANT', label: 'Officiant', count: 535 },
+    { type: 'FAIRE_PART', label: 'Faire-part', count: 353 },
+    { type: 'ORGANISATION', label: 'Organisation', count: 40 },
+    { type: 'LUNE_DE_MIEL', label: 'Lune de miel', count: 39 },
+    { type: 'CADEAUX_INVITES', label: 'Cadeaux invités', count: 3 },
+  ];
 
   const getServiceTypeLabel = (serviceType: string) => {
     const labels: Record<string, string> = {
@@ -119,11 +164,24 @@ export default function PrestatairesPage() {
     );
   }
 
+  const handleServiceTypeChange = (serviceType: string) => {
+    setSelectedServiceType(serviceType);
+    setCurrentPage(1); // Reset à la première page
+  };
+
   const totalPages = data?.totalPages || 0;
 
   return (
     <div className="container mx-auto py-8">
       <h1 className="mb-8 text-3xl font-bold">Nos Prestataires</h1>
+      
+      <TypeFilter
+        types={serviceTypes}
+        activeType={selectedServiceType}
+        onTypeChange={handleServiceTypeChange}
+        showAll={true}
+      />
+      
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data?.prestataires.map((prestataire) => (
           <div key={prestataire.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
