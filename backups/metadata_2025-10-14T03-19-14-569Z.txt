@@ -1,0 +1,7 @@
+
+Backup créé le: 10/14/2025, 7:19:40 AM
+Méthode: Prisma Client
+Collections: user, partner, establishment, subscription, consultedStorefront, favorite, searchHistory, guest, table, weddingProvider
+Total d'enregistrements: 63987
+Fichier: mongodb_backup_prisma_2025-10-14T03-19-14-569Z.json
+Taille: 117.98 MB
