@@ -82,19 +82,20 @@ export default function Results() {
       { threshold: 0.1 }
     )
 
-    if (observerRef.current) {
+    const currentRef = observerRef.current
+    if (currentRef) {
       console.log('👁️ Observer attaché à l\'élément')
-      observer.observe(observerRef.current)
+      observer.observe(currentRef)
     } else {
       console.log('❌ observerRef.current est null')
     }
 
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current)
+      if (currentRef) {
+        observer.unobserve(currentRef)
       }
     }
-  }, [hasMore, isLoadingMore, currentOffset, searchResults.length])
+  }, [hasMore, isLoadingMore, currentOffset, searchResults.length, loadMoreResults])
 
   // Fonction pour effectuer la recherche avec pagination
   const performSearch = async (searchQuery: string, offset: number = 0, isInitial: boolean = false) => {

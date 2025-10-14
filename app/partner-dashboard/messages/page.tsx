@@ -66,7 +66,7 @@ export default function Messages() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Fonction pour récupérer les messages
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       console.log('🔄 Chargement des messages partenaire...')
       const response = await fetch('/api/partner-dashboard/messages')
@@ -101,12 +101,12 @@ export default function Messages() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
   // Charger les messages au montage
   useEffect(() => {
     fetchMessages()
-  }, [])
+  }, [fetchMessages])
 
   // Écouter les nouveaux messages via Socket.IO
   useEffect(() => {

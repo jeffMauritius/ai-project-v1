@@ -407,7 +407,7 @@ export default function Register() {
             <p className="text-xs text-gray-500 dark:text-gray-400">
               En créant un compte, vous acceptez nos{' '}
               <Link href="/legal/terms" className="text-pink-600 hover:text-pink-500 dark:text-pink-400">
-                conditions d'utilisation
+                conditions d&apos;utilisation
               </Link>{' '}
               et notre{' '}
               <Link href="/legal/privacy" className="text-pink-600 hover:text-pink-500 dark:text-pink-400">

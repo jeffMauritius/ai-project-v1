@@ -72,7 +72,7 @@ export default function ChatCard({ companyName, storefrontId }: ChatCardProps) {
       // Essayer de récupérer une conversation existante
       createOrGetConversation()
     }
-  }, [session?.user?.id])
+  }, [session?.user?.id, conversationId, createOrGetConversation])
 
   // Écouter les nouveaux messages (désactivé pour l'instant)
   // useEffect(() => {
@@ -83,7 +83,7 @@ export default function ChatCard({ companyName, storefrontId }: ChatCardProps) {
   //   }
   // }, [socket, onNewMessage])
 
-  const createOrGetConversation = async () => {
+  const createOrGetConversation = useCallback(async () => {
     try {
       const response = await fetch('/api/chat/conversations', {
         method: 'POST',
@@ -117,7 +117,7 @@ export default function ChatCard({ companyName, storefrontId }: ChatCardProps) {
       console.error('Error creating conversation:', error)
     }
     return null
-  }
+  }, [storefrontId])
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !session?.user?.id) return

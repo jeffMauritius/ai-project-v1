@@ -152,7 +152,7 @@ export default function Partners() {
   }
 
   // Charger les partenaires du système
-  const fetchSystemPartners = async () => {
+  const fetchSystemPartners = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -179,7 +179,7 @@ export default function Partners() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, selectedType, searchTerm])
 
   useEffect(() => {
     fetchRecommendedPartners()
@@ -189,7 +189,7 @@ export default function Partners() {
     if (isDialogOpen) {
       fetchSystemPartners()
     }
-  }, [isDialogOpen, selectedType, searchTerm, page])
+  }, [isDialogOpen, selectedType, searchTerm, page, fetchSystemPartners])
 
   const handleAddPartner = async (systemPartner: SystemPartner) => {
     try {

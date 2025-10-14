@@ -131,6 +131,7 @@ async function analyzeAndFixAllPartners() {
     let alreadyCorrect = 0
     let errors = 0
 
+    // Reprendre depuis le début pour vérifier tous les partenaires
     for (let skip = 0; skip < totalPartners; skip += batchSize) {
       console.log(`\n📦 Traitement du batch ${Math.floor(skip / batchSize) + 1}/${Math.ceil(totalPartners / batchSize)}...`)
       
@@ -143,10 +144,8 @@ async function analyzeAndFixAllPartners() {
           description: true,
           shortDescription: true,
           serviceType: true
-        },
-        orderBy: {
-          createdAt: 'asc'
         }
+        // Supprimer orderBy pour éviter la limite de mémoire MongoDB
       })
 
       for (const partner of partners) {

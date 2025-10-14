@@ -89,7 +89,7 @@ export default function Photos() {
     defaultValues: { photos: [], albumId: '' }
   })
 
-  const fetchAlbums = async () => {
+  const fetchAlbums = useCallback(async () => {
     const res = await fetch('/api/user/photos/albums', { cache: 'no-store' })
     if (res.ok) {
       const data: AlbumDTO[] = await res.json()
@@ -100,11 +100,11 @@ export default function Photos() {
         setAlbumToView(refreshed)
       }
     }
-  }
+  }, [albumToView])
 
   useEffect(() => {
     fetchAlbums()
-  }, [])
+  }, [fetchAlbums])
 
   useEffect(() => {
     if (selectedAlbum) {
