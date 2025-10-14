@@ -147,6 +147,7 @@ model Partner {
   // Informations de base
   companyName String
   description String
+  shortDescription String? // Description courte pour les cartes
   
   // Type de service
   serviceType ServiceType

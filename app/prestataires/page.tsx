@@ -193,8 +193,9 @@ export default function PrestatairesPage() {
               
               <div 
                 className="text-gray-600 text-sm mb-4 line-clamp-2"
-                dangerouslySetInnerHTML={{ __html: prestataire.description }}
-              />
+              >
+                {prestataire.description}
+              </div>
               
               <div className="space-y-2 mb-4">
                 {prestataire.location && (

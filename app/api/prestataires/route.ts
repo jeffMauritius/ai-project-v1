@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
         id: true,
         companyName: true,
         description: true,
+        shortDescription: true, // Ajouter la description courte
         serviceType: true,
         billingCity: true,
         billingCountry: true,
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
         id: storefront?.id || partner.id, // Utiliser l'ID du storefront si disponible
         name: partner.companyName,
         companyName: partner.companyName,
-        description: partner.description || '',
+        description: partner.shortDescription || partner.description || '',
         serviceType: partner.serviceType,
         location: `${partner.billingCity || ''}, ${partner.billingCountry || ''}`,
         rating: 4.5,
