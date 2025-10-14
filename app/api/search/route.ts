@@ -498,7 +498,7 @@ export async function POST(request: NextRequest) {
           serviceType: partner.serviceType,
           location: `${partner.billingCity}, France`,
           rating: partner.rating || 4.5,
-          price: partner.basePrice,
+          price: partner.basePrice || undefined,
           capacity: partner.maxCapacity,
           description: partner.description,
           features: partner.services || [],

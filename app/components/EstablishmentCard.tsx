@@ -166,7 +166,9 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
         />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">À partir de {priceRange}</span>
+            {priceRange && priceRange !== "0" && priceRange !== "0€" && (
+              <span className="text-sm font-semibold">À partir de {priceRange}</span>
+            )}
             <span className="text-sm text-gray-600">{capacity}</span>
           </div>
           <Link href={`/storefront/${id}`} onClick={handleCardClick}>

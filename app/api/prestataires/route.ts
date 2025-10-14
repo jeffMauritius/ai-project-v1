@@ -9,11 +9,27 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
+    const serviceType = searchParams.get('serviceType')
 
-    console.log('🔍 Requête prestataires:', { page, limit })
+    console.log('🔍 Requête prestataires:', { page, limit, serviceType })
 
-    // Récupérer les prestataires avec leurs images et storefronts
+    // Construire le filtre where
+    const whereClause: any = {
+      serviceType: {
+        not: 'LIEU' // Exclure les lieux qui sont gérés dans Establishment
+      }
+    }
+
+    // Ajouter le filtre par type de service si spécifié
+    if (serviceType) {
+      whereClause.serviceType = {
+        equals: serviceType
+      }
+    }
+
+    // Récupérer les prestataires avec leurs images directement de la collection partners
     const partners = await prisma.partner.findMany({
+      where: whereClause,
       select: {
         id: true,
         companyName: true,
@@ -23,11 +39,11 @@ export async function GET(request: NextRequest) {
         billingCountry: true,
         basePrice: true,
         maxCapacity: true,
+        images: true, // Utiliser les images directement de la collection partners
         storefronts: {
           select: {
             id: true,
-            isActive: true,
-            images: true
+            isActive: true
           },
           take: 1
         }
@@ -36,19 +52,16 @@ export async function GET(request: NextRequest) {
       take: limit
     })
 
-    const total = await prisma.partner.count()
+    const total = await prisma.partner.count({
+      where: whereClause
+    })
 
     console.log(`👨‍💼 ${partners.length} prestataires trouvés sur ${total} total`)
 
     // Transformer les données
     const prestataires = partners.map(partner => {
       const storefront = partner.storefronts?.[0]
-      const images = storefront?.images || []
-      
-      // Transformer les URLs d'images
-      const transformedImages = images.map((url, index) => 
-        transformImageUrlWithEntity(url, storefront?.id || partner.id, 'partners', index + 1)
-      )
+      const images = partner.images || [] // Utiliser les images directement de la collection partners
       
       return {
         id: storefront?.id || partner.id, // Utiliser l'ID du storefront si disponible
@@ -58,10 +71,10 @@ export async function GET(request: NextRequest) {
         serviceType: partner.serviceType,
         location: `${partner.billingCity || ''}, ${partner.billingCountry || ''}`,
         rating: 4.5,
-        price: partner.basePrice || 0,
+        price: partner.basePrice || undefined,
         capacity: partner.maxCapacity || undefined,
-        images: transformedImages,
-        imageUrl: transformedImages.length > 0 ? transformedImages[0] : undefined,
+        images: images,
+        imageUrl: images.length > 0 ? images[0] : undefined,
         logo: null,
         isActive: storefront?.isActive || false
       }

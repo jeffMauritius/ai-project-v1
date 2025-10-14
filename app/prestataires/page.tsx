@@ -49,40 +49,21 @@ export default function PrestatairesPage() {
   }>({
     queryKey: ["prestataires", currentPage, selectedServiceType],
     queryFn: async () => {
+      // Construire l'URL avec les paramètres
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString()
+      });
+      
       if (selectedServiceType) {
-        // Utiliser l'API de recherche avec POST
-        const response = await fetch('/api/search', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: selectedServiceType,
-            offset: (currentPage - 1) * ITEMS_PER_PAGE,
-            limit: ITEMS_PER_PAGE
-          })
-        });
-        
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement des prestataires");
-        }
-        
-        const searchData = await response.json();
-        return {
-          prestataires: searchData.results || [],
-          total: searchData.total || 0,
-          page: currentPage,
-          limit: ITEMS_PER_PAGE,
-          totalPages: Math.ceil((searchData.total || 0) / ITEMS_PER_PAGE)
-        };
-      } else {
-        // Utiliser l'API des prestataires normale
-        const response = await fetch(`/api/prestataires?page=${currentPage}&limit=${ITEMS_PER_PAGE}`);
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement des prestataires");
-        }
-        return response.json();
+        params.append('serviceType', selectedServiceType);
       }
+      
+      const response = await fetch(`/api/prestataires?${params.toString()}&_t=${Date.now()}`);
+      if (!response.ok) {
+        throw new Error("Erreur lors du chargement des prestataires");
+      }
+      return response.json();
     },
   });
 
@@ -223,7 +204,7 @@ export default function PrestatairesPage() {
                   </div>
                 )}
                 
-                {prestataire.price && (
+                {prestataire.price && prestataire.price > 0 && (
                   <div className="flex items-center text-sm text-gray-500">
                     <BanknotesIcon className="h-4 w-4 mr-2" />
                     {formatPrice(prestataire.price)}

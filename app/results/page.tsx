@@ -344,7 +344,7 @@ export default function Results() {
                       </div>
                     )}
                     
-                    {result.price && (
+                    {result.price && result.price > 0 && (
                       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                         <BanknotesIcon className="h-4 w-4 mr-2" />
                         {formatPrice(result.price)}

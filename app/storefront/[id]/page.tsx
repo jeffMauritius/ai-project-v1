@@ -332,7 +332,8 @@ async function getStorefrontData(id: string) {
             basePrice: true,
             maxCapacity: true,
             options: true,
-            searchableOptions: true
+            searchableOptions: true,
+            images: true // Inclure les images de la collection partners
           }
         }
       }
@@ -388,6 +389,18 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
   if (isVenue && storefront.establishment?.images && storefront.establishment.images.length > 0) {
     // Pour les lieux, utiliser directement les URLs 960p de la base de données
     allImages = storefront.establishment.images.map((url, index) => ({
+      id: `img-${index}`,
+      url: url,
+      type: 'IMAGE',
+      title: null,
+      description: null,
+      order: index
+    }))
+  }
+  
+  if (isPartner && storefront.partner?.images && storefront.partner.images.length > 0) {
+    // Pour les partenaires, utiliser les images de la collection partners
+    allImages = storefront.partner.images.map((url, index) => ({
       id: `img-${index}`,
       url: url,
       type: 'IMAGE',

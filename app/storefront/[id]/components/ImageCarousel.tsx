@@ -20,35 +20,58 @@ interface ImageCarouselProps {
 
 export default function ImageCarousel({ images, title }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
+
+  // Debug: afficher les images reçues
+  console.log('ImageCarousel - Images reçues:', images.length)
+  console.log('ImageCarousel - URLs:', images.map(img => img.url))
+
+  const handleImageError = (imageUrl: string) => {
+    console.error('Erreur chargement image:', imageUrl)
+    setFailedImages(prev => new Set([...prev, imageUrl]))
+  }
+
+  // Filtrer les images qui ont échoué
+  const validImages = images.filter(img => !failedImages.has(img.url))
 
   useEffect(() => {
-    if (images.length <= 1) return
+    if (validImages.length <= 1) return
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => 
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+        prevIndex === validImages.length - 1 ? 0 : prevIndex + 1
       )
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [images.length])
+  }, [validImages.length])
 
   const goToPrevious = () => {
-    setCurrentIndex(currentIndex === 0 ? images.length - 1 : currentIndex - 1)
+    setCurrentIndex(currentIndex === 0 ? validImages.length - 1 : currentIndex - 1)
   }
 
   const goToNext = () => {
-    setCurrentIndex(currentIndex === images.length - 1 ? 0 : currentIndex + 1)
+    setCurrentIndex(currentIndex === validImages.length - 1 ? 0 : currentIndex + 1)
   }
 
   const goToSlide = (slideIndex: number) => {
     setCurrentIndex(slideIndex)
   }
-
-  if (!images || images.length === 0) {
+  
+  // Si toutes les images ont échoué ou qu'il n'y en a pas, utiliser l'image de fallback
+  if (!images || images.length === 0 || validImages.length === 0) {
     return (
-      <div className="h-full bg-gray-200 rounded-lg flex items-center justify-center">
-        <p className="text-gray-500">Aucune image disponible</p>
+      <div className="relative h-full overflow-hidden rounded-lg">
+        <Image
+          src="/placeholder-venue.jpg"
+          alt={`${title} - Image par défaut`}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+          <p className="text-white text-lg font-medium">Image par défaut</p>
+        </div>
       </div>
     )
   }
@@ -58,17 +81,21 @@ export default function ImageCarousel({ images, title }: ImageCarouselProps) {
       {/* Image principale */}
       <div className="relative h-full">
         <Image
-          src={images[currentIndex].url}
-          alt={images[currentIndex].title || `${title} - Image ${currentIndex + 1}`}
+          src={validImages[currentIndex].url}
+          alt={validImages[currentIndex].title || `${title} - Image ${currentIndex + 1}`}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
           priority
+          onError={() => handleImageError(validImages[currentIndex].url)}
+          onLoad={() => {
+            console.log('Image chargée avec succès:', validImages[currentIndex].url)
+          }}
         />
       </div>
 
       {/* Boutons de navigation */}
-      {images.length > 1 && (
+      {validImages.length > 1 && (
         <>
           <button
             onClick={goToPrevious}
@@ -88,9 +115,9 @@ export default function ImageCarousel({ images, title }: ImageCarouselProps) {
       )}
 
       {/* Indicateurs de points */}
-      {images.length > 1 && (
+      {validImages.length > 1 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {images.map((_, slideIndex) => (
+          {validImages.map((_, slideIndex) => (
             <button
               key={slideIndex}
               onClick={() => goToSlide(slideIndex)}
@@ -106,9 +133,9 @@ export default function ImageCarousel({ images, title }: ImageCarouselProps) {
       )}
 
       {/* Compteur d'images */}
-      {images.length > 1 && (
+      {validImages.length > 1 && (
         <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-          {currentIndex + 1} / {images.length}
+          {currentIndex + 1} / {validImages.length}
         </div>
       )}
     </div>
