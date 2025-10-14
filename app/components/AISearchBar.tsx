@@ -210,10 +210,9 @@ export default function AISearchBar() {
             </p>
             <Button 
               onClick={() => router.push('/auth/login')}
-              className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
+              className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium mx-auto"
             >
-              Créer un compte
-              <ArrowRight className="w-4 h-4" />
+              Créer un compte gratuitement
             </Button>
           </div>
         </div>

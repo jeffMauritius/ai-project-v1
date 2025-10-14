@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BuildingStorefrontIcon } from '@heroicons/react/24/outline'
+import { BuildingStorefrontIcon, HeartIcon } from '@heroicons/react/24/outline'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -26,6 +26,7 @@ import {
 } from '@/lib/validation-schemas'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { Heart, Sparkles, User, Mail, Lock, Building, AlertCircle, CheckCircle } from 'lucide-react'
 
 const partnerTypes = [
   { id: 'venue', name: 'Lieu de réception' },
@@ -122,219 +123,299 @@ export default function Register() {
   }
 
   return (
-    <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-xl rounded-lg sm:px-10">
-        <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Créer un compte
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Ou{' '}
-            <Link href="/auth/login" className="font-medium text-pink-600 hover:text-pink-500">
-              connectez-vous à votre compte
-            </Link>
-          </p>
-        </div>
+    <div className="min-h-screen">
+      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full max-w-md">
+          {/* Header with logo and welcome message */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Rejoignez monmariage.ai
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              Créez votre compte pour commencer à planifier votre mariage
+            </p>
+          </div>
 
-        <div className="flex justify-center space-x-4 mb-6">
-          <button
-            type="button"
-            onClick={() => setAccountType('couple')}
-            className={`flex-1 py-2 px-4 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 ${
-              accountType === 'couple'
-                ? 'bg-pink-600 text-white hover:bg-pink-500 border-transparent'
-                : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600'
-            }`}
-          >
-            <div className="flex items-center justify-center">
-              <BuildingStorefrontIcon className="h-5 w-5 mr-2" />
-              Futur marié
+          {/* Registration form card */}
+          <div className="rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-8">
+            <div className="flex items-center justify-center mb-6">
+              <Sparkles className="w-6 h-6 text-pink-500 mr-2" />
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                Créer un compte
+              </h2>
             </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setAccountType('partner')}
-            className={`flex-1 py-2 px-4 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 ${
-              accountType === 'partner'
-                ? 'bg-pink-600 text-white hover:bg-pink-500 border-transparent'
-                : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600'
-            }`}
-          >
-            <div className="flex items-center justify-center">
-              <BuildingStorefrontIcon className="h-5 w-5 mr-2" />
-              Prestataire
-            </div>
-          </button>
-        </div>
 
-        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
-          
-          <div>
-            <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">
-              Nom complet
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              className={`mt-1 ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-              placeholder="John Doe"
-              {...(accountType === 'couple' ? coupleForm.register('name') : partnerForm.register('name'))}
-            />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.name.message}
-              </p>
-            )}
-          </div>
-          
-          <div>
-            <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
-              Adresse email
-            </Label>
-            <Input
-              id="email"
-              type="text"
-              autoComplete="email"
-              className={`mt-1 ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-              placeholder="vous@exemple.fr"
-              {...(accountType === 'couple' ? coupleForm.register('email') : partnerForm.register('email'))}
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
-
-          {accountType === 'partner' && (
-            <>
-              <div>
-                <Label htmlFor="partner-type" className="text-gray-700 dark:text-gray-300">
-                  Type de prestation
-                </Label>
-                <Select 
-                  onValueChange={(value) => partnerForm.setValue('partnerType', value)}
-                  value={partnerForm.watch('partnerType')}
-                >
-                  <SelectTrigger className={`mt-1 ${errors.partnerType ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}>
-                    <SelectValue placeholder="Sélectionnez votre activité" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {partnerTypes.map(type => (
-                      <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.partnerType && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.partnerType.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="siret" className="text-gray-700 dark:text-gray-300">
-                  Numéro SIRET
-                </Label>
-                <Input
-                  id="siret"
-                  type="text"
-                  className={`mt-1 ${errors.siret ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="12345678901234"
-                  {...partnerForm.register('siret')}
-                />
-                <p className="mt-1 text-xs text-gray-500">Format : 14 chiffres sans espaces</p>
-                {errors.siret && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.siret.message}
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-
-          <div>
-            <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
-              Mot de passe
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              className={`mt-1 ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-              placeholder="••••••••"
-              {...(accountType === 'couple' ? coupleForm.register('password') : partnerForm.register('password'))}
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="password-confirmation" className="text-gray-700 dark:text-gray-300">
-              Confirmer le mot de passe
-            </Label>
-            <Input
-              id="password-confirmation"
-              type="password"
-              autoComplete="new-password"
-              className={`mt-1 ${errors.passwordConfirmation ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-              placeholder="••••••••"
-              {...(accountType === 'couple' ? coupleForm.register('passwordConfirmation') : partnerForm.register('passwordConfirmation'))}
-            />
-            {errors.passwordConfirmation && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.passwordConfirmation.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center">
-            <Checkbox
-              id="terms"
-              checked={accountType === 'couple' ? coupleForm.watch('terms') : partnerForm.watch('terms')}
-              onCheckedChange={(checked) => {
-                if (accountType === 'couple') {
-                  coupleForm.setValue('terms', checked as boolean)
-                } else {
-                  partnerForm.setValue('terms', checked as boolean)
-                }
-              }}
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-              J&apos;accepte les{' '}
+            {/* Account type selection */}
+            <div className="flex justify-center space-x-2 mb-8">
               <button
                 type="button"
-                onClick={() => setIsTermsModalOpen(true)}
-                className="font-medium text-pink-600 hover:text-pink-500"
+                onClick={() => setAccountType('couple')}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  accountType === 'couple'
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg transform scale-105'
+                    : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
               >
-                conditions d&apos;utilisation
+                <div className="flex items-center justify-center">
+                  <HeartIcon className="h-5 w-5 mr-2" />
+                  Futur marié
+                </div>
               </button>
-            </label>
-          </div>
-          {errors.terms && (
-            <p className="text-sm text-red-600 dark:text-red-400">
-              {errors.terms.message}
-            </p>
-          )}
+              <button
+                type="button"
+                onClick={() => setAccountType('partner')}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  accountType === 'partner'
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg transform scale-105'
+                    : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                <div className="flex items-center justify-center">
+                  <Building className="h-5 w-5 mr-2" />
+                  Prestataire
+                </div>
+              </button>
+            </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
-            >
-              {isLoading ? 'Création...' : 'Créer mon compte'}
-            </button>
+            <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+              {error && (
+                <div className="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-red-500 mr-3" />
+                  <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                </div>
+              )}
+              
+              <div>
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Nom complet
+                </Label>
+                <div className="mt-2 relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Input
+                    id="name"
+                    type="text"
+                    className={`pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-pink-500 focus:ring-pink-500'}`}
+                    placeholder="John Doe"
+                    {...(accountType === 'couple' ? coupleForm.register('name') : partnerForm.register('name'))}
+                  />
+                </div>
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Adresse email
+                </Label>
+                <div className="mt-2 relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="text"
+                    autoComplete="email"
+                    className={`pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-pink-500 focus:ring-pink-500'}`}
+                    placeholder="vous@exemple.fr"
+                    {...(accountType === 'couple' ? coupleForm.register('email') : partnerForm.register('email'))}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {accountType === 'partner' && (
+                <>
+                  <div>
+                    <Label htmlFor="partner-type" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Type de prestation
+                    </Label>
+                    <div className="mt-2 relative">
+                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                      <Select 
+                        onValueChange={(value) => partnerForm.setValue('partnerType', value)}
+                        value={partnerForm.watch('partnerType')}
+                      >
+                        <SelectTrigger className={`pl-10 rounded-lg border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm ${errors.partnerType ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-pink-500 focus:ring-pink-500'}`}>
+                          <SelectValue placeholder="Sélectionnez votre activité" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {partnerTypes.map(type => (
+                            <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {errors.partnerType && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.partnerType.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="siret" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Numéro SIRET
+                    </Label>
+                    <div className="mt-2 relative">
+                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input
+                        id="siret"
+                        type="text"
+                        className={`pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm ${errors.siret ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-pink-500 focus:ring-pink-500'}`}
+                        placeholder="12345678901234"
+                        {...partnerForm.register('siret')}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Format : 14 chiffres sans espaces</p>
+                    {errors.siret && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.siret.message}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div>
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Mot de passe
+                </Label>
+                <div className="mt-2 relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete="new-password"
+                    className={`pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-pink-500 focus:ring-pink-500'}`}
+                    placeholder="••••••••"
+                    {...(accountType === 'couple' ? coupleForm.register('password') : partnerForm.register('password'))}
+                  />
+                </div>
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password-confirmation" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Confirmer le mot de passe
+                </Label>
+                <div className="mt-2 relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Input
+                    id="password-confirmation"
+                    type="password"
+                    autoComplete="new-password"
+                    className={`pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm ${errors.passwordConfirmation ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-pink-500 focus:ring-pink-500'}`}
+                    placeholder="••••••••"
+                    {...(accountType === 'couple' ? coupleForm.register('passwordConfirmation') : partnerForm.register('passwordConfirmation'))}
+                  />
+                </div>
+                {errors.passwordConfirmation && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.passwordConfirmation.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-start">
+                <Checkbox
+                  id="terms"
+                  checked={accountType === 'couple' ? coupleForm.watch('terms') : partnerForm.watch('terms')}
+                  onCheckedChange={(checked) => {
+                    if (accountType === 'couple') {
+                      coupleForm.setValue('terms', checked as boolean)
+                    } else {
+                      partnerForm.setValue('terms', checked as boolean)
+                    }
+                  }}
+                  className="border-pink-300 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500 mt-1"
+                />
+                <label htmlFor="terms" className="ml-3 block text-sm text-gray-700 dark:text-gray-300">
+                  J&apos;accepte les{' '}
+                  <button
+                    type="button"
+                    onClick={() => setIsTermsModalOpen(true)}
+                    className="font-medium text-pink-600 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300 transition-colors"
+                  >
+                    conditions d&apos;utilisation
+                  </button>
+                </label>
+              </div>
+              {errors.terms && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {errors.terms.message}
+                </p>
+              )}
+
+              <div>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      Création...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Créer mon compte
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            <div className="mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 font-medium">
+                    Ou
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Déjà un compte ?{' '}
+                  <Link
+                    href="/auth/login"
+                    className="font-semibold text-pink-600 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300 transition-colors"
+                  >
+                    Se connecter
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
-        </form>
+
+          {/* Footer */}
+          <div className="text-center mt-8">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              En créant un compte, vous acceptez nos{' '}
+              <Link href="/legal/terms" className="text-pink-600 hover:text-pink-500 dark:text-pink-400">
+                conditions d'utilisation
+              </Link>{' '}
+              et notre{' '}
+              <Link href="/legal/privacy" className="text-pink-600 hover:text-pink-500 dark:text-pink-400">
+                politique de confidentialité
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Modal des conditions d'utilisation */}
@@ -410,7 +491,7 @@ export default function Register() {
           <DialogFooter>
             <Button
               onClick={() => setIsTermsModalOpen(false)}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
             >
               J&apos;ai compris
             </Button>
