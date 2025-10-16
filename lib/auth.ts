@@ -43,10 +43,9 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Mot de passe', type: 'password' },
       },
       async authorize(credentials): Promise<User | null> {
-        console.log("[AUTH] Tentative de connexion avec:", { email: credentials?.email });
 
         if (!credentials?.email || !credentials?.password) {
-          console.log("[AUTH] Email ou mot de passe manquant");
+
           throw new Error('Email et mot de passe requis')
         }
 
@@ -56,29 +55,25 @@ export const authOptions: NextAuthOptions = {
           },
         })
 
-        console.log("[AUTH] Utilisateur trouvé:", user ? { ...user, password: '[HIDDEN]' } : 'null');
-
         if (!user || !user.password) {
-          console.log("[AUTH] Utilisateur non trouvé ou pas de mot de passe");
+
           throw new Error('Email ou mot de passe incorrect')
         }
 
         try {
-          console.log("[AUTH] Vérification du mot de passe");
+
           const isPasswordValid = await argon2.verify(user.password, credentials.password)
-          console.log("[AUTH] Résultat de la vérification:", isPasswordValid);
 
           if (!isPasswordValid) {
-            console.log("[AUTH] Mot de passe invalide");
+
             throw new Error('Email ou mot de passe incorrect')
           }
 
           if (!["USER", "ADMIN", "PARTNER"].includes(user.role)) {
-            console.log("[AUTH] Rôle invalide:", user.role);
+
             throw new Error('Rôle utilisateur invalide')
           }
 
-          console.log("[AUTH] Connexion réussie pour:", user.email);
           return {
             id: user.id,
             email: user.email,

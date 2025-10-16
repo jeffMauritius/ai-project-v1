@@ -65,88 +65,7 @@ export async function GET(request: Request) {
 
     // Sinon, accès privé par session (partenaire connecté)
     const session = await getServerSession(authOptions)
-    console.log("[PARTNER_STOREFRONT_GET] Session:", session)
-    if (!session?.user?.id) {
-      console.log("[PARTNER_STOREFRONT_GET] Pas de session ou pas d'ID utilisateur")
-      return new NextResponse("Non autorisé", { status: 401 })
-    }
 
-    // Vérifier si l'utilisateur existe et a le bon rôle
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { partners: true }
-    })
-    console.log("[PARTNER_STOREFRONT_GET] Utilisateur trouvé:", user)
-    
-    if (!user) {
-      console.log("[PARTNER_STOREFRONT_GET] Utilisateur non trouvé dans la base de données")
-      return new NextResponse("Utilisateur non trouvé", { status: 404 })
-    }
-
-    if (user.role !== "PARTNER") {
-      console.log("[PARTNER_STOREFRONT_GET] L'utilisateur n'a pas le rôle PARTNER")
-      return new NextResponse("Accès non autorisé", { status: 403 })
-    }
-
-    // Trouver le partenaire de l'utilisateur
-    let partner = user.partners[0]
-    if (!partner) {
-      console.log("[PARTNER_STOREFRONT_GET] Aucun partenaire trouvé pour l'utilisateur, création automatique...")
-      
-      // Créer automatiquement le partenaire
-      partner = await prisma.partner.create({
-        data: {
-          companyName: user.name || 'Nouveau Partenaire',
-          description: 'Description par défaut',
-          serviceType: 'LIEU', // Type par défaut
-          billingStreet: 'Adresse à compléter',
-          billingCity: 'Ville à compléter',
-          billingPostalCode: '00000',
-          billingCountry: 'France',
-          siret: '00000000000000',
-          vatNumber: 'FR00000000000',
-          interventionType: 'all_france',
-          interventionRadius: 50,
-          userId: user.id
-        }
-      })
-      
-      console.log("[PARTNER_STOREFRONT_GET] Partenaire créé automatiquement:", partner.id)
-    }
-
-    console.log("[PARTNER_STOREFRONT_GET] Recherche du storefront pour le partenaire:", partner.id)
-    const storefront = await prisma.partnerStorefront.findFirst({
-      where: { partnerId: partner.id },
-      include: {
-        media: true,
-        partner: true,
-      },
-    })
-    
-    console.log("[PARTNER_STOREFRONT_GET] Résultat de la recherche:", storefront)
-    if (!storefront) {
-      console.log("[PARTNER_STOREFRONT_GET] Aucun storefront trouvé pour le partenaire, création automatique...")
-      
-      // Créer automatiquement le storefront
-      storefront = await prisma.partnerStorefront.create({
-        data: {
-          type: 'PARTNER',
-          isActive: true,
-          partnerId: partner.id
-        },
-        include: {
-          media: true,
-          partner: true,
-        },
-      })
-      
-      console.log("[PARTNER_STOREFRONT_GET] Storefront créé automatiquement:", storefront.id)
-    }
-    
-    // Debug: afficher les options du partenaire
-    console.log("[PARTNER_STOREFRONT_GET] DEBUG - partner.options:", partner.options);
-    console.log("[PARTNER_STOREFRONT_GET] DEBUG - partner.serviceType:", partner.serviceType);
-    
     // Retourner une structure simplifiée et cohérente
     const responseData = {
       id: storefront.id,
@@ -186,18 +105,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    console.log("[PARTNER_STOREFRONT_POST] Session:", session)
     
     if (!session?.user?.id) {
-      console.log("[PARTNER_STOREFRONT_POST] Pas de session ou pas d'ID utilisateur")
       return new NextResponse("Non autorisé", { status: 401 })
     }
 
     const body = await request.json()
-    console.log("[PARTNER_STOREFRONT_POST] Données reçues:", body)
-
     const validatedData = storefrontSchema.parse(body)
-    console.log("[PARTNER_STOREFRONT_POST] Données validées:", validatedData)
     
     // Vérifier si l'utilisateur existe et a le bon rôle
     const user = await prisma.user.findUnique({
@@ -206,19 +120,16 @@ export async function POST(request: Request) {
     })
 
     if (!user) {
-      console.log("[PARTNER_STOREFRONT_POST] Utilisateur non trouvé")
       return new NextResponse("Utilisateur non trouvé", { status: 404 })
     }
 
     if (user.role !== "PARTNER") {
-      console.log("[PARTNER_STOREFRONT_POST] L'utilisateur n'a pas le rôle PARTNER")
       return new NextResponse("Accès non autorisé", { status: 403 })
     }
 
     // Trouver le partenaire de l'utilisateur
     const partner = user.partners[0]
     if (!partner) {
-      console.log("[PARTNER_STOREFRONT_POST] Aucun partenaire trouvé pour l'utilisateur")
       return new NextResponse("Partenaire non trouvé", { status: 404 })
     }
 
@@ -228,7 +139,6 @@ export async function POST(request: Request) {
     })
 
     if (existingStorefront) {
-      console.log("[PARTNER_STOREFRONT_POST] Vitrine existante trouvée")
       return new NextResponse("Une vitrine existe déjà pour ce partenaire", { status: 400 })
     }
 
@@ -244,7 +154,6 @@ export async function POST(request: Request) {
       },
     })
 
-    console.log("[PARTNER_STOREFRONT_POST] Vitrine créée:", storefront)
     return NextResponse.json(storefront)
   } catch (error) {
     console.error("[PARTNER_STOREFRONT_POST] Erreur:", error)
@@ -255,18 +164,14 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    console.log("[PARTNER_STOREFRONT_PUT] Session:", session)
     
     if (!session?.user?.id) {
-      console.log("[PARTNER_STOREFRONT_PUT] Pas de session ou pas d'ID utilisateur")
       return new NextResponse("Non autorisé", { status: 401 })
     }
 
     const body = await request.json()
-    console.log("[PARTNER_STOREFRONT_PUT] Données reçues:", body)
 
     const validatedData = storefrontSchema.partial().parse(body)
-    console.log("[PARTNER_STOREFRONT_PUT] Données validées:", validatedData)
 
     // Vérifier si l'utilisateur existe et a le bon rôle
     const user = await prisma.user.findUnique({
@@ -275,12 +180,10 @@ export async function PUT(request: Request) {
     })
 
     if (!user) {
-      console.log("[PARTNER_STOREFRONT_PUT] Utilisateur non trouvé")
       return new NextResponse("Utilisateur non trouvé", { status: 404 })
     }
 
     if (user.role !== "PARTNER") {
-      console.log("[PARTNER_STOREFRONT_PUT] L'utilisateur n'a pas le rôle PARTNER")
       return new NextResponse("Accès non autorisé", { status: 403 })
     }
 
@@ -333,8 +236,7 @@ export async function PUT(request: Request) {
     let updatedOptions = partner.options || {};
     
     if (serviceTypeChanged) {
-      console.log(`[PARTNER_STOREFRONT_PUT] ServiceType changé de ${partner.serviceType} vers ${newServiceType}`);
-      
+
       const providerType = SERVICE_TO_PROVIDER_MAPPING[newServiceType];
       if (providerType) {
         // Initialiser les options pour le nouveau type de service
@@ -342,7 +244,7 @@ export async function PUT(request: Request) {
           ...updatedOptions,
           [providerType]: {}
         };
-        console.log(`[PARTNER_STOREFRONT_PUT] Options initialisées pour ${providerType}:`, updatedOptions);
+
       }
     }
     
@@ -379,8 +281,6 @@ export async function PUT(request: Request) {
         partner: true,
       },
     })
-
-    console.log("[PARTNER_STOREFRONT_PUT] Vitrine mise à jour:", updatedStorefront.id)
     
     // Retourner la même structure que GET
     const responseData = {

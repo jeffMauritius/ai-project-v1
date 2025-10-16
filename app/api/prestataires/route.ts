@@ -11,19 +11,18 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const serviceType = searchParams.get('serviceType')
 
-    console.log('🔍 Requête prestataires:', { page, limit, serviceType })
-
     // Construire le filtre where
-    const whereClause: any = {
-      serviceType: {
-        not: 'LIEU' // Exclure les lieux qui sont gérés dans Establishment
-      }
-    }
+    const whereClause: any = {}
 
     // Ajouter le filtre par type de service si spécifié
     if (serviceType) {
       whereClause.serviceType = {
         equals: serviceType
+      }
+    } else {
+      // Si aucun filtre spécifique, exclure seulement les lieux
+      whereClause.serviceType = {
+        not: 'LIEU'
       }
     }
 
@@ -34,13 +33,13 @@ export async function GET(request: NextRequest) {
         id: true,
         companyName: true,
         description: true,
-        shortDescription: true, // Ajouter la description courte
+        shortDescription: true,
         serviceType: true,
         billingCity: true,
         billingCountry: true,
         basePrice: true,
         maxCapacity: true,
-        images: true, // Utiliser les images directement de la collection partners
+        images: true,
         storefronts: {
           select: {
             id: true,
@@ -50,22 +49,24 @@ export async function GET(request: NextRequest) {
         }
       },
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
+      // Ordre de tri pour avoir une diversité de types sur chaque page
+      orderBy: [
+        { companyName: 'asc' }   // Trier par nom de compagnie pour avoir une diversité naturelle
+      ]
     })
 
     const total = await prisma.partner.count({
       where: whereClause
     })
 
-    console.log(`👨‍💼 ${partners.length} prestataires trouvés sur ${total} total`)
-
     // Transformer les données
     const prestataires = partners.map(partner => {
       const storefront = partner.storefronts?.[0]
-      const images = partner.images || [] // Utiliser les images directement de la collection partners
+      const images = partner.images || []
       
       return {
-        id: storefront?.id || partner.id, // Utiliser l'ID du storefront si disponible
+        id: storefront?.id || partner.id,
         name: partner.companyName,
         companyName: partner.companyName,
         description: partner.shortDescription || partner.description || '',

@@ -66,23 +66,6 @@ export default function ChatCard({ companyName, storefrontId }: ChatCardProps) {
     }
   }, [conversationId, session?.user?.id, loadMessages])
 
-  // Charger les messages au montage du composant si l'utilisateur est connecté
-  useEffect(() => {
-    if (session?.user?.id && !conversationId) {
-      // Essayer de récupérer une conversation existante
-      createOrGetConversation()
-    }
-  }, [session?.user?.id, conversationId, createOrGetConversation])
-
-  // Écouter les nouveaux messages (désactivé pour l'instant)
-  // useEffect(() => {
-  //   if (socket) {
-  //     onNewMessage((message: Message) => {
-  //       setMessages(prev => [...prev, message])
-  //     })
-  //   }
-  // }, [socket, onNewMessage])
-
   const createOrGetConversation = useCallback(async () => {
     try {
       const response = await fetch('/api/chat/conversations', {
@@ -118,6 +101,23 @@ export default function ChatCard({ companyName, storefrontId }: ChatCardProps) {
     }
     return null
   }, [storefrontId])
+
+  // Charger les messages au montage du composant si l'utilisateur est connecté
+  useEffect(() => {
+    if (session?.user?.id && !conversationId) {
+      // Essayer de récupérer une conversation existante
+      createOrGetConversation()
+    }
+  }, [session?.user?.id, conversationId, createOrGetConversation])
+
+  // Écouter les nouveaux messages (désactivé pour l'instant)
+  // useEffect(() => {
+  //   if (socket) {
+  //     onNewMessage((message: Message) => {
+  //       setMessages(prev => [...prev, message])
+  //     })
+  //   }
+  // }, [socket, onNewMessage])
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !session?.user?.id) return

@@ -1,0 +1,733 @@
+{
+  "summary": {
+    "totalPartners": 23561,
+    "updatesNeeded": 12707,
+    "processed": 0
+  },
+  "changesByType": {
+    "ORGANISATION → DECORATION": 500,
+    "MUSIQUE → DECORATION": 353,
+    "OFFICIANT → DECORATION": 58,
+    "DECORATION → FLORISTE": 516,
+    "PHOTOGRAPHE → DECORATION": 11,
+    "VOITURE → DECORATION": 50,
+    "TRAITEUR → DECORATION": 53,
+    "CADEAUX_INVITES → DECORATION": 32,
+    "FLORISTE → DECORATION": 59,
+    "ORGANISATION → CHAPITEAU": 65,
+    "VIDEO → DECORATION": 3,
+    "DECORATION → LIEU": 271,
+    "ANIMATION → DECORATION": 3,
+    "MUSIQUE → FLORISTE": 233,
+    "TRAITEUR → LIEU": 1556,
+    "OFFICIANT → LIEU": 393,
+    "MUSIQUE → LIEU": 2462,
+    "CADEAUX_INVITES → LIEU": 62,
+    "PHOTOGRAPHE → LIEU": 40,
+    "ANIMATION → LIEU": 12,
+    "LUNE_DE_MIEL → LIEU": 18,
+    "FLORISTE → LIEU": 23,
+    "WEDDING_CAKE → LIEU": 3,
+    "VOITURE → LIEU": 60,
+    "ORGANISATION → LIEU": 43,
+    "MUSIQUE → FAIRE_PART": 618,
+    "OFFICIANT → FAIRE_PART": 78,
+    "DECORATION → FAIRE_PART": 400,
+    "ORGANISATION → FAIRE_PART": 20,
+    "PHOTOGRAPHE → FAIRE_PART": 24,
+    "FLORISTE → FAIRE_PART": 7,
+    "VOITURE → FAIRE_PART": 10,
+    "TRAITEUR → FAIRE_PART": 76,
+    "CADEAUX_INVITES → FAIRE_PART": 56,
+    "VIDEO → FAIRE_PART": 4,
+    "DECORATION → VOITURE": 56,
+    "TRAITEUR → VOITURE": 82,
+    "ORGANISATION → VOITURE": 64,
+    "MUSIQUE → VOITURE": 335,
+    "CADEAUX_INVITES → VOITURE": 38,
+    "PHOTOGRAPHE → VOITURE": 92,
+    "OFFICIANT → VOITURE": 94,
+    "LUNE_DE_MIEL → VOITURE": 14,
+    "ANIMATION → VOITURE": 2,
+    "FLORISTE → VOITURE": 8,
+    "VOITURE → BUS": 72,
+    "MUSIQUE → CADEAUX_INVITES": 1108,
+    "DECORATION → CADEAUX_INVITES": 369,
+    "OFFICIANT → CADEAUX_INVITES": 18,
+    "TRAITEUR → CADEAUX_INVITES": 44,
+    "ORGANISATION → CADEAUX_INVITES": 16,
+    "FLORISTE → CADEAUX_INVITES": 56,
+    "VIDEO → CADEAUX_INVITES": 2,
+    "WEDDING_CAKE → CADEAUX_INVITES": 22,
+    "ANIMATION → CADEAUX_INVITES": 18,
+    "LUNE_DE_MIEL → CADEAUX_INVITES": 6,
+    "PHOTOGRAPHE → CADEAUX_INVITES": 22,
+    "VOITURE → CADEAUX_INVITES": 6,
+    "ORGANISATION → FLORISTE": 15,
+    "OFFICIANT → FLORISTE": 22,
+    "CADEAUX_INVITES → FLORISTE": 3,
+    "TRAITEUR → FLORISTE": 4,
+    "LUNE_DE_MIEL → FLORISTE": 1,
+    "FLORISTE → TRAITEUR": 4,
+    "MUSIQUE → TRAITEUR": 348,
+    "DECORATION → TRAITEUR": 35,
+    "OFFICIANT → TRAITEUR": 11,
+    "MUSIQUE → CHAPITEAU": 90,
+    "WEDDING_CAKE → TRAITEUR": 24,
+    "ORGANISATION → TRAITEUR": 60,
+    "CADEAUX_INVITES → TRAITEUR": 9,
+    "MUSIQUE → FOOD_TRUCK": 10,
+    "VOITURE → TRAITEUR": 3,
+    "LUNE_DE_MIEL → TRAITEUR": 7,
+    "ANIMATION → TRAITEUR": 2,
+    "PHOTOGRAPHE → ANIMATION": 255,
+    "MUSIQUE → ANIMATION": 278,
+    "CADEAUX_INVITES → ANIMATION": 38,
+    "ORGANISATION → ANIMATION": 72,
+    "TRAITEUR → ANIMATION": 85,
+    "DECORATION → ANIMATION": 36,
+    "VIDEO → ANIMATION": 9,
+    "FLORISTE → ANIMATION": 1,
+    "VOITURE → ANIMATION": 6,
+    "OFFICIANT → ANIMATION": 13,
+    "LUNE_DE_MIEL → ANIMATION": 1,
+    "WEDDING_CAKE → ANIMATION": 1,
+    "ANIMATION → MUSIQUE": 57,
+    "CADEAUX_INVITES → MUSIQUE": 6,
+    "ORGANISATION → MUSIQUE": 104,
+    "TRAITEUR → FOOD_TRUCK": 6,
+    "LUNE_DE_MIEL → FOOD_TRUCK": 2,
+    "TRAITEUR → CHAPITEAU": 17,
+    "VOITURE → CHAPITEAU": 49,
+    "DECORATION → CHAPITEAU": 105,
+    "OFFICIANT → CHAPITEAU": 11,
+    "VIDEO → CHAPITEAU": 6,
+    "CADEAUX_INVITES → CHAPITEAU": 7,
+    "ANIMATION → CHAPITEAU": 6,
+    "PHOTOGRAPHE → CHAPITEAU": 1,
+    "FAIRE_PART → CHAPITEAU": 1,
+    "DECORATION → MUSIQUE": 11,
+    "PHOTOGRAPHE → MUSIQUE": 4,
+    "OFFICIANT → MUSIQUE": 6,
+    "TRAITEUR → MUSIQUE": 8,
+    "ORGANISATION → FOOD_TRUCK": 1,
+    "VIDEO → LIEU": 2,
+    "LUNE_DE_MIEL → BUS": 7,
+    "CADEAUX_INVITES → BUS": 10,
+    "TRAITEUR → BUS": 4,
+    "MUSIQUE → BUS": 15,
+    "ORGANISATION → BUS": 1,
+    "OFFICIANT → BUS": 2,
+    "MUSIQUE → PHOTOGRAPHE": 58,
+    "OFFICIANT → PHOTOGRAPHE": 5,
+    "CADEAUX_INVITES → PHOTOGRAPHE": 10,
+    "FLORISTE → PHOTOGRAPHE": 1,
+    "ORGANISATION → PHOTOGRAPHE": 7,
+    "VIDEO → PHOTOGRAPHE": 11,
+    "PHOTOGRAPHE → FLORISTE": 1,
+    "DECORATION → PHOTOGRAPHE": 5,
+    "TRAITEUR → PHOTOGRAPHE": 1
+  },
+  "updates": [
+    {
+      "id": "68bed5da72afc59ca2deb5fc",
+      "companyName": "LPA Location",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed5e372afc59ca2deb608",
+      "companyName": "La Signature",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed5e872afc59ca2deb60e",
+      "companyName": "Maracudja Deco",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed5f272afc59ca2deb61a",
+      "companyName": "Agellos Event",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed7f309ec75e8832ac7ab",
+      "companyName": "LPA Location",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed7fd09ec75e8832ac7b7",
+      "companyName": "La Signature",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed80209ec75e8832ac7bd",
+      "companyName": "Maracudja Deco",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed80b09ec75e8832ac7c9",
+      "companyName": "Agellos Event",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed82209ec75e8832ac7e4",
+      "companyName": "Krys Event's",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed83309ec75e8832ac7f9",
+      "companyName": "Customix Event",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed83f09ec75e8832ac808",
+      "companyName": "Classe Cérémonie",
+      "currentType": "OFFICIANT",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed84209ec75e8832ac80b",
+      "companyName": "Les Ambiances de Yami",
+      "currentType": "DECORATION",
+      "newType": "FLORISTE"
+    },
+    {
+      "id": "68bed84409ec75e8832ac80e",
+      "companyName": "Elikya Event's",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed84909ec75e8832ac814",
+      "companyName": "French Light Letters",
+      "currentType": "PHOTOGRAPHE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed84c09ec75e8832ac817",
+      "companyName": "Jolia Event",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed85309ec75e8832ac820",
+      "companyName": "Louise & Juliette - Location de vaisselle et objets vintages",
+      "currentType": "VOITURE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed85a09ec75e8832ac829",
+      "companyName": "Benory Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed86209ec75e8832ac832",
+      "companyName": "Love Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed86e09ec75e8832ac841",
+      "companyName": "Maison Kaspariantz",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed87509ec75e8832ac84a",
+      "companyName": "Kiss Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed88409ec75e8832ac85c",
+      "companyName": "Fairylight Bougies",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed89a09ec75e8832ac877",
+      "companyName": "Cocktail Grenadine",
+      "currentType": "TRAITEUR",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed89f09ec75e8832ac87d",
+      "companyName": "Events For You",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8a209ec75e8832ac880",
+      "companyName": "Festidays",
+      "currentType": "CADEAUX_INVITES",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8a409ec75e8832ac883",
+      "companyName": "Au fil de vous",
+      "currentType": "CADEAUX_INVITES",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8a909ec75e8832ac889",
+      "companyName": "Princess Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8ab09ec75e8832ac88c",
+      "companyName": "Solutions location",
+      "currentType": "VOITURE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8b309ec75e8832ac895",
+      "companyName": "Les Jolies Cagettes",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8b809ec75e8832ac89b",
+      "companyName": "Un Bel Événement",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8ba09ec75e8832ac89e",
+      "companyName": "Ana Event",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8bd09ec75e8832ac8a1",
+      "companyName": "LM Wedding Design",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8c409ec75e8832ac8aa",
+      "companyName": "360 Event Manager",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8d009ec75e8832ac8b9",
+      "companyName": "My Milky Candle",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8d509ec75e8832ac8bf",
+      "companyName": "Mona Ilsa",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8dd09ec75e8832ac8c8",
+      "companyName": "PaperBay",
+      "currentType": "FLORISTE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8df09ec75e8832ac8cb",
+      "companyName": "Celishop",
+      "currentType": "TRAITEUR",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8e209ec75e8832ac8ce",
+      "companyName": "Jenlie Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8e909ec75e8832ac8d7",
+      "companyName": "Maison Olympes Événementiel",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8eb09ec75e8832ac8da",
+      "companyName": "JB Wedding Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8ee09ec75e8832ac8dd",
+      "companyName": "It’s my Day",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8f509ec75e8832ac8e6",
+      "companyName": "Idées et Merveilles",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8fa09ec75e8832ac8ec",
+      "companyName": "Big Day",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8fd09ec75e8832ac8ef",
+      "companyName": "Tendance Réception",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed8ff09ec75e8832ac8f2",
+      "companyName": "100% Loc & Vente",
+      "currentType": "TRAITEUR",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed90e09ec75e8832ac904",
+      "companyName": "Decibels'Images",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed91809ec75e8832ac910",
+      "companyName": "Florine Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed92609ec75e8832ac922",
+      "companyName": "Cobra Sonorisation",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed92909ec75e8832ac925",
+      "companyName": "FêtePation",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed93009ec75e8832ac92e",
+      "companyName": "Elsy's Evénements",
+      "currentType": "OFFICIANT",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed93809ec75e8832ac937",
+      "companyName": "Mabel Journée",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed93a09ec75e8832ac93a",
+      "companyName": "Marguerite et Jorge",
+      "currentType": "VOITURE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed94b09ec75e8832ac94f",
+      "companyName": "Créa’ Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed94e09ec75e8832ac952",
+      "companyName": "L&M Concept Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed95009ec75e8832ac955",
+      "companyName": "Faith Kabod Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed95a09ec75e8832ac961",
+      "companyName": "Eventure",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed95d09ec75e8832ac964",
+      "companyName": "Smack Muah",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed95f09ec75e8832ac967",
+      "companyName": "Mzelle Bougies",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed96409ec75e8832ac96d",
+      "companyName": "Les Trésors de la Table Ronde",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed96c09ec75e8832ac976",
+      "companyName": "M/C Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed97309ec75e8832ac97f",
+      "companyName": "Maier Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed97809ec75e8832ac985",
+      "companyName": "Manon Gribouille",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed97d09ec75e8832ac98b",
+      "companyName": "Belliss'event",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed98709ec75e8832ac997",
+      "companyName": "Mazagan Organisation",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed98e09ec75e8832ac9a0",
+      "companyName": "Led Party",
+      "currentType": "TRAITEUR",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9a209ec75e8832ac9b8",
+      "companyName": "Charlésine",
+      "currentType": "OFFICIANT",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9a909ec75e8832ac9c1",
+      "companyName": "M&Scintille",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9ac09ec75e8832ac9c4",
+      "companyName": "Au bonheur de Meli",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9b109ec75e8832ac9ca",
+      "companyName": "La Fille d'Automne",
+      "currentType": "VOITURE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9b609ec75e8832ac9d0",
+      "companyName": "L & Pluriel",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9bd09ec75e8832ac9d9",
+      "companyName": "C'est le Jour J Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9c009ec75e8832ac9dc",
+      "companyName": "Paméla",
+      "currentType": "OFFICIANT",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9c409ec75e8832ac9e2",
+      "companyName": "Clem Event’s",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9cc09ec75e8832ac9eb",
+      "companyName": "Life Story Decor Paris",
+      "currentType": "OFFICIANT",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9d609ec75e8832ac9f7",
+      "companyName": "C le Moment !",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9db09ec75e8832ac9fd",
+      "companyName": "Narlow",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9e409ec75e8832aca09",
+      "companyName": "Les Fleurs de Cannelle",
+      "currentType": "FLORISTE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9e709ec75e8832aca0c",
+      "companyName": "Ana Event’s",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9f109ec75e8832aca18",
+      "companyName": "Nana Rockett",
+      "currentType": "VOITURE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bed9f809ec75e8832aca21",
+      "companyName": "Camelia Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda0909ec75e8832aca36",
+      "companyName": "D'âme Festive",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda0b09ec75e8832aca39",
+      "companyName": "FMR Prestations",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda2409ec75e8832aca57",
+      "companyName": "Bens Évents Paris",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda2709ec75e8832aca5a",
+      "companyName": "Events_74",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda3009ec75e8832aca66",
+      "companyName": "Juste un Rêve",
+      "currentType": "OFFICIANT",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda3509ec75e8832aca6c",
+      "companyName": "Tables et Fleurs d'un Jour",
+      "currentType": "FLORISTE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda4b09ec75e8832aca87",
+      "companyName": "Réception Services Location",
+      "currentType": "VOITURE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda5509ec75e8832aca93",
+      "companyName": "L'Effet Deco Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda5809ec75e8832aca96",
+      "companyName": "Biskoul'Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda5a09ec75e8832aca99",
+      "companyName": "SinceNovember.Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda5f09ec75e8832aca9f",
+      "companyName": "LCDJ évènements",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda6409ec75e8832acaa5",
+      "companyName": "Fée Maison Design",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda6909ec75e8832acaab",
+      "companyName": "Mam Louve Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda6b09ec75e8832acaae",
+      "companyName": "Créaloc Event",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda7309ec75e8832acab7",
+      "companyName": "Cälico Event Design",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda7a09ec75e8832acac0",
+      "companyName": "Pitch Wedding",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda7f09ec75e8832acac6",
+      "companyName": "Mimi Conciergerie Evènementielle",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda9509ec75e8832acae1",
+      "companyName": "Douces Lueurs du Marais",
+      "currentType": "MUSIQUE",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68beda9d09ec75e8832acaea",
+      "companyName": "Deco Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bedaa409ec75e8832acaf3",
+      "companyName": "Sibel Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    },
+    {
+      "id": "68bedaab09ec75e8832acafc",
+      "companyName": "Aya Klaman Events",
+      "currentType": "ORGANISATION",
+      "newType": "DECORATION"
+    }
+  ]
+}

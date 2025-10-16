@@ -1,1 +1,36 @@
-{"placeholder": "structure"}
+{
+  "animation": {
+    "sections": [
+      {
+        "title": "Types d'animation",
+        "options": [
+          {
+            "name": "DJ",
+            "description": "Animation musicale avec DJ"
+          },
+          {
+            "name": "Orchestre",
+            "description": "Animation musicale avec orchestre"
+          },
+          {
+            "name": "Groupe",
+            "description": "Animation musicale avec groupe"
+          }
+        ]
+      },
+      {
+        "title": "Services supplémentaires",
+        "options": [
+          {
+            "name": "Éclairage",
+            "description": "Éclairage de scène et effets lumineux"
+          },
+          {
+            "name": "Sonorisation",
+            "description": "Installation et gestion du son"
+          }
+        ]
+      }
+    ]
+  }
+}

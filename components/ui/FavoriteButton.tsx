@@ -70,7 +70,7 @@ export function FavoriteButton({
           
           // Mettre à jour le statut de la vitrine consultée
           try {
-            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: remove, storefrontId:', storefrontId);
+
             const statusResponse = await fetch('/api/consulted-storefronts/update-status', {
               method: 'POST',
               headers: {
@@ -82,7 +82,7 @@ export function FavoriteButton({
                 action: 'remove'
               }),
             });
-            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', statusResponse.status, statusResponse.ok);
+
           } catch (error) {
             console.error('Erreur lors de la mise à jour du statut:', error);
           }
@@ -104,7 +104,7 @@ export function FavoriteButton({
           
           // Mettre à jour le statut de la vitrine consultée
           try {
-            console.log('[FAVORITE_BUTTON] Mise à jour du statut - action: add, storefrontId:', storefrontId);
+
             const statusResponse = await fetch('/api/consulted-storefronts/update-status', {
               method: 'POST',
               headers: {
@@ -116,7 +116,7 @@ export function FavoriteButton({
                 action: 'add'
               }),
             });
-            console.log('[FAVORITE_BUTTON] Réponse mise à jour statut:', statusResponse.status, statusResponse.ok);
+
           } catch (error) {
             console.error('Erreur lors de la mise à jour du statut:', error);
           }

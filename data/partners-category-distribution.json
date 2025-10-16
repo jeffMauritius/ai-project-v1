@@ -1,0 +1,118 @@
+{
+  "summary": {
+    "totalPartners": 23561,
+    "totalCategories": 15,
+    "topCategory": "LIEU",
+    "topCategoryCount": 4969,
+    "timestamp": "2025-10-15T04:48:54.165Z"
+  },
+  "distribution": [
+    {
+      "category": "LIEU",
+      "count": 4969,
+      "percentage": "21.1%"
+    },
+    {
+      "category": "DECORATION",
+      "count": 3117,
+      "percentage": "13.2%"
+    },
+    {
+      "category": "VOITURE",
+      "count": 3048,
+      "percentage": "12.9%"
+    },
+    {
+      "category": "TRAITEUR",
+      "count": 2783,
+      "percentage": "11.8%"
+    },
+    {
+      "category": "FLORISTE",
+      "count": 2170,
+      "percentage": "9.2%"
+    },
+    {
+      "category": "CADEAUX_INVITES",
+      "count": 2095,
+      "percentage": "8.9%"
+    },
+    {
+      "category": "PHOTOGRAPHE",
+      "count": 1739,
+      "percentage": "7.4%"
+    },
+    {
+      "category": "FAIRE_PART",
+      "count": 1293,
+      "percentage": "5.5%"
+    },
+    {
+      "category": "ANIMATION",
+      "count": 1009,
+      "percentage": "4.3%"
+    },
+    {
+      "category": "MUSIQUE",
+      "count": 847,
+      "percentage": "3.6%"
+    },
+    {
+      "category": "CHAPITEAU",
+      "count": 358,
+      "percentage": "1.5%"
+    },
+    {
+      "category": "BUS",
+      "count": 111,
+      "percentage": "0.5%"
+    },
+    {
+      "category": "FOOD_TRUCK",
+      "count": 19,
+      "percentage": "0.1%"
+    },
+    {
+      "category": "OFFICIANT",
+      "count": 2,
+      "percentage": "0.0%"
+    },
+    {
+      "category": "VIDEO",
+      "count": 1,
+      "percentage": "0.0%"
+    }
+  ],
+  "top5": [
+    {
+      "rank": 1,
+      "category": "LIEU",
+      "count": 4969,
+      "percentage": "21.1%"
+    },
+    {
+      "rank": 2,
+      "category": "DECORATION",
+      "count": 3117,
+      "percentage": "13.2%"
+    },
+    {
+      "rank": 3,
+      "category": "VOITURE",
+      "count": 3048,
+      "percentage": "12.9%"
+    },
+    {
+      "rank": 4,
+      "category": "TRAITEUR",
+      "count": 2783,
+      "percentage": "11.8%"
+    },
+    {
+      "rank": 5,
+      "category": "FLORISTE",
+      "count": 2170,
+      "percentage": "9.2%"
+    }
+  ]
+}

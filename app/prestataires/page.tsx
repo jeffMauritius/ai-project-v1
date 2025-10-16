@@ -67,20 +67,21 @@ export default function PrestatairesPage() {
     },
   });
 
-  // Types de services avec leurs compteurs (LIEU supprimé car doublon avec établissements)
+  // Types de services avec leurs compteurs réels (LIEU supprimé car doublon avec établissements)
   const serviceTypes = [
-    { type: 'DECORATION', label: 'Décoration', count: 6414 },
-    { type: 'TRAITEUR', label: 'Traiteur', count: 3771 },
-    { type: 'ANIMATION', label: 'Animation', count: 3111 },
-    { type: 'FLORISTE', label: 'Fleuriste', count: 2179 },
-    { type: 'MUSIQUE', label: 'Musique', count: 1218 },
-    { type: 'VOITURE', label: 'Transport', count: 1157 },
-    { type: 'PHOTOGRAPHE', label: 'Photographe', count: 892 },
-    { type: 'OFFICIANT', label: 'Officiant', count: 535 },
-    { type: 'FAIRE_PART', label: 'Faire-part', count: 353 },
-    { type: 'ORGANISATION', label: 'Organisation', count: 40 },
-    { type: 'LUNE_DE_MIEL', label: 'Lune de miel', count: 39 },
-    { type: 'CADEAUX_INVITES', label: 'Cadeaux invités', count: 3 },
+    { type: 'DECORATION', label: 'Décoration', count: 3117 },
+    { type: 'VOITURE', label: 'Transport', count: 3149 },
+    { type: 'TRAITEUR', label: 'Traiteur', count: 2783 },
+    { type: 'FLORISTE', label: 'Fleuriste', count: 2170 },
+    { type: 'CADEAUX_INVITES', label: 'Cadeaux invités', count: 2095 },
+    { type: 'PHOTOGRAPHE', label: 'Photographe', count: 1739 },
+    { type: 'FAIRE_PART', label: 'Faire-part', count: 1293 },
+    { type: 'ANIMATION', label: 'Animation', count: 1009 },
+    { type: 'MUSIQUE', label: 'Musique', count: 847 },
+    { type: 'CHAPITEAU', label: 'Chapiteau', count: 358 },
+    { type: 'FOOD_TRUCK', label: 'Food truck', count: 19 },
+    { type: 'OFFICIANT', label: 'Officiant', count: 2 },
+    { type: 'VIDEO', label: 'Video', count: 1 }
   ];
 
   const getServiceTypeLabel = (serviceType: string) => {

@@ -32,21 +32,19 @@ const partnerTypeToServiceType: Record<string, ServiceType> = {
 
 export async function POST(req: Request) {
   try {
-    console.log("[REGISTER] Début de la requête d'inscription");
+
     const body = await req.json();
-    console.log("[REGISTER] Corps de la requête reçu:", { ...body, password: '[REDACTED]' });
-    
+
     const validatedData = registerSchema.parse(body);
-    console.log("[REGISTER] Données validées");
 
     // Check if user already exists
-    console.log("[REGISTER] Vérification de l'existence de l'utilisateur");
+
     const existingUser = await prisma.user.findUnique({
       where: { email: validatedData.email }
     });
 
     if (existingUser) {
-      console.log("[REGISTER] Utilisateur déjà existant");
+
       return NextResponse.json(
         { error: "Un utilisateur avec cet email existe déjà" },
         { status: 400 }
@@ -54,7 +52,7 @@ export async function POST(req: Request) {
     }
 
     // Hash password with argon2
-    console.log("[REGISTER] Hashage du mot de passe");
+
     const hashedPassword = await argon2.hash(validatedData.password);
 
     // Prepare user data
@@ -66,25 +64,22 @@ export async function POST(req: Request) {
     };
 
     // Create user
-    console.log("[REGISTER] Création de l'utilisateur");
+
     const user = await prisma.user.create({
       data: userData,
     });
-    console.log("[REGISTER] Utilisateur créé avec succès");
 
     // Create empty profile for user
-    console.log("[REGISTER] Création du profil");
+
     await prisma.profile.create({
       data: {
         userId: user.id,
       },
     });
-    console.log("[REGISTER] Profil créé avec succès");
 
     // Si c'est un partenaire, créer une vitrine avec les données pré-remplies
     if (validatedData.role === "PARTNER" && validatedData.partnerType) {
-      console.log("[REGISTER] Création de la vitrine partenaire");
-      
+
       const serviceType = partnerTypeToServiceType[validatedData.partnerType] || ServiceType.LIEU;
       
       await prisma.partnerStorefront.create({
@@ -108,7 +103,7 @@ export async function POST(req: Request) {
           interventionRadius: 50,
         },
       });
-      console.log("[REGISTER] Vitrine partenaire créée avec succès");
+
     }
 
     // Ne pas renvoyer le mot de passe

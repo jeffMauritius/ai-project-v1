@@ -36,7 +36,7 @@ export function DynamicOptionsForm({
 
   // Synchroniser les données quand initialData change
   useEffect(() => {
-    console.log(`[DynamicOptionsForm] initialData reçu pour ${providerType}:`, initialData);
+
     setFormData(initialData || {});
   }, [initialData, providerType]);
 
@@ -50,10 +50,9 @@ export function DynamicOptionsForm({
       }
 
       try {
-        console.log(`[DynamicOptionsForm] Chargement des options pour ${providerType} avec serviceType ${serviceType}`);
+
         const options = await OptionsService.loadProviderOptionsByType(providerType);
-        console.log(`[DynamicOptionsForm] Options chargées:`, options);
-        console.log(`[DynamicOptionsForm] Options[${providerType}]:`, options?.[providerType]);
+
         setProviderOptions(options);
         setLoading(false);
       } catch (error) {
@@ -376,7 +375,7 @@ export function DynamicOptionsForm({
   const relevantOptions = providerOptions[providerType];
 
   if (!relevantOptions) {
-    console.log(`[DynamicOptionsForm] Aucune option trouvée pour ${providerType} dans:`, Object.keys(providerOptions));
+
     return (
       <Card>
         <CardContent className="p-6">

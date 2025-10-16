@@ -30,11 +30,7 @@ export function ShareButton({
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    console.log('🔴 SHARE BUTTON CLICKED!');
-    console.log('URL:', currentUrl);
-    console.log('Title:', currentTitle);
-    
+
     setIsSharing(true);
     
     try {

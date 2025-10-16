@@ -286,12 +286,14 @@ import ChatCard from './components/ChatCard'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { FavoriteButton } from '@/components/ui/FavoriteButton'
 import { ShareButton } from '@/components/ui/ShareButton'
-import receptionVenueOptions from '../../../partners-options/reception-venue-options.json'
+import { promises as fs } from 'fs'
+import path from 'path'
 import { getSectionIcon } from '@/lib/field-icons'
 
 async function getStorefrontData(id: string) {
   try {
-    const storefront = await prisma.partnerStorefront.findUnique({
+    // D'abord, essayer de trouver un storefront avec cet ID
+    let storefront = await prisma.partnerStorefront.findUnique({
       where: { id },
       select: {
         id: true,
@@ -339,12 +341,83 @@ async function getStorefrontData(id: string) {
       }
     })
     
+    // Si pas de storefront trouvé, chercher dans les établissements
     if (!storefront) {
-      console.log(`[STOREFRONT] Storefront ${id} non trouvé`)
+      const establishment = await prisma.establishment.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          city: true,
+          region: true,
+          country: true,
+          startingPrice: true,
+          currency: true,
+          maxCapacity: true,
+          rating: true,
+          reviewCount: true,
+          venueType: true,
+          hasParking: true,
+          hasTerrace: true,
+          hasKitchen: true,
+          hasAccommodation: true,
+          images: true
+        }
+      })
+      
+      if (establishment) {
+        // Créer un objet storefront fictif pour l'établissement
+        storefront = {
+          id: establishment.id,
+          type: 'VENUE' as const,
+          isActive: true,
+          images: [],
+          media: [],
+          establishment: establishment,
+          partner: null
+        }
+      }
+    }
+    
+    // Si toujours pas trouvé, chercher dans les partenaires
+    if (!storefront) {
+      const partner = await prisma.partner.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          companyName: true,
+          description: true,
+          serviceType: true,
+          billingCity: true,
+          basePrice: true,
+          maxCapacity: true,
+          options: true,
+          searchableOptions: true,
+          images: true
+        }
+      })
+      
+      if (partner) {
+        // Créer un objet storefront fictif pour le partenaire
+        storefront = {
+          id: partner.id,
+          type: 'PARTNER' as const,
+          isActive: true,
+          images: [],
+          media: [],
+          establishment: null,
+          partner: partner
+        }
+      }
+    }
+    
+    if (!storefront) {
+      console.log(`[STOREFRONT] Aucun élément trouvé avec l'ID ${id}`)
       return null
     }
     
-    console.log(`[STOREFRONT] Storefront ${id} trouvé:`, {
+    console.log(`[STOREFRONT] Élément ${id} trouvé:`, {
       type: storefront.type,
       hasEstablishment: !!storefront.establishment,
       hasPartner: !!storefront.partner,
@@ -442,67 +515,82 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
     capacity = partner.maxCapacity || 0
   }
 
+  // Helper function pour charger les options de manière sécurisée
+  const loadOptionsSafely = async (fileName: string, propertyPath: string) => {
+    try {
+      const filePath = path.join(process.cwd(), 'partners-options', fileName)
+      const fileContent = await fs.readFile(filePath, 'utf-8')
+      const data = JSON.parse(fileContent)
+      
+      // Vérifier si c'est un placeholder
+      if (data.placeholder) {
+        console.warn(`⚠️ Fichier ${fileName} contient seulement un placeholder`)
+        return []
+      }
+      
+      // Naviguer dans la structure de données
+      const pathParts = propertyPath.split('.')
+      let result = data
+      
+      for (const part of pathParts) {
+        if (result && typeof result === 'object' && part in result) {
+          result = result[part]
+        } else {
+          console.warn(`⚠️ Propriété ${part} non trouvée dans ${fileName}`)
+          return []
+        }
+      }
+      
+      return result || []
+    } catch (error) {
+      console.error(`❌ Erreur lors du chargement de ${fileName}:`, error)
+      return []
+    }
+  }
+
   // Récupérer les options selon le type de service
   const getOptionsForServiceType = async (serviceType: string) => {
     try {
       switch (serviceType) {
         case 'LIEU':
-          return receptionVenueOptions.lieu_reception.sections
+          return await loadOptionsSafely('reception-venue-options.json', 'lieu_reception.sections')
         case 'TRAITEUR':
-          const catererOptions = await import('../../../partners-options/caterer-options.json')
-          return (catererOptions.default as any).traiteur.sections
+          return await loadOptionsSafely('caterer-options.json', 'traiteur.sections')
         case 'PHOTOGRAPHE':
-          const photographerOptions = await import('../../../partners-options/photographer-options.json')
-          return (photographerOptions.default as any).photographe.sections
+          return await loadOptionsSafely('photographer-options.json', 'photographe.sections')
         case 'MUSIQUE':
-          const musicOptions = await import('../../../partners-options/music-dj-options.json')
-          return (musicOptions.default as any).musique_dj.sections
+          return await loadOptionsSafely('music-dj-options.json', 'musique_dj.sections')
         case 'VOITURE':
         case 'BUS':
-          const vehicleOptions = await import('../../../partners-options/vehicle-options.json')
-          return (vehicleOptions.default as any).voiture.sections
+          return await loadOptionsSafely('vehicle-options.json', 'voiture.sections')
         case 'DECORATION':
-          const decorationOptions = await import('../../../partners-options/decoration-options.json')
-          return (decorationOptions.default as any).decoration.sections
+          return await loadOptionsSafely('decoration-options.json', 'decoration.sections')
         case 'CHAPITEAU':
-          const tentOptions = await import('../../../partners-options/tent-options.json')
-          return (tentOptions.default as any).chapiteau.sections
+          return await loadOptionsSafely('tent-options.json', 'chapiteau.sections')
         case 'ANIMATION':
-          const animationOptions = await import('../../../partners-options/animation-options.json')
-          return (animationOptions.default as any).animation.sections
+          return await loadOptionsSafely('animation-options.json', 'animation.sections')
         case 'FLORISTE':
-          const floristOptions = await import('../../../partners-options/florist-options.json')
-          return (floristOptions.default as any).fleurs.sections
+          return await loadOptionsSafely('florist-options.json', 'fleurs.sections')
         case 'LISTE':
-          const registryOptions = await import('../../../partners-options/wedding-registry-options.json')
-          return (registryOptions.default as any).liste_cadeau_mariage.sections
+          return await loadOptionsSafely('wedding-registry-options.json', 'liste_cadeau_mariage.sections')
         case 'ORGANISATION':
-          const plannerOptions = await import('../../../partners-options/wedding-planner-options.json')
-          return (plannerOptions.default as any).organisation.sections
+          return await loadOptionsSafely('wedding-planner-options.json', 'organisation.sections')
         case 'VIDEO':
-          const videoOptions = await import('../../../partners-options/video-options.json')
-          return (videoOptions.default as any).video.sections
+          return await loadOptionsSafely('video-options.json', 'video.sections')
         case 'LUNE_DE_MIEL':
-          const travelOptions = await import('../../../partners-options/honeymoon-travel-options.json')
-          return (travelOptions.default as any).voyage.sections
+          return await loadOptionsSafely('honeymoon-travel-options.json', 'voyage.sections')
         case 'WEDDING_CAKE':
-          const cakeOptions = await import('../../../partners-options/wedding-cake-options.json')
-          return (cakeOptions.default as any).wedding_cake.sections
+          return await loadOptionsSafely('wedding-cake-options.json', 'wedding_cake.sections')
         case 'OFFICIANT':
-          const officiantOptions = await import('../../../partners-options/officiant-options.json')
-          return (officiantOptions.default as any).officiants.sections
+          return await loadOptionsSafely('officiant-options.json', 'officiants.sections')
         case 'FOOD_TRUCK':
-          const foodTruckOptions = await import('../../../partners-options/food-truck-options.json')
-          return (foodTruckOptions.default as any).food_truck.sections
+          return await loadOptionsSafely('food-truck-options.json', 'food_truck.sections')
         case 'VIN':
-          const wineOptions = await import('../../../partners-options/wine-options.json')
-          return (wineOptions.default as any).vin.sections
+          return await loadOptionsSafely('wine-options.json', 'vin.sections')
         case 'FAIRE_PART':
-          const invitationOptions = await import('../../../partners-options/invitation-options.json')
-          return (invitationOptions.default as any).faire_part.sections
+          return await loadOptionsSafely('invitation-options.json', 'faire_part.sections')
         case 'CADEAUX_INVITES':
-          const giftsOptions = await import('../../../partners-options/guest-gifts-options.json')
-          return (giftsOptions.default as any).cadeaux_invites.sections
+          return await loadOptionsSafely('guest-gifts-options.json', 'cadeaux_invites.sections')
         default:
           return []
       }
@@ -645,7 +733,7 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                     <h3 className="text-lg font-semibold text-gray-800">{section.title}</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {section.fields?.map((field: any, fieldIndex: number) => {
+                    {(section.fields || section.options)?.map((field: any, fieldIndex: number) => {
                       // Récupérer la valeur sauvegardée pour ce champ
                       let savedValue = null;
                       

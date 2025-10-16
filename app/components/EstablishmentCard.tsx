@@ -74,53 +74,41 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
       
       if (!response.ok) {
         // Si l'utilisateur n'est pas connecté, on ignore l'erreur
-        console.log('Utilisateur non connecté, consultation non sauvegardée')
       }
     } catch (error) {
-      // Ne pas bloquer la navigation si la sauvegarde échoue
-      console.log('Erreur lors de la sauvegarde de la consultation (non bloquante):', error)
+      // Ignorer les erreurs de réseau
+    } finally {
+      setIsNavigating(false)
     }
-    
-    setIsNavigating(false)
   }
 
   return (
-    <Card className="w-full overflow-hidden group">
-      <div className="relative h-[200px] w-full">
-        {/* Favorite Button - Outside the Link */}
-        <div className="absolute right-2 top-2 z-10">
-          <FavoriteButton
-            storefrontId={id}
-            name={name}
-            location={location}
-            rating={rating}
-            numberOfReviews={numberOfReviews}
-            description={description}
-            imageUrl={mainImage}
-            className="rounded-full bg-white/80 hover:bg-white/90"
-            size="icon"
-          />
-        </div>
-        
-        {/* Image container with relative positioning */}
-        <div className="relative h-full w-full">
-          <div className="absolute left-4 top-4 z-10">
-            <span className="rounded-md bg-amber-400 px-2 py-1 text-sm font-semibold">
-              TOP
-            </span>
-          </div>
+    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
+      <div className="relative">
+        <div className="relative h-48 overflow-hidden">
           <Image
             src={mainImage}
             alt={name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          {/* Bouton pour ouvrir la galerie */}
+          
+          {/* Bouton de favori */}
+          <div className="absolute top-4 right-4 z-10">
+            <FavoriteButton 
+              storefrontId={id}
+              name={name}
+              type="VENUE"
+              serviceType="Lieu de réception"
+            />
+          </div>
+          
+          {/* Bouton galerie */}
           {allImages.length > 1 && (
             <button
               onClick={(e) => {
-                e.preventDefault();
+                e.preventDefault()
+                e.stopPropagation()
                 openGallery(0);
               }}
               className="absolute left-4 bottom-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10"
@@ -129,6 +117,7 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
               <ZoomIn className="w-4 h-4" />
             </button>
           )}
+          
           <div className="absolute bottom-4 right-4 flex gap-2">
             {allImages.slice(0, 5).map((_, index) => (
               <div
@@ -139,6 +128,7 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
               />
             ))}
           </div>
+          
           {/* Link overlay for the entire image area */}
           <Link 
             href={`/storefront/${id}`} 

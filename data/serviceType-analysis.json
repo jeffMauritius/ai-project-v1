@@ -1,0 +1,849 @@
+{
+  "summary": {
+    "totalPartners": 23561,
+    "exactMatches": 23561,
+    "partialMatches": 0,
+    "noMatches": 0,
+    "serviceTypeChanges": 15708
+  },
+  "changesByType": {
+    "ORGANISATION → DECORATION": 501,
+    "MUSIQUE → DECORATION": 355,
+    "OFFICIANT → DECORATION": 58,
+    "PHOTOGRAPHE → DECORATION": 12,
+    "VOITURE → DECORATION": 50,
+    "TRAITEUR → DECORATION": 53,
+    "CADEAUX_INVITES → DECORATION": 32,
+    "FLORISTE → DECORATION": 63,
+    "ORGANISATION → CHAPITEAU": 67,
+    "VIDEO → DECORATION": 3,
+    "ANIMATION → DECORATION": 3,
+    "TRAITEUR → LIEU": 1521,
+    "OFFICIANT → LIEU": 347,
+    "MUSIQUE → LIEU": 2199,
+    "DECORATION → LIEU": 104,
+    "CADEAUX_INVITES → LIEU": 61,
+    "PHOTOGRAPHE → LIEU": 37,
+    "ANIMATION → LIEU": 12,
+    "LUNE_DE_MIEL → LIEU": 16,
+    "FLORISTE → LIEU": 19,
+    "WEDDING_CAKE → LIEU": 2,
+    "VOITURE → LIEU": 41,
+    "ORGANISATION → LIEU": 40,
+    "MUSIQUE → FAIRE_PART": 618,
+    "OFFICIANT → FAIRE_PART": 78,
+    "DECORATION → FAIRE_PART": 400,
+    "ORGANISATION → FAIRE_PART": 20,
+    "PHOTOGRAPHE → FAIRE_PART": 24,
+    "FLORISTE → FAIRE_PART": 7,
+    "VOITURE → FAIRE_PART": 10,
+    "TRAITEUR → FAIRE_PART": 76,
+    "CADEAUX_INVITES → FAIRE_PART": 56,
+    "VIDEO → FAIRE_PART": 4,
+    "DECORATION → VOITURE": 56,
+    "TRAITEUR → VOITURE": 82,
+    "ORGANISATION → VOITURE": 64,
+    "MUSIQUE → VOITURE": 335,
+    "CADEAUX_INVITES → VOITURE": 38,
+    "PHOTOGRAPHE → VOITURE": 92,
+    "OFFICIANT → VOITURE": 94,
+    "LUNE_DE_MIEL → VOITURE": 14,
+    "ANIMATION → VOITURE": 2,
+    "FLORISTE → VOITURE": 8,
+    "MUSIQUE → CADEAUX_INVITES": 1108,
+    "DECORATION → CADEAUX_INVITES": 369,
+    "OFFICIANT → CADEAUX_INVITES": 18,
+    "TRAITEUR → CADEAUX_INVITES": 44,
+    "ORGANISATION → CADEAUX_INVITES": 16,
+    "FLORISTE → CADEAUX_INVITES": 56,
+    "VIDEO → CADEAUX_INVITES": 2,
+    "WEDDING_CAKE → CADEAUX_INVITES": 22,
+    "ANIMATION → CADEAUX_INVITES": 18,
+    "LUNE_DE_MIEL → CADEAUX_INVITES": 6,
+    "PHOTOGRAPHE → CADEAUX_INVITES": 22,
+    "VOITURE → CADEAUX_INVITES": 6,
+    "DECORATION → FLEURS_MARIAGE": 508,
+    "FLORISTE → FLEURS_MARIAGE": 1373,
+    "MUSIQUE → FLEURS_MARIAGE": 232,
+    "ORGANISATION → FLEURS_MARIAGE": 14,
+    "OFFICIANT → FLEURS_MARIAGE": 22,
+    "CADEAUX_INVITES → FLEURS_MARIAGE": 3,
+    "TRAITEUR → FLEURS_MARIAGE": 4,
+    "LUNE_DE_MIEL → FLEURS_MARIAGE": 1,
+    "MUSIQUE → TRAITEUR": 348,
+    "DECORATION → TRAITEUR": 35,
+    "OFFICIANT → TRAITEUR": 11,
+    "MUSIQUE → FOOD_TRUCK": 12,
+    "WEDDING_CAKE → TRAITEUR": 24,
+    "ORGANISATION → TRAITEUR": 60,
+    "CADEAUX_INVITES → TRAITEUR": 9,
+    "VOITURE → TRAITEUR": 3,
+    "LUNE_DE_MIEL → TRAITEUR": 7,
+    "FLORISTE → TRAITEUR": 3,
+    "ANIMATION → TRAITEUR": 2,
+    "PHOTOGRAPHE → ANIMATION": 255,
+    "MUSIQUE → ANIMATION": 278,
+    "CADEAUX_INVITES → ANIMATION": 38,
+    "ORGANISATION → ANIMATION": 72,
+    "TRAITEUR → ANIMATION": 85,
+    "DECORATION → ANIMATION": 36,
+    "VIDEO → ANIMATION": 9,
+    "FLORISTE → ANIMATION": 1,
+    "VOITURE → ANIMATION": 6,
+    "OFFICIANT → ANIMATION": 13,
+    "LUNE_DE_MIEL → ANIMATION": 1,
+    "WEDDING_CAKE → ANIMATION": 1,
+    "ANIMATION → MUSIQUE": 57,
+    "CADEAUX_INVITES → MUSIQUE": 6,
+    "ORGANISATION → MUSIQUE": 102,
+    "PHOTOGRAPHE → PHOTO_MARIAGE": 1641,
+    "TRAITEUR → FOOD_TRUCK": 6,
+    "LUNE_DE_MIEL → FOOD_TRUCK": 2,
+    "TRAITEUR → CHAPITEAU": 17,
+    "VOITURE → CHAPITEAU": 49,
+    "DECORATION → CHAPITEAU": 105,
+    "MUSIQUE → CHAPITEAU": 88,
+    "OFFICIANT → CHAPITEAU": 11,
+    "VIDEO → CHAPITEAU": 6,
+    "CADEAUX_INVITES → CHAPITEAU": 7,
+    "ANIMATION → CHAPITEAU": 6,
+    "PHOTOGRAPHE → CHAPITEAU": 1,
+    "FAIRE_PART → CHAPITEAU": 1,
+    "DECORATION → MUSIQUE": 11,
+    "PHOTOGRAPHE → MUSIQUE": 4,
+    "OFFICIANT → MUSIQUE": 6,
+    "TRAITEUR → MUSIQUE": 8,
+    "CADEAUX_INVITES → BATEAU_MARIAGE": 1,
+    "MUSIQUE → ROBE_MARIEE": 262,
+    "PHOTOGRAPHE → ROBE_MARIEE": 2,
+    "TRAITEUR → ROBE_MARIEE": 33,
+    "DECORATION → ROBE_MARIEE": 164,
+    "OFFICIANT → ROBE_MARIEE": 46,
+    "VOITURE → ROBE_MARIEE": 19,
+    "FLORISTE → ROBE_MARIEE": 3,
+    "ORGANISATION → ROBE_MARIEE": 3,
+    "LUNE_DE_MIEL → ROBE_MARIEE": 2,
+    "WEDDING_CAKE → ROBE_MARIEE": 1,
+    "ORGANISATION → FOOD_TRUCK": 1,
+    "VIDEO → LIEU": 2,
+    "TRAITEUR → AUBERGE_MARIAGE": 1,
+    "VOITURE → BUS": 69,
+    "LUNE_DE_MIEL → BUS": 7,
+    "CADEAUX_INVITES → BUS": 10,
+    "TRAITEUR → BUS": 4,
+    "MUSIQUE → BUS": 15,
+    "ORGANISATION → BUS": 1,
+    "OFFICIANT → BUS": 2,
+    "MUSIQUE → PHOTO_MARIAGE": 58,
+    "OFFICIANT → PHOTO_MARIAGE": 5,
+    "CADEAUX_INVITES → PHOTO_MARIAGE": 10,
+    "FLORISTE → PHOTO_MARIAGE": 1,
+    "ORGANISATION → PHOTO_MARIAGE": 7,
+    "VIDEO → PHOTO_MARIAGE": 11,
+    "PHOTOGRAPHE → FLEURS_MARIAGE": 1,
+    "DECORATION → PHOTO_MARIAGE": 5,
+    "TRAITEUR → PHOTO_MARIAGE": 1
+  },
+  "matches": [
+    {
+      "partnerId": "68bed5d772afc59ca2deb5f9",
+      "companyName": "Loc Story",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5da72afc59ca2deb5fc",
+      "companyName": "LPA Location",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5dc72afc59ca2deb5ff",
+      "companyName": "SL Création",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5de72afc59ca2deb602",
+      "companyName": "Brin de Couleur",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5e172afc59ca2deb605",
+      "companyName": "Clauday Evénements",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5e372afc59ca2deb608",
+      "companyName": "La Signature",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5e672afc59ca2deb60b",
+      "companyName": "L'Atelier Nectarine",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5e872afc59ca2deb60e",
+      "companyName": "Maracudja Deco",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5ea72afc59ca2deb611",
+      "companyName": "Adeline Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5ed72afc59ca2deb614",
+      "companyName": "MBH",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5ef72afc59ca2deb617",
+      "companyName": "Hoc Dié",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed5f272afc59ca2deb61a",
+      "companyName": "Agellos Event",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed7f009ec75e8832ac7a8",
+      "companyName": "Loc Story",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed7f309ec75e8832ac7ab",
+      "companyName": "LPA Location",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed7f509ec75e8832ac7ae",
+      "companyName": "SL Création",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed7f809ec75e8832ac7b1",
+      "companyName": "Brin de Couleur",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed7fa09ec75e8832ac7b4",
+      "companyName": "Clauday Evénements",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed7fd09ec75e8832ac7b7",
+      "companyName": "La Signature",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed7ff09ec75e8832ac7ba",
+      "companyName": "L'Atelier Nectarine",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed80209ec75e8832ac7bd",
+      "companyName": "Maracudja Deco",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed80409ec75e8832ac7c0",
+      "companyName": "Adeline Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed80709ec75e8832ac7c3",
+      "companyName": "MBH",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed80909ec75e8832ac7c6",
+      "companyName": "Hoc Dié",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed80b09ec75e8832ac7c9",
+      "companyName": "Agellos Event",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed80e09ec75e8832ac7cc",
+      "companyName": "Magali Location Vaisselle",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed81009ec75e8832ac7cf",
+      "companyName": "Authentique Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed81309ec75e8832ac7d2",
+      "companyName": "JDDECO",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed81509ec75e8832ac7d5",
+      "companyName": "Nathalie Crochemore Décoration",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed81809ec75e8832ac7d8",
+      "companyName": "By Mademoiselle S",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed81a09ec75e8832ac7db",
+      "companyName": "Marveline - Location vaisselle",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed81d09ec75e8832ac7de",
+      "companyName": "Iliade Location",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed81f09ec75e8832ac7e1",
+      "companyName": "AC Décoratrice",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed82209ec75e8832ac7e4",
+      "companyName": "Krys Event's",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed82409ec75e8832ac7e7",
+      "companyName": "Ma Déco Chic",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed82709ec75e8832ac7ea",
+      "companyName": "T & T Loc",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed82909ec75e8832ac7ed",
+      "companyName": "Le P'tit Festif Valence",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed82c09ec75e8832ac7f0",
+      "companyName": "Green ta Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed82e09ec75e8832ac7f3",
+      "companyName": "Sam fée déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed83109ec75e8832ac7f6",
+      "companyName": "NG Évènements",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed83309ec75e8832ac7f9",
+      "companyName": "Customix Event",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed83509ec75e8832ac7fc",
+      "companyName": "Griffe Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed83809ec75e8832ac7ff",
+      "companyName": "Lou Lou Réception",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed83a09ec75e8832ac802",
+      "companyName": "Milca Créa",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed83d09ec75e8832ac805",
+      "companyName": "La Trappe à Ballons",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed83f09ec75e8832ac808",
+      "companyName": "Classe Cérémonie",
+      "currentServiceType": "OFFICIANT",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed84209ec75e8832ac80b",
+      "companyName": "Les Ambiances de Yami",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed84409ec75e8832ac80e",
+      "companyName": "Elikya Event's",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed84709ec75e8832ac811",
+      "companyName": "L'Atelier Déco d'Adeline",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed84909ec75e8832ac814",
+      "companyName": "French Light Letters",
+      "currentServiceType": "PHOTOGRAPHE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed84c09ec75e8832ac817",
+      "companyName": "Jolia Event",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed84e09ec75e8832ac81a",
+      "companyName": "Les brindilles création",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed85009ec75e8832ac81d",
+      "companyName": "Olympe Décoration",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed85309ec75e8832ac820",
+      "companyName": "Louise & Juliette - Location de vaisselle et objets vintages",
+      "currentServiceType": "VOITURE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed85509ec75e8832ac823",
+      "companyName": "Camellia",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed85809ec75e8832ac826",
+      "companyName": "Rose Pudding Design",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed85a09ec75e8832ac829",
+      "companyName": "Benory Events",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed85d09ec75e8832ac82c",
+      "companyName": "DGA Création",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed85f09ec75e8832ac82f",
+      "companyName": "Les Décors de Lili",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed86209ec75e8832ac832",
+      "companyName": "Love Events",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed86409ec75e8832ac835",
+      "companyName": "Creazoom Evènement",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed86709ec75e8832ac838",
+      "companyName": "Pink Event Location",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed86909ec75e8832ac83b",
+      "companyName": "Romances Intemporelles",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed86b09ec75e8832ac83e",
+      "companyName": "Epis de Bois",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed86e09ec75e8832ac841",
+      "companyName": "Maison Kaspariantz",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed87009ec75e8832ac844",
+      "companyName": "Mel'a'déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed87309ec75e8832ac847",
+      "companyName": "Ephemerys",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed87509ec75e8832ac84a",
+      "companyName": "Kiss Events",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed87809ec75e8832ac84d",
+      "companyName": "Sophie G",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed87a09ec75e8832ac850",
+      "companyName": "Loc'Housse",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed87d09ec75e8832ac853",
+      "companyName": "7M Design - Gravure laser",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed87f09ec75e8832ac856",
+      "companyName": "Boutique de Ballons",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed88209ec75e8832ac859",
+      "companyName": "C.Organisé ! Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed88409ec75e8832ac85c",
+      "companyName": "Fairylight Bougies",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed88609ec75e8832ac85f",
+      "companyName": "Rouge Paris",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed88909ec75e8832ac862",
+      "companyName": "Caro fait Sa Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed88c09ec75e8832ac865",
+      "companyName": "Instant Magique",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed88e09ec75e8832ac868",
+      "companyName": "Loc Vaisselle",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed89109ec75e8832ac86b",
+      "companyName": "Souss Agadir Artisanat",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed89309ec75e8832ac86e",
+      "companyName": "Mille Merveilles Evénementiel",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed89509ec75e8832ac871",
+      "companyName": "Un Jour Une Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed89809ec75e8832ac874",
+      "companyName": "Solutions Evènements",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed89a09ec75e8832ac877",
+      "companyName": "Cocktail Grenadine",
+      "currentServiceType": "TRAITEUR",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed89d09ec75e8832ac87a",
+      "companyName": "Mariage Création",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed89f09ec75e8832ac87d",
+      "companyName": "Events For You",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8a209ec75e8832ac880",
+      "companyName": "Festidays",
+      "currentServiceType": "CADEAUX_INVITES",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8a409ec75e8832ac883",
+      "companyName": "Au fil de vous",
+      "currentServiceType": "CADEAUX_INVITES",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8a709ec75e8832ac886",
+      "companyName": "Dreams Décoration",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8a909ec75e8832ac889",
+      "companyName": "Princess Events",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8ab09ec75e8832ac88c",
+      "companyName": "Solutions location",
+      "currentServiceType": "VOITURE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8ae09ec75e8832ac88f",
+      "companyName": "Nora Event",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8b009ec75e8832ac892",
+      "companyName": "My Planedenn",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8b309ec75e8832ac895",
+      "companyName": "Les Jolies Cagettes",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8b509ec75e8832ac898",
+      "companyName": "Lafaitlyly",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8b809ec75e8832ac89b",
+      "companyName": "Un Bel Événement",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8ba09ec75e8832ac89e",
+      "companyName": "Ana Event",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8bd09ec75e8832ac8a1",
+      "companyName": "LM Wedding Design",
+      "currentServiceType": "MUSIQUE",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8bf09ec75e8832ac8a4",
+      "companyName": "Laser Lumière",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8c109ec75e8832ac8a7",
+      "companyName": "Lady 2C & Déco",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8c409ec75e8832ac8aa",
+      "companyName": "360 Event Manager",
+      "currentServiceType": "ORGANISATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    },
+    {
+      "partnerId": "68bed8c609ec75e8832ac8ad",
+      "companyName": "Ker Ostara",
+      "currentServiceType": "DECORATION",
+      "suggestedServiceType": "DECORATION",
+      "matchType": "exact"
+    }
+  ]
+}

@@ -22,18 +22,28 @@ export default function ImageCarousel({ images, title }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
 
-  // Debug: afficher les images reçues
-  console.log('ImageCarousel - Images reçues:', images.length)
-  console.log('ImageCarousel - URLs:', images.map(img => img.url))
-
   const handleImageError = (imageUrl: string) => {
-    console.error('Erreur chargement image:', imageUrl)
     setFailedImages(prev => new Set([...prev, imageUrl]))
+  }
+
+  const handleImageLoad = (imageUrl: string) => {
+    // Image chargée avec succès
   }
 
   // Filtrer les images qui ont échoué
   const validImages = images.filter(img => !failedImages.has(img.url))
+  
+  // Si toutes les images ont échoué, réinitialiser l'état après un délai
+  useEffect(() => {
+    if (failedImages.size === images.length && images.length > 0) {
+      const timer = setTimeout(() => {
+        setFailedImages(new Set())
+      }, 10000) // Réessayer après 10 secondes
+      return () => clearTimeout(timer)
+    }
+  }, [failedImages.size, images.length])
 
+  // Auto-rotation des images
   useEffect(() => {
     if (validImages.length <= 1) return
 
@@ -45,6 +55,18 @@ export default function ImageCarousel({ images, title }: ImageCarouselProps) {
 
     return () => clearInterval(interval)
   }, [validImages.length])
+
+  // Si toutes les images ont échoué, afficher un message informatif
+  if (failedImages.size === images.length && images.length > 0) {
+    return (
+      <div className="relative h-full overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+        <div className="text-center p-6">
+          <p className="text-gray-500 mb-2">Images temporairement indisponibles</p>
+          <p className="text-sm text-gray-400">Réessai en cours...</p>
+        </div>
+      </div>
+    )
+  }
 
   const goToPrevious = () => {
     setCurrentIndex(currentIndex === 0 ? validImages.length - 1 : currentIndex - 1)
@@ -76,21 +98,40 @@ export default function ImageCarousel({ images, title }: ImageCarouselProps) {
     )
   }
 
+  // Vérifier qu'on a des images valides et que l'index est correct
+  if (validImages.length === 0) {
+    return (
+      <div className="relative h-full overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">Aucune image disponible</p>
+      </div>
+    )
+  }
+
+  // S'assurer que l'index est dans les limites
+  const safeIndex = Math.min(currentIndex, validImages.length - 1)
+  const currentImage = validImages[safeIndex]
+
+  if (!currentImage) {
+    return (
+      <div className="relative h-full overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">Erreur de chargement des images</p>
+      </div>
+    )
+  }
+
   return (
     <div className="relative h-full overflow-hidden rounded-lg">
       {/* Image principale */}
       <div className="relative h-full">
         <Image
-          src={validImages[currentIndex].url}
-          alt={validImages[currentIndex].title || `${title} - Image ${currentIndex + 1}`}
+          src={currentImage.url}
+          alt={currentImage.title || `${title} - Image ${safeIndex + 1}`}
           fill
           className="object-cover"
+          onError={() => handleImageError(currentImage.url)}
+          onLoad={() => handleImageLoad(currentImage.url)}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-          priority
-          onError={() => handleImageError(validImages[currentIndex].url)}
-          onLoad={() => {
-            console.log('Image chargée avec succès:', validImages[currentIndex].url)
-          }}
+          unoptimized={true}
         />
       </div>
 

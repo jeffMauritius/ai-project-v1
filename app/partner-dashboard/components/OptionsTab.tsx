@@ -102,9 +102,9 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
         
         newLoading[provider.value] = true;
         try {
-          console.log(`[OptionsTab] Chargement des options pour ${provider.value}`);
+
           const options = await OptionsService.loadProviderOptionsByType(provider.value);
-          console.log(`[OptionsTab] Options chargées pour ${provider.value}:`, options);
+
           if (options) {
             newProviderOptions[provider.value] = options;
           }
@@ -133,8 +133,7 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
     setSaving(prev => ({ ...prev, [providerType]: true }));
 
     try {
-      console.log(`[OptionsTab] Sauvegarde des options pour ${providerType}:`, data);
-      
+
       const response = await fetch(`/api/partner-storefront/${storefrontData.id}/options`, {
         method: 'PUT',
         headers: {
@@ -152,7 +151,6 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
       }
 
       const result = await response.json();
-      console.log(`[OptionsTab] Options sauvegardées pour ${providerType}:`, result);
 
       // Mettre à jour les données du storefront avec les nouvelles options
       onUpdate({
@@ -216,16 +214,13 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
         if (!provider) return null;
         
         // Debug: afficher le storefrontData complet
-        console.log(`[OptionsTab] DEBUG - storefrontData complet:`, storefrontData);
-        console.log(`[OptionsTab] DEBUG - storefrontData.options:`, storefrontData?.options);
-        
+
         // Les données sauvegardées sont dans le format { providerType: { question_1: value, question_2: value } }
         // On récupère les options spécifiques au type de prestataire
         const savedOptions = storefrontData?.options?.[provider.value] || {};
         
         // Debug: afficher les options pour ce prestataire
-        console.log(`[OptionsTab] Options pour ${provider.value}:`, savedOptions);
-        console.log(`[OptionsTab] Toutes les options:`, storefrontData?.options);
+
         const isLoading = loading[provider.value];
         const isSaving = saving[provider.value];
         const isValid = isFormValid(provider.value);

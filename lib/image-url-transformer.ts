@@ -30,7 +30,6 @@ export function transformImageUrl(originalUrl: string | null | undefined): strin
   // Pour l'instant, on retourne l'URL originale car la transformation nécessite
   // de connaître l'ID de l'entité (establishment ou partner) pour construire
   // la nouvelle URL Vercel Blob
-  console.warn(`URL mariages.net non transformée: ${originalUrl}`)
   return originalUrl
 }
 
@@ -84,7 +83,6 @@ export function transformImageUrlWithEntity(
   // Construire l'URL finale
   const newUrl = `${baseUrl}/${category}/${entityId}/${imageName}.${extension}`
   
-  console.log(`URL transformée: ${originalUrl} -> ${newUrl}`)
   return newUrl
 }
 

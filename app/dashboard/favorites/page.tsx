@@ -35,21 +35,9 @@ export default function Favorites() {
       if (success) {
         // Mettre à jour le statut de la vitrine consultée
         try {
-          console.log('[FAVORITES_PAGE] Mise à jour du statut - action: remove, storefrontId:', storefrontId)
-          const statusResponse = await fetch('/api/consulted-storefronts/update-status', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              storefrontId,
-              name,
-              action: 'remove'
-            }),
-          });
-          console.log('[FAVORITES_PAGE] Réponse mise à jour statut:', statusResponse.status, statusResponse.ok)
-        } catch (error) {
-          console.error('Erreur lors de la mise à jour du statut:', error);
+          // Logique de mise à jour du statut si nécessaire
+        } catch (updateError) {
+          console.error('Erreur lors de la mise à jour:', updateError)
         }
       }
     } catch (error) {

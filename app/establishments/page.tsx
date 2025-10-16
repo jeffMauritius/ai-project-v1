@@ -45,15 +45,15 @@ export default function EstablishmentsPage() {
     },
   });
 
-  // Types d'établissements avec leurs compteurs réels (après filtrage des traiteurs)
+  // Types d'établissements avec leurs compteurs réels (basés sur l'analyse MongoDB - champ type)
   const establishmentTypes = [
-    { type: 'Domaine mariage', label: 'Domaine mariage', count: 2430 },
-    { type: 'Château mariage', label: 'Château mariage', count: 673 },
-    { type: 'Salle mariage', label: 'Salle mariage', count: 583 },
-    { type: 'Restaurant mariage', label: 'Restaurant mariage', count: 347 },
-    { type: 'Hôtel mariage', label: 'Hôtel mariage', count: 279 },
-    { type: 'Bateau mariage', label: 'Bateau mariage', count: 41 },
-    { type: 'Auberge mariage', label: 'Auberge mariage', count: 43 },
+    { type: 'Domaine mariage', label: 'Domaine mariage', count: 5482 },
+    { type: 'Château mariage', label: 'Château mariage', count: 1062 },
+    { type: 'Salle mariage', label: 'Salle mariage', count: 1006 },
+    { type: 'Restaurant mariage', label: 'Restaurant mariage', count: 403 },
+    { type: 'Hôtel mariage', label: 'Hôtel mariage', count: 319 },
+    { type: 'Bateau mariage', label: 'Bateau mariage', count: 65 },
+    { type: 'Auberge mariage', label: 'Auberge mariage', count: 56 },
   ];
 
   if (isLoading) {

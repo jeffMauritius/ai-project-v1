@@ -1,0 +1,516 @@
+{
+  "summary": {
+    "totalEntries": 20512,
+    "correctionsCount": 4924
+  },
+  "correctionsByType": {
+    "FLEURS_MARIAGE → FLORISTE": 1709,
+    "PHOTO_MARIAGE → PHOTOGRAPHE": 1987,
+    "BATEAU_MARIAGE → LIEU": 63,
+    "ROBE_MARIEE → LIEU": 663,
+    "AUBERGE_MARIAGE → LIEU": 73,
+    "ACCESSOIRES_MARIAGE → LIEU": 429
+  },
+  "corrections": [
+    {
+      "name": "Vert Anis",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Mimosa'ik",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "L'Instant Floral",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Délice Floral",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Things to Bloom",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Récréation Intérieure",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Bouquets de Pauline",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Passiflore",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Fleurs & D'Lys",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Fleurafleur",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "L'Artelier d'Abigaëlle",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Brindille",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Borgona",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier Vert Sauge",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Le Jardin des Roses",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Maison Chancel",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Nature by E'lys",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Elofleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Une touche florale",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Fleurs de Jade",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Créations de Colibri",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "L’Atelier de Léonie",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Art et Végétal",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Marie Pétale",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "L'Atelier de Matisse",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "N°13 Fleuriste",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Chrysalidevents",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Fleurs d'Agrippine",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Darina Rieffel",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Arômes de Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Vert Tige",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Fleurs Marie-Thé",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "La Fée des Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Coccinelle, Maître Artisan Fleuriste",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Isabelle Fiori's",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Sandra-flor",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Marine Gross - Maître Fleuriste",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Floralies",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Herbes Sauvages",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Pissenlits par la Racine",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Magnolia fleuriste bohème",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Empreinte Numéro 8",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Pivoine et Caudalie",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Marie Brillac",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "La Fleur Engagée",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Eden Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "L'Atelier Julie Bihler",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Espace Floral Marsin",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier après la Pluie",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Vert Tige'",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "L'Or en Fleur",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Fleurs de B",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Riri Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Charly's Studio",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Marina Martinet",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Maison Camélia",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Nacha Créations Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier ô Roses",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Flowers by Emeline",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Antoine Thomas",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Zobel Créatrice d'Univers",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier Myosotis",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "L'Atelier Hanami",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier Floral B & L",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Justine Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "La Rose",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Art Floral La Suite",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Le Jardin D'Amandine",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Au Mél'ange des pétales",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Marie-Gaëlle - Fleuriste Événementiel",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Le Cocon Végétal",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier Pétales Sauvages",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier Ciel & Terre",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Fleurs de Perséphone",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Emmy Studio",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Echappées Florales",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Marché aux Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Stessy Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Le Jardin de Stelly",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "La Dame aux Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "De fleurs et d'eau",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Déborah Armengaud",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "BlueGreen FloralDesign",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Botao",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "MB Fleurs Events",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Bouquets de Maithe",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "La Vie en Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Le Lavoir",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Au Caprice Fleuri",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Fleurs d’t",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "La Tour Ö Fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Mille et une fleurs",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Oz'Home",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "La Fontaine Fleurie",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Rollin' Garden",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Les Fleurs d'Aqui",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "D Emotions",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Vert Pastel",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Atelier d'Evelyse",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    },
+    {
+      "name": "Le Bouquet de Carole",
+      "oldType": "FLEURS_MARIAGE",
+      "newType": "FLORISTE"
+    }
+  ]
+}

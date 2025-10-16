@@ -192,62 +192,51 @@ export class OptionsService {
    */
   static async loadProviderOptionsByType(providerType: string): Promise<ProviderOptions | null> {
     try {
-      console.log(`[OptionsService] Chargement des options pour ${providerType}`);
-      
+
       const fileName = PROVIDER_TYPE_TO_JSON_FILE[providerType];
       if (!fileName) {
         console.error(`[OptionsService] Aucun fichier JSON trouvé pour le providerType: ${providerType}`);
         return null;
       }
-      
-      console.log(`[OptionsService] Fichier à charger: ${fileName}`);
 
       // Utiliser fetch pour charger le fichier JSON côté client
       if (typeof window !== 'undefined') {
-        console.log(`[OptionsService] Côté client - fetch de /partners-options/${fileName}`);
+
         const response = await fetch(`/partners-options/${fileName}`);
-        console.log(`[OptionsService] Réponse fetch:`, response.status, response.ok);
-        
+
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
         }
         
         const options = await response.json();
-        console.log(`[OptionsService] Options brutes reçues (client):`, options);
+
         const jsonKey = PROVIDER_TYPE_TO_JSON_KEY[providerType];
-        console.log(`[OptionsService] Clé JSON pour ${providerType}:`, jsonKey);
-        console.log(`[OptionsService] Contenu de options[jsonKey] (client):`, options[jsonKey]);
 
         if (jsonKey && options[jsonKey]) {
           const result = {
             [providerType]: options[jsonKey]
           };
-          console.log(`[OptionsService] Options transformées pour ${providerType}:`, result);
-          console.log(`[OptionsService] Vérification result[${providerType}]:`, result[providerType]);
+
           return result;
         }
-        
-        console.log(`[OptionsService] Clé JSON non trouvée, retour des options brutes`);
+
         return { [providerType]: options };
       } else {
         // Côté serveur, utiliser fs
-        console.log(`[OptionsService] Côté serveur - lecture du fichier`);
+
         const fs = require('fs');
         const path = require('path');
         const filePath = path.join(process.cwd(), 'partners-options', fileName);
         const fileContent = fs.readFileSync(filePath, 'utf8');
         const options = JSON.parse(fileContent);
-        console.log(`[OptionsService] Options brutes reçues (serveur):`, options);
+
         const jsonKey = PROVIDER_TYPE_TO_JSON_KEY[providerType];
-        console.log(`[OptionsService] Clé JSON pour ${providerType}:`, jsonKey);
-        console.log(`[OptionsService] Contenu de options[jsonKey] (serveur):`, options[jsonKey]);
 
         if (jsonKey && options[jsonKey]) {
           const result = {
             [providerType]: options[jsonKey]
           };
-          console.log(`[OptionsService] Options transformées pour ${providerType} (serveur):`, result);
-          console.log(`[OptionsService] Vérification result[${providerType}] (serveur):`, result[providerType]);
+
           return result;
         }
         return { [providerType]: options };

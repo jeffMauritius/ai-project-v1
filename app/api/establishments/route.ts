@@ -10,8 +10,6 @@ export async function GET(request: Request) {
     const type = searchParams.get("type");
     const decodedType = type ? decodeURIComponent(type) : null;
 
-    console.log("Fetching establishments with:", { page, limit, skip, type, decodedType });
-
     const [establishments, total] = await Promise.all([
       prisma.establishment.findMany({
         where: {
@@ -101,9 +99,6 @@ export async function GET(request: Request) {
       // Utiliser directement les URLs 960p de la base de données
       images: e.images || []
     }));
-
-    console.log("Found establishments:", transformedEstablishments);
-    console.log("Total count:", total);
 
     return NextResponse.json({ establishments: transformedEstablishments, total });
   } catch (error) {
