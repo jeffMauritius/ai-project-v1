@@ -4,6 +4,7 @@ import { createContext, useContext, ReactNode, useState } from 'react'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 import { useImageGallery } from '@/hooks/useImageGallery'
+import { useSession } from 'next-auth/react'
 
 interface ImageItem {
   id?: string
@@ -32,6 +33,7 @@ interface GalleryProviderProps {
 }
 
 export function GalleryProvider({ children }: GalleryProviderProps) {
+  const { data: session } = useSession()
   const [galleryImages, setGalleryImages] = useState<ImageItem[]>([])
   const [onDeleteCb, setOnDeleteCb] = useState<((deletedId?: string) => void) | undefined>(undefined)
   const {
@@ -113,8 +115,8 @@ export function GalleryProvider({ children }: GalleryProviderProps) {
               <X className="w-6 h-6" />
             </button>
 
-            {/* Bouton supprimer */}
-            {galleryImages[selectedImage]?.id && (
+            {/* Bouton supprimer - seulement si l'utilisateur est connecté et si un callback onDelete est fourni */}
+            {galleryImages[selectedImage]?.id && session?.user && onDeleteCb && (
               <button
                 onClick={handleDelete}
                 className="absolute top-4 left-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-500 transition-all z-10"
