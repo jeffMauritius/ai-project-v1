@@ -617,9 +617,12 @@ model Guest {
   // Relations
   userId    String   @db.ObjectId
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  groupId   String   @db.ObjectId
-  group     GuestGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String?  @db.ObjectId
+  group     GuestGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
   
+  // Index unique pour éviter les doublons
+  @@unique([userId, email])
+  @@index([userId, firstName, lastName])
   @@map("guests")
 }
 

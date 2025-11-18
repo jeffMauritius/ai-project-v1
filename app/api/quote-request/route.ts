@@ -42,7 +42,13 @@ export async function POST(request: NextRequest) {
     // Vérifier que la vitrine partenaire existe (vers laquelle l'utilisateur envoie sa demande)
     const storefront = await prisma.partnerStorefront.findUnique({
       where: { id: storefrontId },
-      include: { user: true }
+      include: { 
+        partner: {
+          include: {
+            user: true
+          }
+        }
+      }
     });
     
     if (!storefront) {
@@ -54,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Email du partenaire qui recevra la demande
-    const recipientEmail = storefrontEmail || storefront.user?.email;
+    const recipientEmail = storefrontEmail || storefront.partner?.user?.email;
     
     if (!recipientEmail) {
 
@@ -93,7 +99,22 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[QUOTE-REQUEST] Erreur détaillée:', error);
+    console.error('[QUOTE-REQUEST] Type d\'erreur:', typeof error);
+    console.error('[QUOTE-REQUEST] Message d\'erreur:', error instanceof Error ? error.message : String(error));
     console.error('[QUOTE-REQUEST] Stack trace:', error instanceof Error ? error.stack : 'Pas de stack trace');
+    
+    // Retourner l'erreur spécifique en développement
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.json(
+        { 
+          error: 'Erreur interne du serveur',
+          details: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }

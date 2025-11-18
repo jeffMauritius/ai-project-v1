@@ -20,7 +20,7 @@ const individualGuestSchema = z.object({
   firstName: z.string().min(1, 'Le prénom est requis').max(50, 'Le prénom ne peut pas dépasser 50 caractères'),
   lastName: z.string().min(1, 'Le nom est requis').max(50, 'Le nom ne peut pas dépasser 50 caractères'),
   email: z.string().email('Veuillez entrer une adresse email valide'),
-  groupId: z.string().min(1, 'Veuillez sélectionner un groupe'),
+  groupId: z.string().optional(),
   status: z.enum(['pending', 'confirmed', 'declined'], {
     required_error: 'Veuillez sélectionner un statut'
   })
@@ -82,6 +82,8 @@ export default function Guests() {
   const [editingGuest, setEditingGuest] = useState<GuestGroup | null>(null)
   const [isAddingIndividualGuest, setIsAddingIndividualGuest] = useState(false)
   const [editingIndividualGuest, setEditingIndividualGuest] = useState<Guest | null>(null)
+  const [isCreatingGroupInline, setIsCreatingGroupInline] = useState(false)
+  const [quickGroupName, setQuickGroupName] = useState('')
 
   // États pour la modal de confirmation de suppression
   const [deleteModal, setDeleteModal] = useState<{
@@ -158,6 +160,29 @@ export default function Guests() {
     }
   }
 
+  // Gestionnaire pour créer un groupe rapidement
+  const handleQuickCreateGroup = async (groupName: string) => {
+    if (!groupName.trim()) {
+      return null
+    }
+
+    const newGroupData = {
+      name: groupName.trim(),
+      type: 'other' as const,
+      count: 5, // Valeur par défaut
+      confirmed: false,
+      notes: ''
+    }
+
+    const createdGroup = await createGuestGroup(newGroupData)
+    if (createdGroup) {
+      setNewIndividualGuest({ ...newIndividualGuest, groupId: createdGroup.id })
+      setIsCreatingGroupInline(false)
+      return createdGroup.id
+    }
+    return null
+  }
+
   // Gestionnaire de soumission du formulaire d'invité individuel
   const handleIndividualSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -166,7 +191,8 @@ export default function Guests() {
       const validatedData = individualGuestSchema.parse(newIndividualGuest)
       
       // Vérifier la limite du groupe avant d'ajouter un invité
-      if (!editingIndividualGuest) {
+      // Vérifier que le groupe n'a pas atteint sa limite d'invités (seulement si un groupe est sélectionné)
+      if (!editingIndividualGuest && validatedData.groupId) {
         const selectedGroup = guestGroups.find(group => group.id === validatedData.groupId)
         if (selectedGroup) {
           const currentGuestCount = individualGuests.filter(guest => guest.groupId === selectedGroup.id).length
@@ -374,20 +400,60 @@ export default function Guests() {
             <PlusIcon className="h-5 w-5 mr-2" />
             Ajouter un groupe
           </button>
-          <button
-            onClick={() => {
-              resetIndividualForm()
-              setEditingIndividualGuest(null)
-              setIsAddingIndividualGuest(true)
-            }}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500"
-            disabled={saving}
-          >
-            <UserPlusIcon className="h-5 w-5 mr-2" />
-            Ajouter un invité
-          </button>
+          <div className="relative group">
+            <button
+              onClick={() => {
+                resetIndividualForm()
+                setEditingIndividualGuest(null)
+                setIsAddingIndividualGuest(true)
+              }}
+              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm ${
+                guestGroups.length === 0
+                  ? 'bg-gray-400 cursor-not-allowed opacity-50 text-white'
+                  : 'bg-pink-600 hover:bg-pink-500 text-white'
+              }`}
+              disabled={saving || guestGroups.length === 0}
+            >
+              <UserPlusIcon className="h-5 w-5 mr-2" />
+              Ajouter un invité
+            </button>
+            {guestGroups.length === 0 && (
+              <div className="absolute bottom-full mb-2 left-0 bg-gray-900 text-white text-xs rounded py-2 px-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                Créez d&apos;abord un groupe pour organiser vos invités
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Message d'aide si aucun groupe */}
+      {guestGroups.length === 0 && (
+        <div className="mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+          <div className="flex items-start gap-4">
+            <ExclamationTriangleIcon className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="text-lg font-medium text-blue-900 dark:text-blue-200 mb-2">
+                Commencez par créer un groupe
+              </h3>
+              <p className="text-blue-800 dark:text-blue-300 mb-4">
+                Pour mieux organiser vos invités, nous vous recommandons de créer d&apos;abord des groupes (Famille, Amis, Collègues, etc.).
+                Vous pourrez ensuite ajouter vos invités individuels dans ces groupes.
+              </p>
+              <button
+                onClick={() => {
+                  resetGroupForm()
+                  setEditingGuest(null)
+                  setIsAddingGuest(true)
+                }}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Créer mon premier groupe
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -760,23 +826,74 @@ export default function Guests() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Groupe
-                  </label>
-                  <select
-                    value={newIndividualGuest.groupId}
-                    onChange={(e) => setNewIndividualGuest({ ...newIndividualGuest, groupId: e.target.value })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
-                      individualErrors.groupId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                  >
-                    <option value="">Sélectionner un groupe</option>
-                    {guestGroups.map((group) => (
-                      <option key={group.id} value={group.id}>
-                        {group.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Groupe (optionnel)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsCreatingGroupInline(!isCreatingGroupInline)}
+                      className="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1"
+                    >
+                      <PlusIcon className="h-3 w-3" />
+                      {isCreatingGroupInline ? 'Annuler' : 'Créer un groupe'}
+                    </button>
+                  </div>
+
+                  {isCreatingGroupInline ? (
+                    <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Nom du nouveau groupe"
+                          value={quickGroupName}
+                          onChange={(e) => setQuickGroupName(e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                          onKeyDown={async (e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              await handleQuickCreateGroup(quickGroupName)
+                              setQuickGroupName('')
+                            } else if (e.key === 'Escape') {
+                              setIsCreatingGroupInline(false)
+                              setQuickGroupName('')
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await handleQuickCreateGroup(quickGroupName)
+                            setQuickGroupName('')
+                          }}
+                          className="px-3 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50"
+                          disabled={!quickGroupName.trim() || saving}
+                        >
+                          {saving ? '...' : 'Créer'}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Le groupe sera créé avec 5 invités par défaut (type: Autres)
+                      </p>
+                    </div>
+                  ) : (
+                    <select
+                      value={newIndividualGuest.groupId}
+                      onChange={(e) => setNewIndividualGuest({ ...newIndividualGuest, groupId: e.target.value })}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                        individualErrors.groupId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      <option value="">Aucun groupe</option>
+                      {guestGroups.map((group) => (
+                        <option key={group.id} value={group.id}>
+                          {group.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  
                   {individualErrors.groupId && (
                     <p className="text-red-500 text-sm mt-1">{individualErrors.groupId}</p>
                   )}
