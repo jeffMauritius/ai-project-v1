@@ -62,41 +62,6 @@ export default function Results() {
     }
   }, [searchParams])
 
-  // Observer pour le lazy loading
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        console.log('🔍 IntersectionObserver triggered:', {
-          isIntersecting: entries[0].isIntersecting,
-          hasMore: hasMore,
-          isLoadingMore: isLoadingMore,
-          currentOffset: currentOffset,
-          searchResultsCount: searchResults.length
-        })
-        
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          console.log('🚀 Chargement de plus de résultats...')
-          loadMoreResults()
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    const currentRef = observerRef.current
-    if (currentRef) {
-      console.log('👁️ Observer attaché à l\'élément')
-      observer.observe(currentRef)
-    } else {
-      console.log('❌ observerRef.current est null')
-    }
-
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
-      }
-    }
-  }, [hasMore, isLoadingMore, currentOffset, searchResults.length, loadMoreResults])
-
   // Fonction pour effectuer la recherche avec pagination
   const performSearch = async (searchQuery: string, offset: number = 0, isInitial: boolean = false) => {
     try {
@@ -175,7 +140,7 @@ export default function Results() {
       currentOffset,
       searchQuery
     })
-    
+
     if (!isLoadingMore && hasMore) {
       console.log('✅ Conditions remplies, lancement de performSearch')
       performSearch(searchQuery, currentOffset, false)
@@ -184,9 +149,63 @@ export default function Results() {
     }
   }, [searchQuery, currentOffset, isLoadingMore, hasMore])
 
+  // Observer pour le lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        console.log('🔍 IntersectionObserver triggered:', {
+          isIntersecting: entries[0].isIntersecting,
+          hasMore: hasMore,
+          isLoadingMore: isLoadingMore,
+          currentOffset: currentOffset,
+          searchResultsCount: searchResults.length
+        })
+
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          console.log('🚀 Chargement de plus de résultats...')
+          loadMoreResults()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const currentRef = observerRef.current
+    if (currentRef) {
+      console.log('👁️ Observer attaché à l\'élément')
+      observer.observe(currentRef)
+    } else {
+      console.log('❌ observerRef.current est null')
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef)
+      }
+    }
+  }, [hasMore, isLoadingMore, currentOffset, searchResults.length, loadMoreResults])
+
   // Plus de données mock - utilisation uniquement des vraies données de la base
 
   // Utilisation uniquement des vraies données de la base
+
+  // Fonction pour obtenir l'image de fallback selon le type de service
+  const getFallbackImage = (serviceType: string): string => {
+    const fallbackImages: Record<string, string> = {
+      'LIEU': 'https://images.unsplash.com/photo-1519167758481-83f29da8ae39?w=800&h=600&fit=crop',
+      'TRAITEUR': 'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&h=600&fit=crop',
+      'PHOTOGRAPHE': 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=800&h=600&fit=crop',
+      'VOITURE': 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&h=600&fit=crop',
+      'MUSIQUE': 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&h=600&fit=crop',
+      'DECORATION': 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop',
+      'FLORISTE': 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&h=600&fit=crop',
+      'VIDEO': 'https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&h=600&fit=crop',
+      'ANIMATION': 'https://images.unsplash.com/photo-1464047736614-af63643285bf?w=800&h=600&fit=crop',
+      'WEDDING_CAKE': 'https://images.unsplash.com/photo-1535254973040-607b474cb50d?w=800&h=600&fit=crop',
+      'OFFICIANT': 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800&h=600&fit=crop',
+    }
+
+    return fallbackImages[serviceType] || 'https://images.unsplash.com/photo-1519167758481-83f29da8ae39?w=800&h=600&fit=crop'
+  }
 
   const getServiceTypeLabel = (serviceType: string) => {
     const labels: Record<string, string> = {
@@ -305,11 +324,18 @@ export default function Results() {
               // Utiliser un ID unique pour éviter les erreurs de clés dupliquées
               const uniqueKey = `${result.id}-${index}`
               
+              const imageUrl = result.imageUrl || result.images?.[0] || getFallbackImage(result.serviceType)
+
+              // Debug: log l'image utilisée
+              if (!result.imageUrl && !result.images?.[0]) {
+                console.log(`🖼️ Utilisation fallback pour ${result.name || result.companyName} (${result.serviceType}): ${imageUrl}`)
+              }
+
               return (
                 <div key={uniqueKey} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-48">
                   <Image
-                    src={result.imageUrl || result.images?.[0] || "/placeholder-venue.jpg"}
+                    src={imageUrl}
                     alt={result.name || result.companyName || "Image du prestataire"}
                     fill
                     className="object-cover"

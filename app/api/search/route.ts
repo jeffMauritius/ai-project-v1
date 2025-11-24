@@ -775,6 +775,7 @@ export async function POST(request: NextRequest) {
           maxCapacity: true,
           description: true,
           services: true,
+          rating: true,
           latitude: true,
           longitude: true,
           interventionRadius: true,
