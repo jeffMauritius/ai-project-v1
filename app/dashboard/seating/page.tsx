@@ -9,6 +9,7 @@ import { SortableGuest } from './SortableGuest'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGuests, type Guest as GuestData } from '@/hooks/useGuests'
 import { useTables, type Table as TableData } from '@/hooks/useTables'
+import { tableSchema } from '@/lib/validation-schemas'
 
 type Table = {
   id: string
@@ -82,6 +83,7 @@ export default function Seating() {
   const [isAddingTable, setIsAddingTable] = useState(false)
   const [newTableSeats, setNewTableSeats] = useState(8)
   const [newTableName, setNewTableName] = useState('')
+  const [tableErrors, setTableErrors] = useState<{ name?: string; seats?: string }>({})
   const dialogRef = useRef<HTMLDivElement>(null)
   const [showTooltip, setShowTooltip] = useState(true)
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
@@ -147,8 +149,45 @@ export default function Seating() {
   }
 
   const handleAddTable = async () => {
+    // Réinitialiser les erreurs
+    setTableErrors({})
+    
+    const tableName = newTableName || `Table ${tables.length + 1}`
+    
+    // Vérifier si une table avec le même nom existe déjà
+    const tableNameExists = tables.some(
+      table => table.name.toLowerCase().trim() === tableName.toLowerCase().trim()
+    )
+    
+    if (tableNameExists) {
+      setTableErrors({
+        name: 'Une table avec ce nom existe déjà'
+      })
+      return
+    }
+    
+    // Valider avec Zod
+    const result = tableSchema.safeParse({
+      name: tableName,
+      seats: newTableSeats
+    })
+    
+    if (!result.success) {
+      // Afficher les erreurs de validation
+      const errors: { name?: string; seats?: string } = {}
+      result.error.errors.forEach((err) => {
+        if (err.path[0] === 'name') {
+          errors.name = err.message
+        } else if (err.path[0] === 'seats') {
+          errors.seats = err.message
+        }
+      })
+      setTableErrors(errors)
+      return
+    }
+    
     const success = await createTable({
-      name: newTableName || `Table ${tables.length + 1}`,
+      name: tableName,
       seats: newTableSeats
     })
     
@@ -156,6 +195,7 @@ export default function Seating() {
       setIsAddingTable(false)
       setNewTableSeats(8)
       setNewTableName('')
+      setTableErrors({})
     }
   }
 
@@ -362,7 +402,10 @@ export default function Seating() {
               </DragOverlay>
             )}
             <button
-              onClick={() => setIsAddingTable(true)}
+              onClick={() => {
+                setIsAddingTable(true)
+                setTableErrors({})
+              }}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
@@ -388,26 +431,57 @@ export default function Seating() {
                     <input
                       type="text"
                       value={newTableName}
-                      onChange={(e) => setNewTableName(e.target.value)}
+                      onChange={(e) => {
+                        setNewTableName(e.target.value)
+                        if (tableErrors.name) {
+                          setTableErrors(prev => ({ ...prev, name: undefined }))
+                        }
+                      }}
                       placeholder="Ex: Table des mariés"
-                      className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                      className={`w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm ${
+                        tableErrors.name ? 'border-red-500' : ''
+                      }`}
                     />
+                    {tableErrors.name && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {tableErrors.name}
+                      </p>
+                    )}
                   </div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nombre de places
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={newTableSeats}
-                    onChange={(e) => setNewTableSeats(parseInt(e.target.value))}
-                    className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Nombre de places
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newTableSeats}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0
+                        setNewTableSeats(value)
+                        if (tableErrors.seats) {
+                          setTableErrors(prev => ({ ...prev, seats: undefined }))
+                        }
+                      }}
+                      className={`w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm ${
+                        tableErrors.seats ? 'border-red-500' : ''
+                      }`}
+                    />
+                    {tableErrors.seats && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {tableErrors.seats}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-3">
                   <button
-                    onClick={() => setIsAddingTable(false)}
+                    onClick={() => {
+                      setIsAddingTable(false)
+                      setTableErrors({})
+                      setNewTableSeats(8)
+                      setNewTableName('')
+                    }}
                     className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md"
                     disabled={saving}
                   >

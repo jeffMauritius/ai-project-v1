@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { PageNavigation } from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
-import { motion } from "framer-motion"
 
 const plans = [
   {
@@ -51,6 +50,12 @@ const plans = [
 ]
 
 export default function Pricing() {
+  const router = useRouter()
+
+  const handleStartTrial = () => {
+    router.push('/auth/register')
+  }
+
   return (
     <div>
       <PageNavigation />
@@ -67,9 +72,9 @@ export default function Pricing() {
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {plans.map((plan, index) => (
-              <Card key={index} className={plan.popular ? 'border-pink-500 dark:border-pink-400' : ''}>
+              <Card key={index} className={`relative ${plan.popular ? 'border-pink-500 dark:border-pink-400' : ''}`}>
                 {plan.popular && (
-                  <div className="absolute top-0 right-6 transform -translate-y-1/2">
+                  <div className="absolute top-0 right-6 transform -translate-y-1/2 z-10">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-500 text-white">
                       Populaire
                     </span>
@@ -93,7 +98,11 @@ export default function Pricing() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full" variant={plan.popular ? 'default' : 'outline'}>
+                  <Button 
+                    className="w-full" 
+                    variant={plan.popular ? 'default' : 'outline'}
+                    onClick={handleStartTrial}
+                  >
                     {`Commencer l'essai gratuit`}
                   </Button>
                 </CardContent>

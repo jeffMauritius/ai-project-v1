@@ -1,4 +1,3 @@
-import Footer from '../../components/Footer'
 import { PageNavigation } from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -37,7 +36,6 @@ export default function Press() {
           </Card>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
