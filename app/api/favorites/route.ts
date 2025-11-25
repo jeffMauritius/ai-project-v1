@@ -125,8 +125,8 @@ export async function DELETE(request: Request) {
       return new NextResponse("Non autorisé", { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const storefrontId = searchParams.get('storefrontId')
+    const body = await request.json()
+    const { storefrontId } = body
 
     if (!storefrontId) {
       return new NextResponse("ID du storefront requis", { status: 400 })

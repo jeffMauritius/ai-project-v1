@@ -1,4 +1,3 @@
-import Footer from '../../components/Footer'
 import { PageNavigation } from '../../components/PageNavigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -26,7 +25,6 @@ export default function Cookies() {
           </Card>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
