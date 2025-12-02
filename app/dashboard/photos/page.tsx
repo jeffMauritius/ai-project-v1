@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { PlusIcon, FolderIcon, PhotoIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -94,13 +94,16 @@ export default function Photos() {
     if (res.ok) {
       const data: AlbumDTO[] = await res.json()
       setAlbums(data)
-      // Mettre à jour l'album affiché si nécessaire
-      if (albumToView) {
-        const refreshed = data.find(a => a.id === albumToView.id) || null
-        setAlbumToView(refreshed)
-      }
+      // Mettre à jour l'album affiché si nécessaire (en utilisant la fonction de mise à jour fonctionnelle)
+      setAlbumToView(prev => {
+        if (prev) {
+          const refreshed = data.find(a => a.id === prev.id) || null
+          return refreshed
+        }
+        return prev
+      })
     }
-  }, [albumToView])
+  }, [])
 
   useEffect(() => {
     fetchAlbums()

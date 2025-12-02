@@ -87,4 +87,19 @@ export const registerPartnerSchema = z.object({
 })
 
 export type RegisterCoupleFormData = z.infer<typeof registerCoupleSchema>
-export type RegisterPartnerFormData = z.infer<typeof registerPartnerSchema> 
+export type RegisterPartnerFormData = z.infer<typeof registerPartnerSchema>
+
+// Schéma de validation pour la création d'une table
+export const tableSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Le nom de la table est requis')
+    .max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+  seats: z
+    .number()
+    .int('Le nombre de places doit être un nombre entier')
+    .min(1, 'Le nombre de places doit être au moins 1')
+    .max(20, 'Le nombre de places ne peut pas dépasser 20 invités'),
+})
+
+export type TableFormData = z.infer<typeof tableSchema> 
