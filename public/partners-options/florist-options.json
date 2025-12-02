@@ -1,1 +1,237 @@
-{"placeholder": "structure"}
+{
+  "fleurs": {
+    "title": "Fleuriste",
+    "sections": [
+      {
+        "title": "Types de créations florales",
+        "fields": [
+          {
+            "id": "types_creations",
+            "question": "Quels types de créations florales proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Bouquet de mariée",
+              "Boutonnière",
+              "Corsage",
+              "Couronne de fleurs",
+              "Décoration de table",
+              "Arche florale",
+              "Composition pour cérémonie",
+              "Décoration de voiture",
+              "Centres de table",
+              "Guirlandes florales",
+              "Compositions suspendues",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "styles_floraux",
+            "question": "Quels styles floraux proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Champêtre",
+              "Bohème",
+              "Romantique",
+              "Moderne",
+              "Classique",
+              "Minimaliste",
+              "Exotique",
+              "Rustique",
+              "Vintage",
+              "Luxueux",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Fleurs et matériaux",
+        "fields": [
+          {
+            "id": "types_fleurs",
+            "question": "Quels types de fleurs utilisez-vous principalement ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Roses",
+              "Pivoines",
+              "Lys",
+              "Orchidées",
+              "Hortensias",
+              "Eucalyptus",
+              "Gypsophile",
+              "Lavande",
+              "Renoncules",
+              "Tulipes",
+              "Fleurs de saison",
+              "Fleurs exotiques",
+              "Fleurs séchées",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "fleurs_locales",
+            "question": "Travaillez-vous avec des fleurs locales et de saison ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, exclusivement",
+              "Oui, en priorité",
+              "Parfois",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "fleurs_bio",
+            "question": "Proposez-vous des fleurs bio ou éco-responsables ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services proposés",
+        "fields": [
+          {
+            "id": "services_inclus",
+            "question": "Quels services sont inclus dans vos prestations ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Consultation personnalisée",
+              "Création sur mesure",
+              "Livraison sur le lieu de réception",
+              "Installation sur place",
+              "Démontage après l'événement",
+              "Location de vases et contenants",
+              "Fleurs pour les invités",
+              "Préservation du bouquet de mariée",
+              "Essai de bouquet avant le jour J",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "location_accessoires",
+            "question": "Proposez-vous la location d'accessoires décoratifs ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "prix_bouquet_mariee",
+            "question": "Quel est le prix de départ pour un bouquet de mariée ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 80",
+            "required": false
+          },
+          {
+            "id": "prix_decoration_complete",
+            "question": "Quel est le prix de départ pour une décoration florale complète ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 500",
+            "required": false
+          },
+          {
+            "id": "forfait_mariage",
+            "question": "Proposez-vous un forfait mariage complet ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "description_forfait",
+            "question": "Si oui, décrivez votre forfait mariage",
+            "component_type": "textarea",
+            "field_type": "text",
+            "placeholder": "Décrivez ce qui est inclus dans votre forfait...",
+            "required": false,
+            "condition": {
+              "field": "forfait_mariage",
+              "value": "Oui"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "deplacement",
+            "question": "Pouvez-vous vous déplacer pour livrer et installer ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "frais_deplacement",
+            "question": "Facturez-vous les déplacements ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non",
+              "Selon la distance"
+            ],
+            "required": false
+          },
+          {
+            "id": "delai_commande",
+            "question": "Quel est le délai minimum pour passer commande ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "1 semaine",
+              "2 semaines",
+              "1 mois",
+              "2 mois",
+              "3 mois ou plus"
+            ],
+            "required": false
+          },
+          {
+            "id": "acompte",
+            "question": "Demandez-vous un acompte à la réservation ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}

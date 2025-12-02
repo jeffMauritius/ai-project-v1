@@ -66,6 +66,35 @@ export async function GET(request: Request) {
     // Sinon, accès privé par session (partenaire connecté)
     const session = await getServerSession(authOptions)
 
+    if (!session?.user?.id) {
+      return new NextResponse("Non autorisé", { status: 401 })
+    }
+
+    // Trouver le partenaire de l'utilisateur connecté
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { partners: true }
+    })
+
+    if (!user || user.role !== "PARTNER") {
+      return new NextResponse("Accès non autorisé", { status: 403 })
+    }
+
+    const partner = user.partners[0]
+    if (!partner) {
+      return new NextResponse("Partenaire non trouvé", { status: 404 })
+    }
+
+    // Trouver la vitrine du partenaire
+    const storefront = await prisma.partnerStorefront.findFirst({
+      where: { partnerId: partner.id },
+      include: { media: true }
+    })
+
+    if (!storefront) {
+      return new NextResponse("Vitrine non trouvée", { status: 404 })
+    }
+
     // Retourner une structure simplifiée et cohérente
     const responseData = {
       id: storefront.id,
@@ -93,7 +122,7 @@ export async function GET(request: Request) {
       createdAt: storefront.createdAt,
       updatedAt: storefront.updatedAt
     }
-    
+
     // Appliquer la transformation des URLs d'images
     return NextResponse.json(transformPartnerImages(responseData))
   } catch (error) {

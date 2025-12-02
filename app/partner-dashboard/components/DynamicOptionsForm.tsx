@@ -374,14 +374,14 @@ export function DynamicOptionsForm({
   // Les données sont maintenant structurées comme { "reception-venue": { sections: [...] } }
   const relevantOptions = providerOptions[providerType];
 
-  if (!relevantOptions) {
+  if (!relevantOptions || !relevantOptions.sections) {
 
     return (
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center space-x-2 text-red-500">
             <Info className="h-4 w-4" />
-            <span>Aucune option trouvée pour ce type de prestataire.</span>
+            <span>Aucune option trouvée pour ce type de prestataire ({providerType}).</span>
           </div>
         </CardContent>
       </Card>
@@ -392,7 +392,7 @@ export function DynamicOptionsForm({
     <Card>
       <CardContent className="p-6">
         <div className="space-y-6">
-          {relevantOptions.sections.map((section: any, index: number) => (
+          {relevantOptions.sections?.map((section: any, index: number) => (
             <div key={index} className="space-y-4">
               <h3 className="text-lg font-semibold">{section.title}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

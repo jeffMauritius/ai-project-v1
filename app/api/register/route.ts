@@ -77,30 +77,37 @@ export async function POST(req: Request) {
       },
     });
 
-    // Si c'est un partenaire, créer une vitrine avec les données pré-remplies
+    // Si c'est un partenaire, créer d'abord un Partner puis une vitrine
     if (validatedData.role === "PARTNER" && validatedData.partnerType) {
 
       const serviceType = partnerTypeToServiceType[validatedData.partnerType] || ServiceType.LIEU;
-      
-      await prisma.partnerStorefront.create({
+
+      // 1. Créer le Partner avec les données de base
+      const partner = await prisma.partner.create({
         data: {
           userId: user.id,
           companyName: validatedData.name, // Utiliser le nom comme nom d'entreprise par défaut
           description: "", // Description vide à remplir plus tard
-          isActive: false, // Vitrine inactive par défaut
           serviceType: serviceType,
-          venueType: serviceType === ServiceType.LIEU ? undefined : undefined,
           billingStreet: "",
           billingCity: "",
           billingPostalCode: "",
           billingCountry: "France",
           siret: validatedData.siret || "",
           vatNumber: "",
-          venueAddress: null,
-          venueLatitude: 48.8566, // Paris par défaut
-          venueLongitude: 2.3522,
+          latitude: 48.8566, // Paris par défaut
+          longitude: 2.3522,
           interventionType: "all_france",
           interventionRadius: 50,
+        },
+      });
+
+      // 2. Créer la vitrine (PartnerStorefront) liée au Partner
+      await prisma.partnerStorefront.create({
+        data: {
+          type: serviceType === ServiceType.LIEU ? 'VENUE' : 'PARTNER',
+          isActive: false, // Vitrine inactive par défaut
+          partnerId: partner.id,
         },
       });
 
