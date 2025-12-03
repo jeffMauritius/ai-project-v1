@@ -37,6 +37,7 @@ interface SearchCriteria {
   style: string[]
   userCoordinates?: { lat: number; lng: number } // Nouveau: coordonnées utilisateur
   maxDistance?: number // Nouveau: distance maximale en km
+  searchByName?: string // Nouveau: recherche par nom exact d'un lieu/prestataire
 }
 
 // Mapping statique pour requêtes simples (rapidité)
@@ -284,6 +285,17 @@ async function analyzeQueryWithAI(query: string): Promise<SearchCriteria> {
             content: `Tu es un expert en analyse de requêtes de recherche pour mariages en France.
 Ton rôle est d'extraire des critères structurés depuis du langage naturel.
 
+IMPORTANT - RECHERCHE PAR NOM :
+Si l'utilisateur mentionne un NOM PROPRE spécifique d'un lieu ou prestataire (comme "Abbaye Royale du Moncel", "Château de Versailles", "Domaine de la Roseraie", etc.), tu DOIS extraire ce nom dans le champ "searchByName".
+Indices qu'il s'agit d'un nom propre :
+- Mots avec majuscules (Abbaye, Château de X, Domaine de Y)
+- Utilisation de "je recherche" suivi d'un nom spécifique
+- Le nom contient des articles comme "du", "de la", "des" avec des mots capitalisés
+- Le nom ressemble à un lieu unique et non à une catégorie générique
+
+Exemple: "je recherche Abbaye Royale du Moncel" → searchByName: "Abbaye Royale du Moncel"
+Exemple: "je recherche un château" → PAS de searchByName, c'est une catégorie
+
 TYPES DE SERVICES disponibles (peut en avoir plusieurs si demandés) :
 - LIEU : château, domaine, auberge, hôtel, restaurant, salle, bateau, manoir, propriété, mas, ferme, grange
 - TRAITEUR : cuisine, repas, buffet, cocktail, menu, gastronomie
@@ -332,13 +344,13 @@ DISTANCE MAXIMALE :
   * "à proximité de Bordeaux" → maxDistance: 50
 
 INSTRUCTIONS D'EXTRACTION :
-1. Identifie le TYPE DE SERVICE principal (un seul, le plus pertinent)
-2. Extrait le TYPE DE LIEU spécifique si LIEU demandé (château, domaine, etc.)
+1. Identifie TOUS les TYPES DE SERVICES demandés (peut être plusieurs : lieu + traiteur, etc.)
+2. Extrait le TYPE DE LIEU spécifique si LIEU demandé (château, domaine, auberge, etc.)
 3. Détecte la LOCALISATION précise (ville) ou zone géographique
-4. Extrait la DISTANCE MAXIMALE si mentionnée (en km)
+4. Extrait la DISTANCE MAXIMALE si mentionnée (en km) - "autour de", "rayon de", "à moins de"
 5. Liste les FEATURES/CARACTÉRISTIQUES demandées (jardin, parking, etc.)
 6. Identifie le STYLE si mentionné
-7. Extrait la CAPACITÉ avec tolérance si mentionnée
+7. Extrait la CAPACITÉ avec tolérance ±10% si mentionnée (50 invités → min: 45, max: 60)
 8. Détecte le BUDGET si mentionné
 
 Réponds UNIQUEMENT avec ce JSON (pas de texte avant/après) :
@@ -350,7 +362,21 @@ Réponds UNIQUEMENT avec ce JSON (pas de texte avant/après) :
   "features": ["jardin", "parking"],
   "style": ["champêtre"],
   "capacity": {"min": 90, "max": 120},
-  "budget": {"min": 5000, "max": 15000}
+  "budget": {"min": 5000, "max": 15000},
+  "searchByName": null
+}
+
+EXEMPLE RECHERCHE PAR NOM :
+Requête : "je recherche Abbaye Royale du Moncel"
+→ {
+  "serviceType": ["LIEU"],
+  "searchByName": "Abbaye Royale du Moncel"
+}
+
+Requête : "je cherche le Domaine de la Bergerie"
+→ {
+  "serviceType": ["LIEU"],
+  "searchByName": "Domaine de la Bergerie"
 }
 
 EXEMPLES :
@@ -416,6 +442,24 @@ Requête : "Je cherche un photographe et un vidéaste à Paris"
   "maxDistance": 50
 }
 
+Requête : "je recherche une auberge pouvant accueillir mes 50 invités dans un rayon de 50 kilomètres autour de Lyon ainsi qu'un traiteur"
+→ {
+  "serviceType": ["LIEU", "TRAITEUR"],
+  "location": "lyon",
+  "venueType": "auberge",
+  "maxDistance": 50,
+  "capacity": {"min": 45, "max": 60}
+}
+
+Requête : "château pour 100 personnes près de Bordeaux avec un fleuriste et un photographe"
+→ {
+  "serviceType": ["LIEU", "FLORISTE", "PHOTOGRAPHE"],
+  "location": "bordeaux",
+  "venueType": "château",
+  "maxDistance": 50,
+  "capacity": {"min": 90, "max": 120}
+}
+
 Maintenant analyse cette requête :`
           },
           {
@@ -463,8 +507,9 @@ Maintenant analyse cette requête :`
       date: parsed.date || '',
       features: parsed.features || [],
       style: parsed.style || [],
-      userCoordinates,
-      maxDistance: parsed.maxDistance || undefined
+      userCoordinates: userCoordinates ?? undefined,
+      maxDistance: parsed.maxDistance || undefined,
+      searchByName: parsed.searchByName || undefined
     }
 
     queryCache.set(cacheKey, result)
@@ -569,7 +614,165 @@ export async function POST(request: NextRequest) {
 
     let results: SearchResult[] = []
 
-    // 2. Recherche dans les établissements (si LIEU demandé)
+    // 2. Recherche par nom spécifique (prioritaire)
+    if (analysis.searchByName) {
+      console.log('🔍 Recherche par nom:', analysis.searchByName)
+
+      // Rechercher dans les établissements
+      const establishmentsByName = await prisma.establishment.findMany({
+        where: {
+          name: { contains: analysis.searchByName, mode: 'insensitive' }
+        },
+        select: {
+          id: true,
+          name: true,
+          city: true,
+          region: true,
+          type: true,
+          rating: true,
+          startingPrice: true,
+          maxCapacity: true,
+          description: true,
+          images: true,
+          latitude: true,
+          longitude: true,
+          hasParking: true,
+          hasGarden: true,
+          hasTerrace: true,
+          hasKitchen: true,
+          hasAccommodation: true,
+          storefronts: {
+            select: { id: true },
+            take: 1
+          }
+        },
+        take: 50
+      })
+
+      console.log(`🏰 ${establishmentsByName.length} établissements trouvés par nom`)
+
+      // Mapper les résultats
+      for (const establishment of establishmentsByName) {
+        results.push({
+          id: establishment.storefronts[0]?.id || establishment.id,
+          type: 'VENUE' as const,
+          name: establishment.name,
+          serviceType: 'LIEU',
+          venueType: establishment.type,
+          location: `${establishment.city}, ${establishment.region}`,
+          rating: establishment.rating,
+          price: establishment.startingPrice,
+          capacity: establishment.maxCapacity,
+          description: establishment.description,
+          features: [
+            establishment.type?.toLowerCase() || '',
+            establishment.hasParking ? 'parking' : '',
+            establishment.hasGarden ? 'jardin' : '',
+            establishment.hasTerrace ? 'terrasse' : '',
+            establishment.hasKitchen ? 'cuisine' : '',
+            establishment.hasAccommodation ? 'hébergement' : ''
+          ].filter(Boolean),
+          imageUrl: establishment.images?.[0],
+          images: establishment.images || [],
+          latitude: establishment.latitude ?? undefined,
+          longitude: establishment.longitude ?? undefined,
+          score: 1000, // Score maximal pour recherche par nom
+          matchedCriteria: ['nom_exact']
+        })
+      }
+
+      // Rechercher aussi dans les partenaires
+      const partnersByName = await prisma.partner.findMany({
+        where: {
+          companyName: { contains: analysis.searchByName, mode: 'insensitive' }
+        },
+        select: {
+          id: true,
+          companyName: true,
+          serviceType: true,
+          billingCity: true,
+          basePrice: true,
+          maxCapacity: true,
+          description: true,
+          services: true,
+          images: true,
+          latitude: true,
+          longitude: true,
+          interventionRadius: true,
+          storefronts: {
+            take: 1,
+            select: {
+              id: true,
+              images: true,
+              media: {
+                take: 1,
+                select: { url: true, type: true }
+              }
+            }
+          }
+        },
+        take: 50
+      })
+
+      console.log(`👨‍💼 ${partnersByName.length} partenaires trouvés par nom`)
+
+      for (const partner of partnersByName) {
+        const bestStorefront = partner.storefronts[0]
+        let imageUrl = undefined
+
+        if (bestStorefront?.images && bestStorefront.images.length > 0) {
+          imageUrl = bestStorefront.images[0]
+        } else if (bestStorefront?.media && bestStorefront.media.length > 0) {
+          const firstImage = bestStorefront.media.find(media => media.type === 'IMAGE')
+          if (firstImage) imageUrl = firstImage.url
+        }
+        if (!imageUrl && partner.images && partner.images.length > 0) {
+          imageUrl = partner.images[0]
+        }
+
+        results.push({
+          id: bestStorefront?.id || partner.id,
+          type: 'PARTNER' as const,
+          name: partner.companyName,
+          serviceType: partner.serviceType,
+          location: `${partner.billingCity || ''}, France`,
+          rating: 4.5,
+          price: partner.basePrice ?? undefined,
+          capacity: partner.maxCapacity ?? undefined,
+          description: partner.description ?? undefined,
+          features: partner.services || [],
+          imageUrl,
+          images: partner.images || bestStorefront?.images || [],
+          latitude: partner.latitude ?? undefined,
+          longitude: partner.longitude ?? undefined,
+          interventionRadius: partner.interventionRadius ?? undefined,
+          score: 1000,
+          matchedCriteria: ['nom_exact']
+        })
+      }
+
+      // Si on trouve des résultats par nom, on skip la recherche normale
+      if (results.length > 0) {
+        console.log(`✅ ${results.length} résultats trouvés par nom, skip recherche classique`)
+
+        // Pagination
+        const paginatedResults = results.slice(offset, offset + limit)
+        const hasMore = offset + limit < results.length
+
+        return NextResponse.json({
+          results: paginatedResults,
+          criteria: analysis,
+          total: results.length,
+          hasMore,
+          offset,
+          limit
+        })
+      }
+
+      console.log('⚠️ Aucun résultat par nom, fallback sur recherche classique')
+    }
+
+    // 3. Recherche dans les établissements (si LIEU demandé)
     if (analysis.serviceType.includes('LIEU')) {
       console.log('🏰 Recherche établissements...')
 
@@ -631,27 +834,42 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // 3. Filtrage par capacité avec tolérance intelligente
-      if (analysis.capacity?.min || analysis.capacity?.max) {
-        const capacityFilter: any = {}
-        if (analysis.capacity.min) {
-          capacityFilter.gte = analysis.capacity.min
-        }
-        if (analysis.capacity.max) {
-          capacityFilter.lte = analysis.capacity.max
-        }
-        andFilters.push({ maxCapacity: capacityFilter })
-        console.log(`👥 Filtre capacité: ${analysis.capacity.min || 0}-${analysis.capacity.max || '∞'}`)
+      // 3. Filtrage par capacité - le lieu doit pouvoir accueillir AU MOINS le nombre demandé
+      if (analysis.capacity?.min) {
+        // On veut des lieux qui peuvent accueillir au moins le nombre minimum demandé
+        andFilters.push({ maxCapacity: { gte: analysis.capacity.min } })
+        console.log(`👥 Filtre capacité: peut accueillir au moins ${analysis.capacity.min} personnes`)
       }
 
-      // 4. Filtrage par localisation (ne pas filtrer en DB si on a des coordonnées, on triera après)
-      if (analysis.location && !analysis.userCoordinates) {
-        // Seulement si on n'a pas de coordonnées pour le tri par distance
+      // 4. Filtrage par localisation - toujours filtrer par région pour réduire les résultats
+      // Même avec des coordonnées, on filtre par région pour avoir des résultats pertinents
+      if (analysis.location) {
         const locationTerms = analysis.location.toLowerCase().split(' ')
+
+        // Mapping des villes vers les départements proches (noms utilisés dans la DB)
+        const cityToRegions: Record<string, string[]> = {
+          'lyon': ['Rhône', 'Ain', 'Isère', 'Loire', 'Savoie', 'Haute-Savoie', 'Drôme', 'Ardèche'],
+          'paris': ['Paris', 'Seine-et-Marne', 'Yvelines', 'Essonne', 'Hauts-de-Seine', 'Seine-Saint-Denis', 'Val-de-Marne', 'Val-d\'Oise', 'Oise'],
+          'marseille': ['Bouches-du-Rhône', 'Var', 'Vaucluse', 'Alpes-de-Haute-Provence'],
+          'bordeaux': ['Gironde', 'Dordogne', 'Lot-et-Garonne', 'Landes', 'Charente-Maritime'],
+          'toulouse': ['Haute-Garonne', 'Tarn', 'Gers', 'Ariège', 'Aude'],
+          'nice': ['Alpes-Maritimes', 'Var', 'Alpes-de-Haute-Provence'],
+          'nantes': ['Loire Atlantique', 'Loire-Atlantique', 'Vendée', 'Maine et Loire', 'Maine-et-Loire', 'Morbihan'],
+          'strasbourg': ['Bas-Rhin', 'Haut Rhin', 'Haut-Rhin', 'Moselle'],
+          'montpellier': ['Hérault', 'Gard', 'Aude', 'Aveyron'],
+          'lille': ['Nord', 'Pas-de-Calais', 'Somme', 'Aisne']
+        }
+
+        const regions = cityToRegions[analysis.location.toLowerCase()] || []
+
         andFilters.push({
           OR: [
             { city: { contains: analysis.location, mode: 'insensitive' as const } },
             { region: { contains: analysis.location, mode: 'insensitive' as const } },
+            // Ajouter les régions associées à la ville
+            ...regions.map(region => ({
+              region: { contains: region, mode: 'insensitive' as const }
+            })),
             ...locationTerms.map(term => ({
               OR: [
                 { city: { contains: term, mode: 'insensitive' as const } },
@@ -660,7 +878,7 @@ export async function POST(request: NextRequest) {
             }))
           ]
         })
-        console.log(`📍 Filtre localisation: ${analysis.location}`)
+        console.log(`📍 Filtre localisation: ${analysis.location} + régions: ${regions.join(', ')}`)
       }
 
       const whereClause = andFilters.length > 0 ? { AND: andFilters } : {}
@@ -722,8 +940,8 @@ export async function POST(request: NextRequest) {
           ].filter(Boolean),
           imageUrl: establishment.images?.[0],
           images: establishment.images || [],
-          latitude: establishment.latitude,
-          longitude: establishment.longitude
+          latitude: establishment.latitude ?? undefined,
+          longitude: establishment.longitude ?? undefined
         }
 
         // Calculer la distance si coordonnées disponibles
@@ -747,25 +965,51 @@ export async function POST(request: NextRequest) {
       results.push(...establishmentResults)
     }
 
-    // 3. Recherche dans les partenaires (si autres types demandés)
+    // 4. Recherche dans les partenaires (si autres types demandés)
     const partnerTypes = analysis.serviceType.filter(type => type !== 'LIEU')
     if (partnerTypes.length > 0) {
       console.log('👨‍💼 Recherche partenaires:', partnerTypes)
       
+      // Mapping des villes vers leurs régions
+      const cityToRegionsForPartners: Record<string, string[]> = {
+        'lyon': ['Lyon', 'Villeurbanne', 'Vénissieux', 'Saint-Étienne', 'Vienne', 'Bourgoin'],
+        'paris': ['Paris', 'Boulogne', 'Saint-Denis', 'Montreuil', 'Nanterre', 'Versailles'],
+        'marseille': ['Marseille', 'Aix-en-Provence', 'Aubagne', 'Martigues'],
+        'bordeaux': ['Bordeaux', 'Mérignac', 'Pessac', 'Talence'],
+        'toulouse': ['Toulouse', 'Blagnac', 'Colomiers', 'Tournefeuille'],
+        'nice': ['Nice', 'Cannes', 'Antibes', 'Grasse'],
+        'nantes': ['Nantes', 'Saint-Nazaire', 'Rezé', 'Saint-Herblain'],
+        'strasbourg': ['Strasbourg', 'Schiltigheim', 'Illkirch', 'Haguenau'],
+        'montpellier': ['Montpellier', 'Béziers', 'Sète', 'Lunel'],
+        'lille': ['Lille', 'Roubaix', 'Tourcoing', 'Villeneuve']
+      }
+
+      const nearbyPartnerCities = analysis.location ? (cityToRegionsForPartners[analysis.location.toLowerCase()] || [analysis.location]) : []
+
+      // Construire les conditions pour les partenaires
+      // NOTE: On n'applique PAS le filtre de capacité aux partenaires car :
+      // - Les traiteurs, photographes, etc. n'ont généralement pas de limite de capacité
+      // - maxCapacity est principalement utilisé pour les lieux de réception
+      // - La plupart des partenaires ont maxCapacity: null
+      const partnerWhereConditions: any = {
+        serviceType: { in: partnerTypes }
+      }
+
+      // Filtrage par localisation - inclure ceux de la région ou qui interviennent partout
+      if (analysis.location) {
+        partnerWhereConditions.OR = [
+          { billingCity: { contains: analysis.location, mode: 'insensitive' } },
+          ...nearbyPartnerCities.map(city => ({
+            billingCity: { contains: city, mode: 'insensitive' as const }
+          })),
+          { interventionType: 'all_france' } // Inclure ceux qui interviennent partout
+        ]
+      }
+
+      console.log('🔍 Filtres partenaires:', JSON.stringify(partnerWhereConditions, null, 2))
+
       const partners = await prisma.partner.findMany({
-        where: {
-          serviceType: { in: partnerTypes },
-          // Filtrage par localisation si spécifiée
-          ...(analysis.location && {
-            OR: [
-              { billingCity: { contains: analysis.location, mode: 'insensitive' } },
-              { interventionCities: { has: analysis.location } }
-            ]
-          }),
-          // Filtrage par capacité si spécifiée
-          ...(analysis.capacity?.min && { maxCapacity: { gte: analysis.capacity.min } }),
-          ...(analysis.capacity?.max && { maxCapacity: { lte: analysis.capacity.max } })
-        },
+        where: partnerWhereConditions,
         select: {
           id: true,
           companyName: true,
@@ -775,7 +1019,7 @@ export async function POST(request: NextRequest) {
           maxCapacity: true,
           description: true,
           services: true,
-          rating: true,
+          images: true,
           latitude: true,
           longitude: true,
           interventionRadius: true,
@@ -813,22 +1057,27 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        // Utiliser les images du partenaire si pas d'images storefront
+        if (!imageUrl && partner.images && partner.images.length > 0) {
+          imageUrl = partner.images[0]
+        }
+
         const result: SearchResult = {
           id: bestStorefront?.id || partner.id,
           type: 'PARTNER' as const,
           name: partner.companyName,
           serviceType: partner.serviceType,
-          location: `${partner.billingCity}, France`,
-          rating: partner.rating || 4.5,
-          price: partner.basePrice || undefined,
-          capacity: partner.maxCapacity,
-          description: partner.description,
+          location: `${partner.billingCity || ''}, France`,
+          rating: 4.5, // Valeur par défaut (pas de rating dans le modèle Partner)
+          price: partner.basePrice ?? undefined,
+          capacity: partner.maxCapacity ?? undefined,
+          description: partner.description ?? undefined,
           features: partner.services || [],
           imageUrl,
-          images: bestStorefront?.images || [],
-          latitude: partner.latitude,
-          longitude: partner.longitude,
-          interventionRadius: partner.interventionRadius
+          images: partner.images || bestStorefront?.images || [],
+          latitude: partner.latitude ?? undefined,
+          longitude: partner.longitude ?? undefined,
+          interventionRadius: partner.interventionRadius ?? undefined
         }
 
         // Calculer la distance si les coordonnées sont disponibles
@@ -854,17 +1103,25 @@ export async function POST(request: NextRequest) {
 
     console.log(`📊 Total résultats avant tri: ${results.length}`)
 
-    // 4. Filtrer par distance maximale si spécifiée
+    // 5. Filtrer par distance maximale si spécifiée
     if (analysis.maxDistance && analysis.userCoordinates) {
       const beforeFilter = results.length
       const withCoordinates = results.filter(r => r.distance !== undefined).length
       const withoutCoordinates = results.filter(r => r.distance === undefined).length
 
-      results = results.filter(result => {
-        // Si une distance max est demandée, exclure ceux sans coordonnées
-        if (result.distance === undefined) return false
-        return result.distance <= analysis.maxDistance!
-      })
+      // Séparer les résultats avec et sans coordonnées
+      const resultsWithDistance = results.filter(r => r.distance !== undefined && r.distance <= analysis.maxDistance!)
+      const resultsWithoutCoords = results.filter(r => r.distance === undefined)
+
+      // Si on a des résultats avec distance, les prioriser
+      // Sinon, inclure aussi ceux sans coordonnées (filtrés par ville/région)
+      if (resultsWithDistance.length > 0) {
+        // On a des résultats avec distance vérifiée, mais on ajoute aussi ceux sans coords de la même région
+        results = [...resultsWithDistance, ...resultsWithoutCoords]
+      } else {
+        // Pas de résultats avec distance, garder ceux sans coordonnées
+        results = resultsWithoutCoords
+      }
 
       console.log(`🗺️ Filtre distance appliqué:`)
       console.log(`   Avant: ${beforeFilter} résultats (${withCoordinates} avec coords, ${withoutCoordinates} sans coords)`)
@@ -872,7 +1129,7 @@ export async function POST(request: NextRequest) {
       console.log(`   Exclus: ${beforeFilter - results.length} résultats (trop loin ou sans coordonnées)`)
     }
 
-    // 5. Trier par score de pertinence (du plus élevé au plus bas)
+    // 6. Trier par score de pertinence (du plus élevé au plus bas)
     results.sort((a, b) => {
       const scoreA = a.score || 0
       const scoreB = b.score || 0
@@ -891,7 +1148,7 @@ export async function POST(request: NextRequest) {
       console.log(`  ${index + 1}. ${result.name} - Score: ${result.score}, Distance: ${result.distance ? result.distance.toFixed(1) + 'km' : 'N/A'}, Critères: ${result.matchedCriteria?.join(', ') || 'aucun'}`)
     })
 
-    // 5. Pagination
+    // 7. Pagination
     const paginatedResults = results.slice(offset, offset + limit)
     const hasMore = offset + limit < results.length
 

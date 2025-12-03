@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { sendMail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,15 +61,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Email du partenaire qui recevra la demande
-    const recipientEmail = storefrontEmail || storefront.partner?.user?.email;
-    
-    if (!recipientEmail) {
+    // Si l'email du prestataire n'est pas disponible, utiliser les emails de fallback
+    const FALLBACK_EMAILS = ['jfroussel75@gmail.com', 'arnaud@monmariage.ai'];
+    const partnerEmail = storefrontEmail || storefront.partner?.user?.email;
+    const isUsingFallback = !partnerEmail;
 
-      return NextResponse.json(
-        { error: 'Email du prestataire non trouvé' },
-        { status: 400 }
-      );
-    }
+    // Construire les informations de référence si fallback
+    const partnerName = storefront.partner?.companyName || storefrontName || 'Prestataire inconnu';
+    const storefrontType = storefront.type; // 'VENUE' ou 'PARTNER'
 
     // Create quote request record in database
     const quoteRequest = await prisma.quoteRequest.create({
@@ -89,12 +89,77 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Log de la demande de devis
+    // Log de la demande de devis avec informations de référence
+    if (isUsingFallback) {
+      console.log('[QUOTE-REQUEST] ⚠️ Email prestataire non disponible - Utilisation du fallback');
+      console.log('[QUOTE-REQUEST] 📧 Emails de destination:', FALLBACK_EMAILS);
+      console.log('[QUOTE-REQUEST] 📋 Référence demande:', {
+        quoteRequestId: quoteRequest.id,
+        storefrontId: storefrontId,
+        storefrontType: storefrontType,
+        partnerName: partnerName,
+        clientId: session.user.id,
+        clientEmail: session.user.email,
+        clientName: session.user.name,
+      });
 
-    return NextResponse.json({ 
-      success: true, 
+      // Envoyer un email à tous les fallbacks avec les informations de référence
+      const typeLabel = storefrontType === 'VENUE' ? 'Lieu' : 'Prestataire';
+      const emailHtml = `
+        <h2>Nouvelle demande de devis</h2>
+        <p><strong>⚠️ Email du prestataire non disponible</strong></p>
+
+        <h3>Informations de référence</h3>
+        <ul>
+          <li><strong>ID Demande:</strong> ${quoteRequest.id}</li>
+          <li><strong>Type:</strong> ${typeLabel}</li>
+          <li><strong>Nom du ${typeLabel.toLowerCase()}:</strong> ${partnerName}</li>
+          <li><strong>ID Storefront:</strong> ${storefrontId}</li>
+        </ul>
+
+        <h3>Client</h3>
+        <ul>
+          <li><strong>ID Client:</strong> ${session.user.id}</li>
+          <li><strong>Nom:</strong> ${session.user.name || 'Non renseigné'}</li>
+          <li><strong>Email:</strong> ${session.user.email || 'Non renseigné'}</li>
+        </ul>
+
+        <h3>Détails de la demande</h3>
+        <ul>
+          <li><strong>Date de l'événement:</strong> ${new Date(eventDate).toLocaleDateString('fr-FR')}</li>
+          <li><strong>Nombre d'invités:</strong> ${guestCount}</li>
+          <li><strong>Type d'événement:</strong> ${eventType}</li>
+          <li><strong>Lieu:</strong> ${venueLocation}</li>
+          <li><strong>Budget:</strong> ${budget}</li>
+        </ul>
+
+        ${message ? `<h3>Message du client</h3><p>${message}</p>` : ''}
+
+        <hr>
+        <p><em>Email envoyé automatiquement car l'email du prestataire n'est pas configuré.</em></p>
+      `;
+
+      // Envoyer à tous les emails de fallback
+      for (const fallbackEmail of FALLBACK_EMAILS) {
+        try {
+          await sendMail({
+            to: fallbackEmail,
+            subject: `[MonMariage.ai] Nouvelle demande de devis - ${partnerName}`,
+            html: emailHtml
+          });
+          console.log('[QUOTE-REQUEST] 📧 Email envoyé à:', fallbackEmail);
+        } catch (emailError) {
+          console.error('[QUOTE-REQUEST] ❌ Erreur envoi email à', fallbackEmail, ':', emailError);
+        }
+      }
+    } else {
+      console.log('[QUOTE-REQUEST] ✅ Demande enregistrée pour:', partnerEmail);
+    }
+
+    return NextResponse.json({
+      success: true,
       message: 'Demande de devis envoyée avec succès',
-      quoteRequestId: quoteRequest.id 
+      quoteRequestId: quoteRequest.id
     });
 
   } catch (error) {
