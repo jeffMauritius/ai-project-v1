@@ -91,12 +91,8 @@ export default function ConsultedStorefronts() {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              // Rediriger vers la vitrine selon le type
-                              if (storefront.type === 'VENUE') {
-                                router.push(`/establishments/${storefront.storefrontId}`)
-                              } else {
-                                router.push(`/storefront/${storefront.storefrontId}`)
-                              }
+                              // Rediriger vers la vitrine (même route pour VENUE et PARTNER)
+                              router.push(`/storefront/${storefront.storefrontId}`)
                             }}
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           >
