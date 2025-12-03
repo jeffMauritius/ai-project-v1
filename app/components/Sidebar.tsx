@@ -8,16 +8,14 @@ import {
   ChatBubbleLeftRightIcon,
   TableCellsIcon,
   PhotoIcon,
-  UsersIcon, 
+  UsersIcon,
   CalendarDaysIcon,
-  GiftIcon,
   HeartIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
   { name: 'Paramètres', href: '/dashboard/settings', icon: UserCircleIcon },
   { name: 'Organisation', href: '/dashboard/planning', icon: CalendarDaysIcon },
-  { name: 'Liste & Cagnotte', href: '/dashboard/registry', icon: GiftIcon },
   { name: 'Historique des recherches', href: '/dashboard/search-history', icon: ClockIcon },
   { name: 'Mes favoris', href: '/dashboard/favorites', icon: HeartIcon },
   { name: 'Messages', href: '/dashboard/messages', icon: ChatBubbleLeftRightIcon },
