@@ -285,7 +285,7 @@ import ContactCard from './components/ContactCard'
 import ChatCard from './components/ChatCard'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { FavoriteButton } from '@/components/ui/FavoriteButton'
-import { ShareButton } from '@/components/ui/ShareButton'
+import { AddToOrganizationButton } from '@/components/ui/AddToOrganizationButton'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { getSectionIcon } from '@/lib/field-icons'
@@ -651,9 +651,10 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                 showText={true}
                 className="bg-pink-600 text-white hover:bg-pink-700"
               />
-              <ShareButton
-                url={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/storefront/${storefront.id}`}
-                title={`${companyName} - ${venueAddress}`}
+              <AddToOrganizationButton
+                storefrontId={storefront.id}
+                name={companyName}
+                serviceType={serviceType}
                 showText={true}
                 className="border border-gray-300 hover:bg-gray-50"
               />

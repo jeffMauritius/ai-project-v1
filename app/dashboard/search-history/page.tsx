@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
-import { ClockIcon, MapPinIcon, BuildingStorefrontIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { Clock, MapPin, Store, RefreshCw, Trash2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SearchResultStatus } from '@/components/ui/SearchResultStatus'
 import { useConsultedStorefronts } from '@/hooks/useConsultedStorefronts'
@@ -28,20 +27,20 @@ export default function ConsultedStorefronts() {
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Historique des recherches</h1>
-        <Button 
+        <Button
           onClick={refreshList}
           variant="outline"
           size="sm"
           className="flex items-center gap-2"
         >
-          <ClockIcon className="h-4 w-4" />
+          <RefreshCw className="h-4 w-4" />
           Rafraîchir
         </Button>
       </div>
       
       {consultedStorefronts.length === 0 ? (
         <div className="text-center py-12">
-          <EyeIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <Eye className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">Aucune vitrine consultée</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Les vitrines que vous consultez apparaîtront ici.
@@ -61,11 +60,11 @@ export default function ConsultedStorefronts() {
                   ) : null}
                   <div className="relative flex space-x-3">
                     <div>
-                      <span className="h-8 w-8 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center ring-8 ring-white dark:ring-gray-900">
+                      <span className="h-10 w-10 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center shadow-sm border-2 border-white dark:border-gray-800">
                         {storefront.type === 'VENUE' ? (
-                          <MapPinIcon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                          <MapPin className="h-5 w-5 text-pink-600 dark:text-pink-400" />
                         ) : (
-                          <BuildingStorefrontIcon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                          <Store className="h-5 w-5 text-pink-600 dark:text-pink-400" />
                         )}
                       </span>
                     </div>
@@ -82,29 +81,29 @@ export default function ConsultedStorefronts() {
                       <div className="flex items-center space-x-2">
                         <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">
                           <time dateTime={storefront.updatedAt}>
-                            <ClockIcon className="inline-block h-4 w-4 mr-1" />
+                            <Clock className="inline-block h-4 w-4 mr-1" />
                             {new Date(storefront.updatedAt).toLocaleDateString()}
                           </time>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-2">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => {
                               // Rediriger vers la vitrine (même route pour VENUE et PARTNER)
                               router.push(`/storefront/${storefront.storefrontId}`)
                             }}
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="h-9 w-9 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                           >
-                            <EyeIcon className="h-4 w-4" />
+                            <Eye className="h-5 w-5" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => deleteConsultation(storefront.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         </div>
                       </div>
