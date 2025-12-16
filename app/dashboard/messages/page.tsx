@@ -2,9 +2,19 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { ChatBubbleLeftRightIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline'
+import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { useSession } from 'next-auth/react'
 import { useSocket } from '@/hooks/useSocket'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface Conversation {
   id: string
@@ -43,6 +53,8 @@ export default function Messages() {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isDeletingConversation, setIsDeletingConversation] = useState<string | null>(null)
+  const [conversationToDelete, setConversationToDelete] = useState<string | null>(null)
   
   // Socket.IO
   const { 
@@ -175,6 +187,44 @@ export default function Messages() {
     loadMessages(conversationId)
   }
 
+  const handleDeleteClick = (conversationId: string, e: React.MouseEvent) => {
+    e.stopPropagation() // Empêcher la sélection de la conversation
+    setConversationToDelete(conversationId)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!conversationToDelete) return
+
+    setIsDeletingConversation(conversationToDelete)
+    const conversationId = conversationToDelete
+    setConversationToDelete(null)
+    try {
+      const response = await fetch(`/api/chat/conversations/${conversationId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        // Supprimer la conversation de la liste
+        setConversations(prev => prev.filter(c => c.id !== conversationId))
+
+        // Si la conversation supprimée était sélectionnée, désélectionner
+        if (selectedConversation === conversationId) {
+          setSelectedConversation(null)
+          setMessages([])
+        }
+      } else {
+        const errorData = await response.json()
+        console.error('Erreur lors de la suppression:', errorData)
+        alert('Erreur lors de la suppression de la conversation')
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error)
+      alert('Erreur lors de la suppression de la conversation')
+    } finally {
+      setIsDeletingConversation(null)
+    }
+  }
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -241,12 +291,12 @@ export default function Messages() {
                 </div>
               ) : (
                 conversations.map((conversation) => (
-                  <button
+                  <div
                     key={conversation.id}
-                    onClick={() => handleSelectConversation(conversation.id)}
-                    className={`w-full p-4 flex items-start space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                    className={`w-full p-4 flex items-start space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer group ${
                       selectedConversation === conversation.id ? 'bg-pink-50 dark:bg-pink-900/20' : ''
                     }`}
+                    onClick={() => handleSelectConversation(conversation.id)}
                   >
                     <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                       <ChatBubbleLeftRightIcon className="w-5 h-5 text-pink-600" />
@@ -267,10 +317,24 @@ export default function Messages() {
                         {conversation.partner.type}
                       </p>
                     </div>
-                    {conversation.unreadCount.user > 0 && (
-                      <span className="h-2 w-2 bg-pink-600 rounded-full"></span>
-                    )}
-                  </button>
+                    <div className="flex items-center space-x-2">
+                      {conversation.unreadCount.user > 0 && (
+                        <span className="h-2 w-2 bg-pink-600 rounded-full"></span>
+                      )}
+                      <button
+                        onClick={(e) => handleDeleteClick(conversation.id, e)}
+                        disabled={isDeletingConversation === conversation.id}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                        title="Supprimer la conversation"
+                      >
+                        {isDeletingConversation === conversation.id ? (
+                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <TrashIcon className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 ))
               )}
             </div>
@@ -372,6 +436,27 @@ export default function Messages() {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmation de suppression */}
+      <AlertDialog open={!!conversationToDelete} onOpenChange={(open) => !open && setConversationToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer la conversation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible et tous les messages seront perdus.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
