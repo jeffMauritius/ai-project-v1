@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ImageIcon, FileIcon as GoogleIcon, Facebook, Apple } from "lucide-react"
+import { ImageIcon, FileIcon as GoogleIcon, Facebook, Apple, Pencil, Check, X } from "lucide-react"
 import { useSession, signOut } from 'next-auth/react'
 import { useToast } from "@/components/ui/use-toast"
 import {
@@ -32,6 +32,9 @@ export default function Settings() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [deleteEmail, setDeleteEmail] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isEditingEmail, setIsEditingEmail] = useState(false)
+  const [newEmail, setNewEmail] = useState("")
+  const [isSavingEmail, setIsSavingEmail] = useState(false)
   const [notifications, setNotifications] = useState({
     email: {
       newMessage: true,
@@ -56,6 +59,77 @@ export default function Settings() {
       setAvatarUrl(session.user.image)
     }
   }, [session?.user?.image])
+
+  // Initialize email when session changes
+  useEffect(() => {
+    if (session?.user?.email) {
+      setNewEmail(session.user.email)
+    }
+  }, [session?.user?.email])
+
+  const handleSaveEmail = async () => {
+    if (!newEmail || newEmail === session?.user?.email) {
+      setIsEditingEmail(false)
+      return
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(newEmail)) {
+      toast({
+        title: "Email invalide",
+        description: "Veuillez entrer une adresse email valide.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSavingEmail(true)
+    try {
+      const response = await fetch('/api/user/update-email', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: newEmail }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erreur lors de la mise à jour')
+      }
+
+      // Update the session with the new email
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          email: newEmail
+        }
+      })
+
+      toast({
+        title: "Succès",
+        description: "Votre adresse email a été mise à jour avec succès.",
+      })
+
+      setIsEditingEmail(false)
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'email:', error)
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la mise à jour.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSavingEmail(false)
+    }
+  }
+
+  const handleCancelEmailEdit = () => {
+    setNewEmail(session?.user?.email || '')
+    setIsEditingEmail(false)
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -302,13 +376,58 @@ export default function Settings() {
                 <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
                   Email
                 </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  value={session?.user?.email || ''}
-                  disabled={true}
-                />
+                <div className="mt-1 flex items-center gap-2">
+                  <Input
+                    id="email"
+                    type="email"
+                    className="flex-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-pink-500 focus:ring-pink-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                    value={isEditingEmail ? newEmail : (session?.user?.email || '')}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    disabled={!isEditingEmail || isSavingEmail}
+                  />
+                  {isEditingEmail ? (
+                    <>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleSaveEmail}
+                        disabled={isSavingEmail}
+                        className="h-9 w-9 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        title="Enregistrer"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleCancelEmailEdit}
+                        disabled={isSavingEmail}
+                        className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Annuler"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setIsEditingEmail(true)}
+                      className="h-9 w-9 text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                      title="Modifier l'email"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {isEditingEmail && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Entrez votre nouvelle adresse email et cliquez sur le bouton vert pour enregistrer.
+                  </p>
+                )}
               </div>
             </div>
           </form>
