@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { Save } from 'lucide-react'
 
 interface ReceptionSpace {
   id: string
@@ -50,11 +52,13 @@ interface ReceptionOptionsProps {
     spaces: ReceptionSpace[]
     options: ReceptionOptions
   }
+  onUpdate?: (data: { receptionSpaces: ReceptionSpace[], receptionOptions: ReceptionOptions }) => void
 }
 
-export function ReceptionOptions({ storefrontId, initialData }: ReceptionOptionsProps) {
+export function ReceptionOptions({ storefrontId, initialData, onUpdate }: ReceptionOptionsProps) {
   console.log('[ReceptionOptions] Props reçues:', { storefrontId, initialData })
 
+  const [isSaving, setIsSaving] = useState(false)
   const [spaces, setSpaces] = useState<ReceptionSpace[]>(initialData?.spaces || [])
   const [options, setOptions] = useState<ReceptionOptions>(initialData?.options || {
     rentalDuration: '',
@@ -107,11 +111,17 @@ export function ReceptionOptions({ storefrontId, initialData }: ReceptionOptions
     setSpaces(spaces.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setIsSaving(true)
+
+    console.log('[ReceptionOptions] Sauvegarde - storefrontId:', storefrontId)
+    console.log('[ReceptionOptions] Sauvegarde - spaces:', spaces)
+    console.log('[ReceptionOptions] Sauvegarde - options:', options)
+
     try {
       const response = await fetch(`/api/partner-storefront/${storefrontId}/reception-options`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -121,14 +131,27 @@ export function ReceptionOptions({ storefrontId, initialData }: ReceptionOptions
         }),
       })
 
+      const data = await response.json()
+      console.log('[ReceptionOptions] Réponse API:', response.status, data)
+
       if (!response.ok) {
-        throw new Error('Erreur lors de la mise à jour')
+        throw new Error(data.error || 'Erreur lors de la mise à jour')
+      }
+
+      // Notifier le parent des nouvelles données
+      if (onUpdate) {
+        onUpdate({
+          receptionSpaces: spaces,
+          receptionOptions: options
+        })
       }
 
       toast.success('Options mises à jour avec succès')
     } catch (error) {
-      console.error('Erreur:', error)
+      console.error('[ReceptionOptions] Erreur:', error)
       toast.error('Erreur lors de la mise à jour des options')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -271,11 +294,20 @@ export function ReceptionOptions({ storefrontId, initialData }: ReceptionOptions
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="accommodationType">Type d&apos;hébergement</Label>
-              <Input
-                id="accommodationType"
-                value={options.accommodationType}
-                onChange={(e) => setOptions({ ...options, accommodationType: e.target.value })}
-              />
+              <Select
+                value={options.accommodationType || undefined}
+                onValueChange={(value) => setOptions({ ...options, accommodationType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez un type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Chambres d'hôtes">Chambres d&apos;hôtes</SelectItem>
+                  <SelectItem value="Hôtel">Hôtel</SelectItem>
+                  <SelectItem value="Gîte">Gîte</SelectItem>
+                  <SelectItem value="Aucun">Aucun</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="numberOfRooms">Nombre de chambres</Label>
@@ -451,6 +483,18 @@ export function ReceptionOptions({ storefrontId, initialData }: ReceptionOptions
           </div>
         </CardContent>
       </Card>
+
+      {/* Bouton de sauvegarde */}
+      <div className="flex justify-end pt-4">
+        <Button
+          onClick={() => handleSubmit()}
+          disabled={isSaving}
+          className="flex items-center gap-2"
+        >
+          <Save className="h-4 w-4" />
+          {isSaving ? 'Sauvegarde...' : 'Sauvegarder les options'}
+        </Button>
+      </div>
     </div>
   )
 } 

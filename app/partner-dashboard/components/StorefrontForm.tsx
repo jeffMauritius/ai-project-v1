@@ -141,6 +141,8 @@ export function StorefrontForm({ storefront, onUpdate }: StorefrontFormProps) {
         logo: formData.logo || '',
         isActive: formData.isActive,
         ...(formData.id && { id: formData.id }),
+        // Ajouter venueType pour les lieux de réception
+        ...(formData.serviceType === 'LIEU' && formData.venueType && { venueType: formData.venueType }),
       }
 
       console.log("Données envoyées:", dataToSend)

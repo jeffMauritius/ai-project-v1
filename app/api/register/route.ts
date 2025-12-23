@@ -102,12 +102,36 @@ export async function POST(req: Request) {
         },
       });
 
-      // 2. Créer la vitrine (PartnerStorefront) liée au Partner
+      // 2. Pour les lieux de réception, créer un Establishment
+      let establishmentId: string | undefined = undefined;
+
+      if (serviceType === ServiceType.LIEU) {
+        const establishment = await prisma.establishment.create({
+          data: {
+            name: validatedData.name,
+            description: "",
+            address: "",
+            city: "",
+            postalCode: "",
+            region: "",
+            country: "France",
+            latitude: 48.8566, // Paris par défaut
+            longitude: 2.3522,
+            maxCapacity: 100, // Valeur par défaut à modifier par le partenaire
+            startingPrice: 0,
+            venueType: "DOMAINE", // Type par défaut
+          },
+        });
+        establishmentId = establishment.id;
+      }
+
+      // 3. Créer la vitrine (PartnerStorefront) liée au Partner et/ou à l'Establishment
       await prisma.partnerStorefront.create({
         data: {
           type: serviceType === ServiceType.LIEU ? 'VENUE' : 'PARTNER',
           isActive: false, // Vitrine inactive par défaut
           partnerId: partner.id,
+          establishmentId: establishmentId,
         },
       });
 

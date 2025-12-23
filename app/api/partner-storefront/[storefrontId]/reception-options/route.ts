@@ -82,65 +82,110 @@ export async function PUT(
     const body = await request.json()
     const { spaces, options } = body
 
+    console.log('[reception-options PUT] storefrontId:', storefrontId)
+    console.log('[reception-options PUT] body:', JSON.stringify({ spaces, options }, null, 2))
+
     // Vérifier que l'utilisateur possède ce storefront
     const storefront = await prisma.partnerStorefront.findFirst({
       where: {
-        id: storefrontId,
-        establishment: {
-          // Vérifier que l'utilisateur possède cet établissement
-          // (à adapter selon votre logique de propriété)
-        }
+        id: storefrontId
+      },
+      include: {
+        establishment: true
       }
     })
+
+    console.log('[reception-options PUT] storefront trouvé:', storefront?.id, 'establishmentId:', storefront?.establishmentId)
 
     if (!storefront) {
       return NextResponse.json({ error: 'Storefront non trouvé' }, { status: 404 })
     }
 
+    if (!storefront.establishmentId) {
+      console.error('[reception-options PUT] Pas d\'establishmentId pour ce storefront')
+      return NextResponse.json({ error: 'Ce storefront n\'est pas lié à un établissement' }, { status: 400 })
+    }
+
     // Mettre à jour ou créer les espaces de réception
     if (spaces && Array.isArray(spaces)) {
+      // Récupérer les espaces existants pour cette établissement
+      const existingSpaces = await prisma.receptionSpace.findMany({
+        where: { establishmentId: storefront.establishmentId! }
+      })
+      const existingIds = existingSpaces.map(s => s.id)
+
       for (const space of spaces) {
-        if (space.id) {
+        const spaceData = {
+          name: space.name || '',
+          description: space.description || '',
+          surface: space.surface || 0,
+          seatedCapacity: space.seatedCapacity || 0,
+          standingCapacity: space.standingCapacity || 0,
+          hasDanceFloor: space.hasDanceFloor || false,
+          hasPmrAccess: space.hasPmrAccess || false,
+          hasPrivateOutdoor: space.hasPrivateOutdoor || false
+        }
+
+        // Vérifier si l'ID existe vraiment dans la base de données (ObjectId MongoDB valide)
+        const isExistingSpace = space.id && existingIds.includes(space.id)
+
+        if (isExistingSpace) {
           await prisma.receptionSpace.update({
             where: { id: space.id },
-            data: {
-              name: space.name,
-              description: space.description,
-              surface: space.surface,
-              seatedCapacity: space.seatedCapacity,
-              standingCapacity: space.standingCapacity,
-              hasDanceFloor: space.hasDanceFloor,
-              hasPmrAccess: space.hasPmrAccess,
-              hasPrivateOutdoor: space.hasPrivateOutdoor
-            }
+            data: spaceData
           })
         } else {
           await prisma.receptionSpace.create({
             data: {
-              name: space.name,
-              description: space.description,
-              surface: space.surface,
-              seatedCapacity: space.seatedCapacity,
-              standingCapacity: space.standingCapacity,
-              hasDanceFloor: space.hasDanceFloor,
-              hasPmrAccess: space.hasPmrAccess,
-              hasPrivateOutdoor: space.hasPrivateOutdoor,
+              ...spaceData,
               establishmentId: storefront.establishmentId!
             }
           })
         }
       }
+
+      // Supprimer les espaces qui ne sont plus dans la liste
+      const newSpaceIds = spaces.filter(s => existingIds.includes(s.id)).map(s => s.id)
+      const spacesToDelete = existingIds.filter(id => !newSpaceIds.includes(id))
+      if (spacesToDelete.length > 0) {
+        await prisma.receptionSpace.deleteMany({
+          where: { id: { in: spacesToDelete } }
+        })
+      }
     }
 
     // Mettre à jour ou créer les options de réception
     if (options) {
+      // Mapper les champs pour correspondre au schéma Prisma
+      const optionsData = {
+        rentalDuration: options.rentalDuration || '',
+        price: options.price || 0,
+        accommodationType: options.accommodationType || '',
+        numberOfRooms: options.numberOfRooms || 0,
+        numberOfBeds: options.numberOfBeds || 0,
+        hasMandatoryCaterer: options.hasMandatoryCaterer || false,
+        providesCatering: options.providesCatering || false,
+        allowsOwnDrinks: options.allowsOwnDrinks || false,
+        hasCorkageFee: options.hasCorkageFee || false,
+        corkageFee: options.corkageFee || 0,
+        hasTimeLimit: options.hasTimeLimit || false,
+        timeLimit: options.timeLimit || null,
+        hasMandatoryPhotographer: options.hasMandatoryPhotographer || false,
+        hasMusicExclusivity: options.hasMusicExclusivity || false,
+        additionalServices: options.additionalServices || null,
+        includesCleaning: options.includesCleaning || false,
+        allowsPets: options.allowsPets || false,
+        allowsMultipleEvents: options.allowsMultipleEvents || false,
+        hasSecurityGuard: options.hasSecurityGuard || false,
+      }
+
       await prisma.receptionOptions.upsert({
         where: {
           establishmentId: storefront.establishmentId!
         },
-        update: options,
+        update: optionsData,
         create: {
-          ...options,
+          ...optionsData,
           establishmentId: storefront.establishmentId!
         }
       })

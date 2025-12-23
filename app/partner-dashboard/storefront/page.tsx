@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState, useMemo, useRef } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { StorefrontForm } from "../components/StorefrontForm"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
-import { PartnerStorefront, ServiceType, VenueType } from '@prisma/client'
+import { ServiceType, VenueType } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { PlusCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import dynamic from 'next/dynamic'
-import { z } from 'zod'
 
 // Chargement dynamique du composant Map
 const Map = dynamic(() => import('../../components/Map'), {
@@ -29,39 +28,16 @@ const MediaManager = dynamic(() => import('../components/MediaManager'), {
   loading: () => <div>Chargement du gestionnaire de médias...</div>,
 })
 
-// Schémas de validation Zod
-const locationSchema = z.object({
-  venueAddress: z.string().min(1, "L'adresse du lieu est requise").max(200, "L'adresse ne peut pas dépasser 200 caractères"),
-  interventionType: z.enum(["all_france", "radius"], {
-    errorMap: () => ({ message: "Veuillez sélectionner un type d'intervention valide" })
-  }),
-  interventionRadius: z.number().min(1, "Le rayon d'intervention doit être supérieur à 0").max(1000, "Le rayon d'intervention ne peut pas dépasser 1000 km"),
-  venueLatitude: z.number().min(-90).max(90),
-  venueLongitude: z.number().min(-180).max(180),
-}).refine((data) => {
-  if (data.interventionType === "radius") {
-    return data.interventionRadius > 0 && data.interventionRadius <= 1000
-  }
-  return true
-}, {
-  message: "Le rayon d'intervention est requis quand le type est 'rayon d'intervention'",
-  path: ["interventionRadius"]
-})
-
-type LocationFormData = z.infer<typeof locationSchema>
-
 
 
 export default function PartnerStorefrontPage() {
   const { data: session } = useSession()
   const { toast } = useToast()
-  const [storefront, setStorefront] = useState<PartnerStorefront | null>(null)
-  const [partnerData, setPartnerData] = useState<any>(null)
+  // Le storefront inclut les données fusionnées du partenaire (billingStreet, latitude, etc.)
+  const [storefront, setStorefront] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [locationErrors, setLocationErrors] = useState<Record<string, string>>({})
   const [isSavingLocation, setIsSavingLocation] = useState(false)
-  const geocodingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
 
   // Valeurs par défaut pour StorefrontForm
@@ -79,9 +55,8 @@ export default function PartnerStorefrontPage() {
     billingCountry: 'France',
     siret: '',
     vatNumber: '',
-    venueAddress: null,
-    venueLatitude: 48.8566,
-    venueLongitude: 2.3522,
+    latitude: 48.8566,
+    longitude: 2.3522,
     interventionType: 'all_france' as "all_france" | "radius",
     interventionRadius: 50,
     options: {},
@@ -131,34 +106,7 @@ export default function PartnerStorefrontPage() {
     if (session?.user?.role === "PARTNER") {
       fetchStorefrontData()
     }
-
-    // Nettoyer le timeout lors du démontage
-    return () => {
-      if (geocodingTimeoutRef.current) {
-        clearTimeout(geocodingTimeoutRef.current)
-      }
-    }
   }, [session, toast])
-
-  // Fonction de validation pour la section localisation
-  const validateLocation = (data: LocationFormData) => {
-    try {
-      locationSchema.parse(data)
-      setLocationErrors({})
-      return true
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {}
-        error.errors.forEach((err) => {
-          if (err.path) {
-            newErrors[err.path[0] as string] = err.message
-          }
-        })
-        setLocationErrors(newErrors)
-      }
-      return false
-    }
-  }
 
   // Fonction pour géocoder une adresse en coordonnées
   const geocodeAddress = async (address: string) => {
@@ -256,91 +204,6 @@ export default function PartnerStorefrontPage() {
     }
   }
 
-  // Fonction pour gérer les changements de champs de localisation avec validation
-  const handleLocationFieldChange = async (field: keyof LocationFormData, value: any) => {
-    // Mettre à jour les données d'abord
-    const updatedData = { ...storefrontFormData, [field]: value }
-    setStorefront(updatedData)
-    
-    // Validation en temps réel pour le champ modifié
-    try {
-      // Validation simple du champ individuel
-      if (field === 'venueAddress') {
-        if (value.length === 0) {
-          setLocationErrors(prev => ({ ...prev, [field]: "L'adresse du lieu est requise" }))
-        } else if (value.length > 200) {
-          setLocationErrors(prev => ({ ...prev, [field]: "L'adresse ne peut pas dépasser 200 caractères" }))
-        } else {
-          setLocationErrors(prev => ({ ...prev, [field]: '' }))
-          
-          // Géocoder l'adresse si elle fait plus de 5 caractères avec debounce
-          if (value.length > 5) {
-            // Annuler le timeout précédent
-            if (geocodingTimeoutRef.current) {
-              clearTimeout(geocodingTimeoutRef.current)
-            }
-            
-            // Définir un nouveau timeout pour éviter trop d'appels API
-            geocodingTimeoutRef.current = setTimeout(async () => {
-              try {
-                const coords = await geocodeAddress(value)
-                // Mettre à jour les coordonnées automatiquement
-                const geocodedData = { 
-                  ...storefrontFormData, 
-                  [field]: value,
-                  venueLatitude: coords.lat,
-                  venueLongitude: coords.lng
-                }
-                setStorefront(geocodedData)
-                
-                // Effacer les erreurs de coordonnées
-                setLocationErrors(prev => ({ 
-                  ...prev, 
-                  venueLatitude: '',
-                  venueLongitude: ''
-                }))
-                
-                toast({
-                  title: "Coordonnées mises à jour",
-                  description: `${coords.displayName || 'Adresse trouvée'} - Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}${coords.usedVariant ? ` (via: ${coords.usedVariant})` : ''}`,
-                })
-              } catch (error) {
-                console.error('Erreur lors de la géocodification:', error)
-                // Ne pas afficher d'erreur à l'utilisateur pour la géocodification automatique
-              }
-            }, 1500) // Attendre 1.5 secondes après la dernière frappe pour respecter le rate limiting
-          }
-        }
-      } else if (field === 'interventionType') {
-        if (value !== 'all_france' && value !== 'radius') {
-          setLocationErrors(prev => ({ ...prev, [field]: "Veuillez sélectionner un type d'intervention valide" }))
-        } else {
-          setLocationErrors(prev => ({ ...prev, [field]: '' }))
-        }
-      } else if (field === 'interventionRadius') {
-        if (value < 1 || value > 1000) {
-          setLocationErrors(prev => ({ ...prev, [field]: "Le rayon d'intervention doit être entre 1 et 1000 km" }))
-        } else {
-          setLocationErrors(prev => ({ ...prev, [field]: '' }))
-        }
-      } else if (field === 'venueLatitude') {
-        if (value < -90 || value > 90) {
-          setLocationErrors(prev => ({ ...prev, [field]: "La latitude doit être entre -90 et 90" }))
-        } else {
-          setLocationErrors(prev => ({ ...prev, [field]: '' }))
-        }
-      } else if (field === 'venueLongitude') {
-        if (value < -180 || value > 180) {
-          setLocationErrors(prev => ({ ...prev, [field]: "La longitude doit être entre -180 et 180" }))
-        } else {
-          setLocationErrors(prev => ({ ...prev, [field]: '' }))
-        }
-      }
-    } catch (error) {
-      console.error('Erreur de validation:', error)
-    }
-  }
-
   const handleStorefrontUpdate = (updatedData: any) => {
     console.log('[Page] Données mises à jour:', updatedData)
     setStorefront(updatedData)
@@ -404,27 +267,74 @@ export default function PartnerStorefrontPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="venueAddress">Adresse du lieu</Label>
-                  <Input
-                    id="venueAddress"
-                    value={storefrontFormData.venueAddress || ''}
-                    onChange={(e) => handleLocationFieldChange('venueAddress', e.target.value)}
-                    className={locationErrors.venueAddress ? 'border-red-500' : ''}
-                    placeholder="Entrez l'adresse complète..."
-                  />
-                  {locationErrors.venueAddress && (
-                    <p className="text-sm text-red-500">{locationErrors.venueAddress}</p>
-                  )}
+                  <Label>Adresse (depuis l&apos;onglet Général)</Label>
+                  <div className="p-3 bg-muted rounded-md">
+                    <p className="text-sm">
+                      {storefrontFormData.billingStreet || 'Adresse non renseignée'}
+                      {storefrontFormData.billingCity && `, ${storefrontFormData.billingCity}`}
+                      {storefrontFormData.billingPostalCode && ` ${storefrontFormData.billingPostalCode}`}
+                      {storefrontFormData.billingCountry && `, ${storefrontFormData.billingCountry}`}
+                    </p>
+                  </div>
                   <p className="text-sm text-gray-500">
-                    Les coordonnées se mettent à jour automatiquement. Format recommandé: &quot;123 Rue de la Paix, 75001 Paris, France&quot;
+                    Modifiez l&apos;adresse dans l&apos;onglet &quot;Général&quot; pour mettre à jour la géolocalisation.
                   </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={async () => {
+                      const fullAddress = [
+                        storefrontFormData.billingStreet,
+                        storefrontFormData.billingCity,
+                        storefrontFormData.billingPostalCode,
+                        storefrontFormData.billingCountry
+                      ].filter(Boolean).join(', ')
+
+                      if (!fullAddress || fullAddress.length < 5) {
+                        toast({
+                          title: "Adresse incomplète",
+                          description: "Veuillez d'abord renseigner l'adresse dans l'onglet Général.",
+                          variant: "destructive",
+                        })
+                        return
+                      }
+
+                      try {
+                        const coords = await geocodeAddress(fullAddress)
+                        const geocodedData = {
+                          ...storefrontFormData,
+                          latitude: coords.lat,
+                          longitude: coords.lng
+                        }
+                        setStorefront(geocodedData)
+
+                        toast({
+                          title: "Coordonnées mises à jour",
+                          description: `Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`,
+                        })
+                      } catch (error) {
+                        console.error('Erreur lors de la géocodification:', error)
+                        toast({
+                          title: "Erreur de géolocalisation",
+                          description: error instanceof Error ? error.message : "Impossible de géolocaliser l'adresse",
+                          variant: "destructive",
+                        })
+                      }
+                    }}
+                    disabled={!storefrontFormData.billingStreet}
+                  >
+                    Géolocaliser l&apos;adresse
+                  </Button>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Zone d&apos;intervention</Label>
                   <RadioGroup
                     value={storefrontFormData.interventionType}
-                    onValueChange={(value) => handleLocationFieldChange('interventionType', value as "all_france" | "radius")}
+                    onValueChange={(value) => setStorefront({
+                      ...storefrontFormData,
+                      interventionType: value as "all_france" | "radius"
+                    })}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="all_france" id="all_france" />
@@ -435,9 +345,6 @@ export default function PartnerStorefrontPage() {
                       <Label htmlFor="radius">Rayon d&apos;intervention</Label>
                     </div>
                   </RadioGroup>
-                  {locationErrors.interventionType && (
-                    <p className="text-sm text-red-500">{locationErrors.interventionType}</p>
-                  )}
                 </div>
 
                 {storefrontFormData.interventionType === "radius" && (
@@ -447,25 +354,27 @@ export default function PartnerStorefrontPage() {
                       id="interventionRadius"
                       type="number"
                       value={storefrontFormData.interventionRadius}
-                      onChange={(e) => handleLocationFieldChange('interventionRadius', parseInt(e.target.value))}
-                      className={locationErrors.interventionRadius ? 'border-red-500' : ''}
+                      onChange={(e) => setStorefront({
+                        ...storefrontFormData,
+                        interventionRadius: parseInt(e.target.value) || 50
+                      })}
                     />
-                    {locationErrors.interventionRadius && (
-                      <p className="text-sm text-red-500">{locationErrors.interventionRadius}</p>
-                    )}
                   </div>
                 )}
 
                 <div className="h-[400px]">
                   <Map
-                    latitude={storefrontFormData.venueLatitude || 48.8566}
-                    longitude={storefrontFormData.venueLongitude || 2.3522}
+                    latitude={storefrontFormData.latitude || 48.8566}
+                    longitude={storefrontFormData.longitude || 2.3522}
                     interventionType={storefrontFormData.interventionType}
                     interventionRadius={storefrontFormData.interventionRadius}
                     enableGeolocation={true}
                     onLocationChange={(lat: number, lng: number) => {
-                      handleLocationFieldChange('venueLatitude', lat)
-                      handleLocationFieldChange('venueLongitude', lng)
+                      setStorefront({
+                        ...storefrontFormData,
+                        latitude: lat,
+                        longitude: lng
+                      })
                     }}
                   />
                 </div>
@@ -474,34 +383,14 @@ export default function PartnerStorefrontPage() {
                   <Button
                     onClick={async () => {
                       setIsSavingLocation(true)
-                      
-                      const locationData: LocationFormData = {
-                        venueAddress: storefrontFormData.venueAddress || '',
-                        interventionType: storefrontFormData.interventionType as "all_france" | "radius",
-                        interventionRadius: storefrontFormData.interventionRadius,
-                        venueLatitude: storefrontFormData.venueLatitude,
-                        venueLongitude: storefrontFormData.venueLongitude,
-                      }
-                      
-                      if (!validateLocation(locationData)) {
-                        toast({
-                          title: "Erreur de validation",
-                          description: "Veuillez corriger les erreurs dans le formulaire",
-                          variant: "destructive",
-                        })
-                        setIsSavingLocation(false)
-                        return
-                      }
 
                       try {
-                        // Préparer les données complètes pour l'API
+                        // Préparer les données de localisation pour l'API
                         const dataToSend = {
-                          ...storefrontFormData,
-                          venueAddress: locationData.venueAddress,
-                          interventionType: locationData.interventionType as "all_france" | "radius",
-                          interventionRadius: locationData.interventionRadius,
-                          venueLatitude: locationData.venueLatitude,
-                          venueLongitude: locationData.venueLongitude,
+                          interventionType: storefrontFormData.interventionType as "all_france" | "radius",
+                          interventionRadius: storefrontFormData.interventionRadius,
+                          latitude: storefrontFormData.latitude,
+                          longitude: storefrontFormData.longitude,
                         }
 
                         console.log("Envoi des données de localisation:", dataToSend)

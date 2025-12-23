@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings, Save } from "lucide-react";
 import { DynamicOptionsForm } from "./DynamicOptionsForm";
+import { ReceptionOptions } from "./ReceptionOptions";
 import { ServiceType } from "@prisma/client";
 import { OptionsService } from "@/lib/options-service";
 import { validateFormData } from "@/lib/options-validation";
@@ -181,7 +182,18 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
     const data = formData[providerType];
     // Vérifier si on a des données dans formData OU des données sauvegardées
     const savedData = storefrontData?.options?.[providerType];
-    return (data && Object.keys(data).length > 0) || (savedData && Object.keys(savedData).length > 0);
+
+    // Vérifier si les données ont au moins une valeur non vide
+    const hasDataValues = data && Object.values(data).some((val: any) =>
+      val !== undefined && val !== null && val !== "" &&
+      (Array.isArray(val) ? val.length > 0 : true)
+    );
+    const hasSavedDataValues = savedData && Object.values(savedData).some((val: any) =>
+      val !== undefined && val !== null && val !== "" &&
+      (Array.isArray(val) ? val.length > 0 : true)
+    );
+
+    return hasDataValues || hasSavedDataValues;
   };
 
   if (!storefrontData?.id) {
@@ -208,17 +220,40 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
     );
   }
 
+  // Pour les établissements (LIEU) avec un vrai Establishment, utiliser le composant ReceptionOptions
+  // Sinon (Partner de type LIEU sans Establishment), utiliser DynamicOptionsForm
+  if (storefrontData.serviceType === ServiceType.LIEU && storefrontData.establishmentId) {
+    return (
+      <ReceptionOptions
+        storefrontId={storefrontData.id}
+        initialData={{
+          spaces: storefrontData.receptionSpaces || [],
+          options: storefrontData.receptionOptions || {}
+        }}
+        onUpdate={(data) => {
+          onUpdate({
+            ...storefrontData,
+            receptionSpaces: data.receptionSpaces,
+            receptionOptions: data.receptionOptions
+          })
+        }}
+      />
+    );
+  }
+
+  // Pour les Partners de type LIEU sans establishmentId, on continue avec DynamicOptionsForm ci-dessous
+
   return (
     <div className="space-y-6">
       {relevantProviders.map((provider) => {
         if (!provider) return null;
-        
+
         // Debug: afficher le storefrontData complet
 
         // Les données sauvegardées sont dans le format { providerType: { question_1: value, question_2: value } }
         // On récupère les options spécifiques au type de prestataire
         const savedOptions = storefrontData?.options?.[provider.value] || {};
-        
+
         // Debug: afficher les options pour ce prestataire
 
         const isLoading = loading[provider.value];
@@ -248,11 +283,11 @@ export function OptionsTab({ storefrontData, onUpdate }: OptionsTabProps) {
                     onCancel={() => {}}
                     serviceType={storefrontData.serviceType}
                   />
-                  
+
                   <div className="mt-6 flex justify-end">
                     <Button
-                      onClick={() => handleSaveOptions(provider.value, formData[provider.value])}
-                      disabled={isSaving || !isValid || !hasData}
+                      onClick={() => handleSaveOptions(provider.value, formData[provider.value] || {})}
+                      disabled={isSaving || !isValid}
                       className="flex items-center gap-2"
                     >
                       <Save className="h-4 w-4" />
