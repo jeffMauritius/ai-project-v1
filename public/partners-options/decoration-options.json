@@ -3,69 +3,123 @@
     "title": "Décoration",
     "sections": [
       {
+        "title": "Types de décoration",
+        "fields": [
+          {
+            "id": "types_decoration",
+            "question": "Quels types de décoration proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Centres de table",
+              "Arches de mariage",
+              "Décoration de chaises",
+              "Décoration de salle",
+              "Décoration extérieure",
+              "Décoration florale",
+              "Photobooth/Coin photo",
+              "Signalétique (panneaux, plan de table)",
+              "Éclairage décoratif",
+              "Tentures et drapés",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "styles_decoration",
+            "question": "Quels styles de décoration proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Champêtre/Rustique",
+              "Bohème",
+              "Romantique",
+              "Moderne/Contemporain",
+              "Classique/Élégant",
+              "Vintage",
+              "Minimaliste",
+              "Exotique",
+              "Industriel",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
         "title": "Services",
         "fields": [
           {
-            "id": "services_proposes",
-            "question": "Quels services proposez-vous ?",
-            "component_type": "select",
-            "field_type": "select",
-            "options": ["Location de mobilier", "Location de vaisselle", "Décoration", "Organisation de mariages et d'événements", "Ustensiles de cuisine", "Montage", "Location équipement d'illumination"],
+            "id": "services_inclus",
+            "question": "Quels services sont inclus ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Conception personnalisée",
+              "Location de matériel",
+              "Installation/Montage",
+              "Démontage",
+              "Livraison",
+              "Conseil et accompagnement",
+              "Autres"
+            ],
             "required": false
           }
         ]
       },
       {
-        "title": "Matériel",
+        "title": "Tarification",
         "fields": [
           {
-            "id": "materiel_location",
-            "question": "Matériel à louer",
-            "component_type": "select",
-            "field_type": "select",
-            "options": ["Autel", "Chapiteau", "Tonnelle", "Tables", "Chaises", "Vaisselle", "Estrade", "Illuminations", "Meubles", "Arche"],
-            "required": false
-          }
-        ]
-      },
-      {
-        "title": "Prix",
-        "fields": [
-          {
-            "id": "services_inclus_prix",
-            "question": "Vos prix incluent",
-            "component_type": "select",
-            "field_type": "select",
-            "options": ["Transport", "Livraison du matériel", "Montage", "Démontage", "Rangement", "Autres"],
-            "required": false
-          }
-        ]
-      },
-      {
-        "title": "Délais",
-        "fields": [
-          {
-            "id": "delai_commande",
-            "question": "Combien de temps à l'avance dois-je vous contacter ?",
+            "id": "budget_minimum",
+            "question": "À partir de quel budget proposez-vous vos services ?",
             "component_type": "input",
-            "field_type": "text",
+            "field_type": "number",
+            "placeholder": "Ex: 500",
+            "required": false
+          },
+          {
+            "id": "type_tarification",
+            "question": "Comment établissez-vous vos tarifs ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Forfait global",
+              "À la pièce/élément",
+              "Sur devis personnalisé",
+              "Autres"
+            ],
             "required": false
           }
         ]
       },
       {
-        "title": "Showroom",
+        "title": "Conditions",
         "fields": [
           {
-            "id": "showroom",
-            "question": "Disposez-vous d'un showroom ?",
+            "id": "deplacement",
+            "question": "Vous déplacez-vous pour l'installation ?",
             "component_type": "radio",
             "field_type": "radio",
-            "options": ["Oui", "Non"],
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "location_possible",
+            "question": "Proposez-vous de la location sans installation ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
             "required": false
           }
         ]
       }
     ]
   }
-} 
+}

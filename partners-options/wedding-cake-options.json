@@ -1,1 +1,146 @@
-{"placeholder": "structure"}
+{
+  "wedding_cake": {
+    "title": "Gâteau de mariage",
+    "sections": [
+      {
+        "title": "Types de gâteaux",
+        "fields": [
+          {
+            "id": "types_gateau",
+            "question": "Quels types de gâteaux proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Pièce montée traditionnelle",
+              "Wedding cake américain",
+              "Naked cake",
+              "Drip cake",
+              "Gâteau à étages",
+              "Cupcakes",
+              "Candy bar",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "parfums",
+            "question": "Quels parfums proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Vanille",
+              "Chocolat",
+              "Fruits rouges",
+              "Citron",
+              "Caramel",
+              "Praliné",
+              "Pistache",
+              "Café",
+              "Fruits exotiques",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Options spéciales",
+        "fields": [
+          {
+            "id": "options_speciales",
+            "question": "Proposez-vous des options spéciales ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Sans gluten",
+              "Sans lactose",
+              "Vegan",
+              "Halal",
+              "Bio",
+              "Allégé en sucre",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "decorations",
+            "question": "Quels types de décorations proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Fleurs fraîches",
+              "Fleurs en sucre",
+              "Figurines",
+              "Décors personnalisés",
+              "Dorure/Argenture",
+              "Rubans",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "prix_par_part",
+            "question": "Quel est votre prix par part (en €) ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 8",
+            "required": false
+          },
+          {
+            "id": "commande_minimum",
+            "question": "Nombre minimum de parts pour une commande",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 50",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services",
+        "fields": [
+          {
+            "id": "degustation",
+            "question": "Proposez-vous une dégustation ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, gratuite",
+              "Oui, payante",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "livraison",
+            "question": "Proposez-vous la livraison ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, gratuite",
+              "Oui, payante",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "installation",
+            "question": "Proposez-vous l'installation sur place ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}

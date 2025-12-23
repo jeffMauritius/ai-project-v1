@@ -1,1 +1,151 @@
-{"placeholder": "structure"}
+{
+  "video": {
+    "title": "Vidéaste",
+    "sections": [
+      {
+        "title": "Style et techniques",
+        "fields": [
+          {
+            "id": "styles_video",
+            "question": "Quels styles de vidéo réalisez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Cinématographique",
+              "Reportage/Documentaire",
+              "Traditionnel",
+              "Clip musical",
+              "Court-métrage",
+              "Same Day Edit",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "equipement",
+            "question": "Quel équipement utilisez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Caméra 4K",
+              "Caméra 8K",
+              "Drone",
+              "Steadicam/Gimbal",
+              "Éclairage professionnel",
+              "Micro sans fil",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services proposés",
+        "fields": [
+          {
+            "id": "services",
+            "question": "Quels services proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Film de mariage complet",
+              "Teaser/Trailer",
+              "Same Day Edit",
+              "Film de cérémonie uniquement",
+              "Captation vin d'honneur",
+              "Captation soirée",
+              "Interview des mariés",
+              "Streaming en direct",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "livrables",
+            "question": "Quels livrables fournissez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Film complet (long format)",
+              "Teaser (2-3 min)",
+              "Rushes bruts",
+              "Version réseaux sociaux",
+              "Clé USB",
+              "Lien de téléchargement",
+              "DVD/Blu-ray",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "prix_minimum",
+            "question": "À partir de quel prix proposez-vous vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 1500",
+            "required": false
+          },
+          {
+            "id": "delai_livraison",
+            "question": "Quel est le délai de livraison ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "1 semaine",
+              "2 semaines",
+              "1 mois",
+              "2 mois",
+              "3 mois ou plus"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "deplacement",
+            "question": "Vous déplacez-vous ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "frais_deplacement",
+            "question": "Facturez-vous les frais de déplacement ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non",
+              "Selon la distance"
+            ],
+            "required": false
+          },
+          {
+            "id": "second_cameraman",
+            "question": "Proposez-vous un second caméraman ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, inclus",
+              "Oui, en option",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}

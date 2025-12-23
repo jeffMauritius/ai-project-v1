@@ -36,9 +36,17 @@ export function DynamicOptionsForm({
 
   // Synchroniser les données quand initialData change
   useEffect(() => {
+    // Seulement mettre à jour si initialData a vraiment changé
+    const initialDataString = JSON.stringify(initialData || {});
+    const formDataString = JSON.stringify(formData);
 
-    setFormData(initialData || {});
-  }, [initialData, providerType]);
+    if (initialDataString !== formDataString) {
+      const newData = initialData || {};
+      setFormData(newData);
+      // Notifier le parent des données initiales
+      onSave(newData);
+    }
+  }, [initialData, providerType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // Charger les options du prestataire depuis le service
@@ -204,6 +212,7 @@ export function DynamicOptionsForm({
       }
 
       if (field.component_type === "radio") {
+        const radioValue = formData[fieldKey];
         return (
           <div className="space-y-2">
             <Label>
@@ -211,7 +220,7 @@ export function DynamicOptionsForm({
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <RadioGroup
-              value={formData[fieldKey] || ""}
+              value={radioValue && radioValue !== "" ? radioValue : undefined}
               onValueChange={(value) => handleRadioChange(field.id, value)}
             >
               {field.options?.map((option: string, index: number) => (
@@ -236,6 +245,7 @@ export function DynamicOptionsForm({
       }
 
       if (field.component_type === "select") {
+        const selectValue = formData[fieldKey];
         return (
           <div className="space-y-2">
             <Label htmlFor={fieldKey}>
@@ -243,7 +253,7 @@ export function DynamicOptionsForm({
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <Select
-              value={formData[fieldKey] || ""}
+              value={selectValue && selectValue !== "" ? selectValue : undefined}
               onValueChange={(value) => handleSelectChange(field.id, value)}
             >
               <SelectTrigger className={hasError ? "border-red-500" : ""}>

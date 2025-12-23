@@ -1,1 +1,125 @@
-{"placeholder": "structure"}
+{
+  "animation": {
+    "title": "Animation",
+    "sections": [
+      {
+        "title": "Types d'animation",
+        "fields": [
+          {
+            "id": "types_animation",
+            "question": "Quels types d'animation proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "DJ",
+              "Orchestre",
+              "Groupe de musique",
+              "Chanteur/Chanteuse",
+              "Magicien",
+              "Caricaturiste",
+              "Photobooth",
+              "Feu d'artifice",
+              "Spectacle de danse",
+              "Karaoké",
+              "Quiz/Jeux",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "moments_animation",
+            "question": "Pour quels moments proposez-vous vos services ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Cérémonie",
+              "Vin d'honneur",
+              "Repas",
+              "Soirée dansante",
+              "Brunch du lendemain",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Équipement",
+        "fields": [
+          {
+            "id": "equipement_fourni",
+            "question": "Quel équipement fournissez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Sonorisation",
+              "Éclairage",
+              "Effets spéciaux (fumée, confettis)",
+              "Écran/Vidéoprojecteur",
+              "Micros",
+              "Instruments",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "prix_minimum",
+            "question": "À partir de quel prix proposez-vous vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 500",
+            "required": false
+          },
+          {
+            "id": "duree_prestation",
+            "question": "Quelle est la durée de votre prestation ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "2 heures",
+              "3 heures",
+              "4 heures",
+              "5 heures",
+              "Soirée complète",
+              "Sur mesure"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "deplacement",
+            "question": "Vous déplacez-vous ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "frais_deplacement",
+            "question": "Facturez-vous les frais de déplacement ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non",
+              "Selon la distance"
+            ],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}

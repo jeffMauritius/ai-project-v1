@@ -1,33 +1,122 @@
 {
   "decoration": {
+    "title": "Décoration",
     "sections": [
       {
         "title": "Types de décoration",
-        "options": [
+        "fields": [
           {
-            "name": "Centres de table",
-            "description": "Décoration des tables de réception"
+            "id": "types_decoration",
+            "question": "Quels types de décoration proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Centres de table",
+              "Arches de mariage",
+              "Décoration de chaises",
+              "Décoration de salle",
+              "Décoration extérieure",
+              "Décoration florale",
+              "Photobooth/Coin photo",
+              "Signalétique (panneaux, plan de table)",
+              "Éclairage décoratif",
+              "Tentures et drapés",
+              "Autres"
+            ],
+            "required": false
           },
           {
-            "name": "Arches de mariage",
-            "description": "Arches décoratives pour la cérémonie"
-          },
-          {
-            "name": "Photobooth",
-            "description": "Espace photo avec accessoires"
+            "id": "styles_decoration",
+            "question": "Quels styles de décoration proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Champêtre/Rustique",
+              "Bohème",
+              "Romantique",
+              "Moderne/Contemporain",
+              "Classique/Élégant",
+              "Vintage",
+              "Minimaliste",
+              "Exotique",
+              "Industriel",
+              "Autres"
+            ],
+            "required": false
           }
         ]
       },
       {
         "title": "Services",
-        "options": [
+        "fields": [
           {
-            "name": "Installation",
-            "description": "Installation et montage des décorations"
+            "id": "services_inclus",
+            "question": "Quels services sont inclus ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Conception personnalisée",
+              "Location de matériel",
+              "Installation/Montage",
+              "Démontage",
+              "Livraison",
+              "Conseil et accompagnement",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "budget_minimum",
+            "question": "À partir de quel budget proposez-vous vos services ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 500",
+            "required": false
           },
           {
-            "name": "Démontage",
-            "description": "Démontage après l'événement"
+            "id": "type_tarification",
+            "question": "Comment établissez-vous vos tarifs ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Forfait global",
+              "À la pièce/élément",
+              "Sur devis personnalisé",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "deplacement",
+            "question": "Vous déplacez-vous pour l'installation ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "location_possible",
+            "question": "Proposez-vous de la location sans installation ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
           }
         ]
       }

@@ -1,1 +1,142 @@
-{"placeholder": "structure"}
+{
+  "organisation": {
+    "title": "Wedding Planner",
+    "sections": [
+      {
+        "title": "Services proposés",
+        "fields": [
+          {
+            "id": "types_accompagnement",
+            "question": "Quels types d'accompagnement proposez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Organisation complète (de A à Z)",
+              "Coordination jour J",
+              "Organisation partielle",
+              "Coaching/Conseils",
+              "Officiant de cérémonie laïque",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "services_inclus",
+            "question": "Quels services sont inclus ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Recherche de prestataires",
+              "Négociation avec les prestataires",
+              "Gestion du budget",
+              "Planning détaillé",
+              "Coordination des prestataires",
+              "Repérages lieux",
+              "Décoration/Scénographie",
+              "Accompagnement démarches administratives",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Spécialités",
+        "fields": [
+          {
+            "id": "types_mariage",
+            "question": "Quels types de mariages organisez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Mariage intimiste",
+              "Grand mariage",
+              "Mariage destination",
+              "Mariage multiculturel",
+              "Mariage éco-responsable",
+              "Elopement",
+              "Renouvellement de vœux",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "styles_mariage",
+            "question": "Quels styles de mariages maîtrisez-vous ?",
+            "component_type": "checkbox",
+            "field_type": "checkbox",
+            "options": [
+              "Champêtre/Rustique",
+              "Bohème",
+              "Romantique",
+              "Moderne/Contemporain",
+              "Classique/Élégant",
+              "Vintage",
+              "Exotique",
+              "Minimaliste",
+              "Autres"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "tarification_type",
+            "question": "Comment établissez-vous vos tarifs ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Forfait fixe",
+              "Pourcentage du budget",
+              "Tarif horaire",
+              "Sur devis personnalisé"
+            ],
+            "required": false
+          },
+          {
+            "id": "budget_minimum",
+            "question": "À partir de quel budget accompagnez-vous les mariages ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Ex: 2000",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "nombre_mariages_an",
+            "question": "Combien de mariages accompagnez-vous par an ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Moins de 10",
+              "10 à 20",
+              "20 à 30",
+              "Plus de 30"
+            ],
+            "required": false
+          },
+          {
+            "id": "zone_intervention",
+            "question": "Vous déplacez-vous pour les mariages ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, partout en France",
+              "Oui, dans ma région uniquement",
+              "Oui, à l'international également",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}
