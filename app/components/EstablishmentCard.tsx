@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ZoomIn } from 'lucide-react'
+import { ZoomIn, ImageOff } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FavoriteButton } from '@/components/ui/FavoriteButton'
@@ -26,6 +26,7 @@ interface EstablishmentCardProps {
 
 export default function EstablishmentCard({ establishment }: EstablishmentCardProps) {
   const [isNavigating, setIsNavigating] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   const {
     id,
@@ -43,6 +44,11 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
   // Utiliser le tableau images comme source principale (URLs Vercel Blob), avec imageUrl comme fallback
   const allImages = images && images.length > 0 ? images : (imageUrl ? [imageUrl] : []);
   const mainImage = allImages[0] || '/placeholder-venue.jpg';
+  const hasValidImage = allImages.length > 0 && !imageError;
+
+  const handleImageError = useCallback(() => {
+    setImageError(true)
+  }, [])
   
   const { openGallery } = useImageGallery(
     allImages.map((url, index) => ({
@@ -85,13 +91,21 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
       <div className="relative">
-        <div className="relative h-48 overflow-hidden">
-          <Image
-            src={mainImage}
-            alt={name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+        <div className="relative h-48 overflow-hidden bg-gray-100">
+          {imageError ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-400">
+              <ImageOff className="w-12 h-12 mb-2" />
+              <span className="text-sm">Image non disponible</span>
+            </div>
+          ) : (
+            <Image
+              src={mainImage}
+              alt={name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={handleImageError}
+            />
+          )}
           
           {/* Bouton de favori */}
           <div className="absolute top-4 right-4 z-10">
@@ -104,7 +118,7 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
           </div>
           
           {/* Bouton galerie */}
-          {allImages.length > 1 && (
+          {hasValidImage && allImages.length > 1 && (
             <button
               onClick={(e) => {
                 e.preventDefault()
@@ -118,16 +132,18 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
             </button>
           )}
           
-          <div className="absolute bottom-4 right-4 flex gap-2">
-            {allImages.slice(0, 5).map((_, index) => (
-              <div
-                key={index}
-                className={`h-2 w-2 rounded-full ${
-                  index === 0 ? "bg-white" : "bg-white/50"
-                }`}
-              />
-            ))}
-          </div>
+          {hasValidImage && allImages.length > 0 && (
+            <div className="absolute bottom-4 right-4 flex gap-2">
+              {allImages.slice(0, 5).map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-2 w-2 rounded-full ${
+                    index === 0 ? "bg-white" : "bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
           
           {/* Link overlay for the entire image area */}
           <Link 

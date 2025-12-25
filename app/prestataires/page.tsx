@@ -12,7 +12,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useQuery } from "@tanstack/react-query";
-import Image from 'next/image'
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { MapPinIcon, BanknotesIcon, UsersIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
@@ -167,12 +167,13 @@ export default function PrestatairesPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data?.prestataires.map((prestataire) => (
           <div key={prestataire.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-            <div className="relative h-48">
-              <Image
-                src={prestataire.imageUrl || prestataire.images?.[0] || "/placeholder-venue.jpg"}
+            <div className="relative h-48 bg-gray-100">
+              <ImageWithFallback
+                src={prestataire.imageUrl || prestataire.images?.[0] || ""}
                 alt={prestataire.name || prestataire.companyName || "Image du prestataire"}
                 fill
                 className="object-cover"
+                fallbackClassName="absolute inset-0"
               />
               <div className="absolute top-4 right-4">
                 <span className="bg-pink-500 text-white px-2 py-1 rounded-full text-xs font-medium">

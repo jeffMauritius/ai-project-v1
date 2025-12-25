@@ -221,3 +221,23 @@
   - Le menu public ne s'affiche maintenant que sur les pages sans sidebar
 
 **Résultat :** Sur mobile, le hamburger ouvre correctement la sidebar sur les pages dashboard (avec tous les items), et le menu déroulant avec les liens publics uniquement sur les pages publiques
+
+---
+
+### 14. Fallback pour images manquantes sur les cartes
+
+**Problème :** Sur les pages Établissements et Prestataires, quand une image n'est pas disponible ou échoue au chargement, un espace vide apparaît à la place de l'image.
+
+**Solution :**
+- Création d'un composant réutilisable `/components/ui/ImageWithFallback.tsx` :
+  - Gère l'état d'erreur de chargement d'image
+  - Affiche un placeholder avec icône `ImageOff` et texte "Image non disponible"
+  - Props configurables pour le style du fallback
+- Modification de `/app/components/EstablishmentCard.tsx` :
+  - Ajout d'un état `imageError` et handler `onError`
+  - Affichage du fallback quand l'image échoue
+  - Masquage des indicateurs de galerie quand l'image est en erreur
+- Modification de `/app/prestataires/page.tsx` :
+  - Utilisation du composant `ImageWithFallback` pour les cartes de prestataires
+
+**Résultat :** Les cartes affichent maintenant un placeholder élégant avec une icône et un message quand l'image n'est pas disponible ou échoue au chargement
