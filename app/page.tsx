@@ -1,13 +1,27 @@
 import AISearchBar from './components/AISearchBar'
 import React from 'react'
-import { 
-  MagnifyingGlassIcon, 
-  BuildingLibraryIcon, 
+import { Metadata } from 'next'
+import {
+  MagnifyingGlassIcon,
+  BuildingLibraryIcon,
   CalendarDaysIcon,
   HeartIcon,
   CakeIcon,
   MusicalNoteIcon
 } from '@heroicons/react/24/outline'
+
+export const metadata: Metadata = {
+  title: 'Organisez votre mariage avec l\'IA',
+  description: 'MonMariage.ai vous aide à trouver les meilleurs prestataires et lieux de réception pour votre mariage en France. Recherche intelligente, comparaison de devis et organisation simplifiée.',
+  openGraph: {
+    title: 'MonMariage.ai - Organisez votre mariage avec l\'IA',
+    description: 'Trouvez les meilleurs prestataires et lieux de réception pour votre mariage en France.',
+    url: '/',
+  },
+  alternates: {
+    canonical: '/',
+  },
+}
 
 const features = [
   {

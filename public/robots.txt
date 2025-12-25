@@ -1,0 +1,25 @@
+# MonMariage.ai - robots.txt
+# https://monmariage.ai
+
+User-agent: *
+Allow: /
+Allow: /establishments
+Allow: /prestataires
+Allow: /storefront/
+
+# Pages privées - ne pas indexer
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /partner-dashboard/
+Disallow: /auth/
+Disallow: /admin/
+
+# Fichiers statiques
+Allow: /monmariage-logo.png
+Allow: /og-image.jpg
+
+# Sitemap
+Sitemap: https://monmariage.ai/sitemap.xml
+
+# Crawl-delay pour éviter la surcharge
+Crawl-delay: 1

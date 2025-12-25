@@ -1,0 +1,37 @@
+{
+  "name": "MonMariage.ai - Organisez votre mariage avec l'IA",
+  "short_name": "MonMariage.ai",
+  "description": "Trouvez les meilleurs prestataires et lieux de réception pour votre mariage en France. Planification intelligente assistée par IA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#db2777",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr-FR",
+  "categories": ["lifestyle", "social", "shopping"],
+  "icons": [
+    {
+      "src": "/monmariage-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Rechercher un lieu",
+      "short_name": "Lieux",
+      "description": "Trouver un lieu de réception pour votre mariage",
+      "url": "/establishments"
+    },
+    {
+      "name": "Rechercher un prestataire",
+      "short_name": "Prestataires",
+      "description": "Trouver des prestataires pour votre mariage",
+      "url": "/prestataires"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

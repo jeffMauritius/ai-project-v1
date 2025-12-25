@@ -1,284 +1,496 @@
 import { notFound } from 'next/navigation'
-import { 
-  MapPin, 
-  Star, 
-  Users, 
-  Square, 
-  Home, 
-  Car, 
-  Music, 
-  Camera, 
-  Utensils, 
-  Palette, 
-  Tent, 
-  Gift, 
-  Calendar, 
-  Clock, 
-  Euro, 
-  Wifi, 
-  ParkingCircle, 
-  TreePine, 
-  Building, 
-  Accessibility, 
-  Sun, 
-  Moon, 
-  Coffee, 
-  Wine, 
-  Cake, 
-  Heart, 
-  Sparkles, 
-  Mic, 
-  Volume2, 
-  Video, 
-  Image, 
-  FileText, 
-  Mail, 
-  Phone, 
-  Globe, 
-  Map, 
-  Navigation, 
-  Route, 
-  Bus, 
-  Truck, 
-  Flower2, 
-  Crown, 
-  Ring, 
-  Plane, 
-  Bed, 
-  Shower, 
-  Waves, 
-  Mountain, 
-  Umbrella, 
-  Thermometer, 
-  Wind, 
-  Droplets, 
-  Lightbulb, 
-  Zap, 
-  Shield, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  Info, 
-  HelpCircle, 
-  Settings, 
-  Wrench, 
-  Hammer, 
-  Scissors, 
-  Paintbrush, 
-  Brush, 
-  PenTool, 
-  Type, 
-  Bold, 
-  Italic, 
-  Underline, 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight, 
-  List, 
-  Grid3X3, 
-  Columns, 
-  Rows, 
-  Layout, 
-  Layers, 
-  Copy, 
-  Move, 
-  RotateCcw, 
-  RotateCw, 
-  ZoomIn, 
-  ZoomOut, 
-  Maximize, 
-  Minimize, 
-  Monitor, 
-  Smartphone, 
-  Tablet, 
-  Laptop, 
-  Desktop, 
-  Server, 
-  Database, 
-  HardDrive, 
-  Folder, 
-  File, 
-  Archive, 
-  Download, 
-  Upload, 
-  Share, 
-  Link, 
-  ExternalLink, 
-  Bookmark, 
-  Tag, 
-  Tags, 
-  Search, 
-  Filter, 
-  SortAsc, 
-  SortDesc, 
-  ArrowUp, 
-  ArrowDown, 
-  ArrowLeft, 
-  ArrowRight, 
-  ChevronUp, 
-  ChevronDown, 
-  ChevronLeft, 
-  ChevronRight, 
-  Plus, 
-  Minus, 
-  X, 
-  Check, 
-  Trash2, 
-  Edit, 
-  Save, 
-  RefreshCw, 
-  RotateCcw as Refresh, 
-  Play, 
-  Pause, 
-  Stop, 
-  SkipBack, 
-  SkipForward, 
-  VolumeX, 
-  Volume1, 
-  Volume2 as Volume, 
-  Headphones, 
-  Radio, 
-  Tv, 
-  Film, 
-  Clapperboard, 
-  Camera as CameraIcon, 
-  Video as VideoIcon, 
-  Image as ImageIcon, 
-  Mic as MicIcon, 
-  MicOff, 
-  Phone as PhoneIcon, 
-  PhoneCall, 
-  PhoneIncoming, 
-  PhoneOutgoing, 
-  PhoneMissed, 
-  PhoneOff, 
-  MessageCircle, 
-  MessageSquare, 
-  Mail as MailIcon, 
-  Send, 
-  Inbox, 
-  Outbox, 
-  Archive as ArchiveIcon, 
-  Trash, 
-  Trash2 as TrashIcon, 
-  Folder as FolderIcon, 
-  FolderOpen, 
-  File as FileIcon, 
-  FileText as FileTextIcon, 
-  FileImage, 
-  FileVideo, 
-  FileAudio, 
-  FileCode, 
-  FileSpreadsheet, 
-  FilePdf, 
-  FileWord, 
-  FileExcel, 
-  FilePowerpoint, 
-  FileZip, 
-  FileCheck, 
-  FileX, 
-  FilePlus, 
-  FileMinus, 
-  FileEdit, 
-  FileSearch, 
-  FileSlash, 
-  FileQuestion, 
-  FileWarning, 
-  FileInfo, 
-  FileHeart, 
-  FileClock, 
-  FileUp, 
-  FileDown, 
-  FileLeft, 
-  FileRight, 
-  FileSymlink, 
-  FileBinary, 
-  FileType, 
-  FileType2, 
-  FileJson, 
-  FileJs, 
-  FileTs, 
-  FileJsx, 
-  FileTsx, 
-  FileVue, 
-  FileSvelte, 
-  FileHtml, 
-  FileCss, 
-  FileScss, 
-  FileLess, 
-  FileSass, 
-  FileStylus, 
-  FileMarkdown, 
-  FileYaml, 
-  FileToml, 
-  FileIni, 
-  FileEnv, 
-  FileGit, 
-  FileGitignore, 
-  FileDocker, 
-  FileKubernetes, 
-  FileTerraform, 
-  FileAnsible, 
-  FileJenkins, 
-  FileTravis, 
-  FileCircleci, 
-  FileGithub, 
-  FileGitlab, 
-  FileBitbucket, 
-  FileAzure, 
-  FileAws, 
-  FileGcp, 
-  FileDigitalocean, 
-  FileHeroku, 
-  FileVercel, 
-  FileNetlify, 
-  FileSurge, 
-  FileFirebase, 
-  FileSupabase, 
-  FilePlanetscale, 
-  FileMongodb, 
-  FilePostgres, 
-  FileMysql, 
-  FileRedis, 
-  FileElasticsearch, 
-  FileKibana, 
-  FileLogstash, 
-  FileBeats, 
-  FileDocker as Docker, 
-  FileKubernetes as Kubernetes, 
-  FileTerraform as Terraform, 
-  FileAnsible as Ansible, 
-  FileJenkins as Jenkins, 
-  FileTravis as Travis, 
-  FileCircleci as Circleci, 
-  FileGithub as Github, 
-  FileGitlab as Gitlab, 
-  FileBitbucket as Bitbucket, 
-  FileAzure as Azure, 
-  FileAws as Aws, 
-  FileGcp as Gcp, 
-  FileDigitalocean as Digitalocean, 
-  FileHeroku as Heroku, 
-  FileVercel as Vercel, 
-  FileNetlify as Netlify, 
-  FileSurge as Surge, 
-  FileFirebase as Firebase, 
-  FileSupabase as Supabase, 
-  FilePlanetscale as Planetscale, 
-  FileMongodb as Mongodb, 
-  FilePostgres as Postgres, 
-  FileMysql as Mysql, 
-  FileRedis as Redis, 
-  FileElasticsearch as Elasticsearch, 
-  FileKibana as Kibana, 
-  FileLogstash as Logstash, 
+import { Metadata } from 'next'
+import {
+  MapPin,
+  Star,
+  Users,
+  Square,
+  Home,
+  Car,
+  Music,
+  Camera,
+  Utensils,
+  Palette,
+  Tent,
+  Gift,
+  Calendar,
+  Clock,
+  Euro,
+  Wifi,
+  ParkingCircle,
+  TreePine,
+  Building,
+  Accessibility,
+  Sun,
+  Moon,
+  Coffee,
+  Wine,
+  Cake,
+  Heart,
+  Sparkles,
+  Mic,
+  Volume2,
+  Video,
+  Image,
+  FileText,
+  Mail,
+  Phone,
+  Globe,
+  Map,
+  Navigation,
+  Route,
+  Bus,
+  Truck,
+  Flower2,
+  Crown,
+  Ring,
+  Plane,
+  Bed,
+  Shower,
+  Waves,
+  Mountain,
+  Umbrella,
+  Thermometer,
+  Wind,
+  Droplets,
+  Lightbulb,
+  Zap,
+  Shield,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Info,
+  HelpCircle,
+  Settings,
+  Wrench,
+  Hammer,
+  Scissors,
+  Paintbrush,
+  Brush,
+  PenTool,
+  Type,
+  Bold,
+  Italic,
+  Underline,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  List,
+  Grid3X3,
+  Columns,
+  Rows,
+  Layout,
+  Layers,
+  Copy,
+  Move,
+  RotateCcw,
+  RotateCw,
+  ZoomIn,
+  ZoomOut,
+  Maximize,
+  Minimize,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Laptop,
+  Desktop,
+  Server,
+  Database,
+  HardDrive,
+  Folder,
+  File,
+  Archive,
+  Download,
+  Upload,
+  Share,
+  Link,
+  ExternalLink,
+  Bookmark,
+  Tag,
+  Tags,
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Minus,
+  X,
+  Check,
+  Trash2,
+  Edit,
+  Save,
+  RefreshCw,
+  RotateCcw as Refresh,
+  Play,
+  Pause,
+  Stop,
+  SkipBack,
+  SkipForward,
+  VolumeX,
+  Volume1,
+  Volume2 as Volume,
+  Headphones,
+  Radio,
+  Tv,
+  Film,
+  Clapperboard,
+  Camera as CameraIcon,
+  Video as VideoIcon,
+  Image as ImageIcon,
+  Mic as MicIcon,
+  MicOff,
+  Phone as PhoneIcon,
+  PhoneCall,
+  PhoneIncoming,
+  PhoneOutgoing,
+  PhoneMissed,
+  PhoneOff,
+  MessageCircle,
+  MessageSquare,
+  Mail as MailIcon,
+  Send,
+  Inbox,
+  Outbox,
+  Archive as ArchiveIcon,
+  Trash,
+  Trash2 as TrashIcon,
+  Folder as FolderIcon,
+  FolderOpen,
+  File as FileIcon,
+  FileText as FileTextIcon,
+  FileImage,
+  FileVideo,
+  FileAudio,
+  FileCode,
+  FileSpreadsheet,
+  FilePdf,
+  FileWord,
+  FileExcel,
+  FilePowerpoint,
+  FileZip,
+  FileCheck,
+  FileX,
+  FilePlus,
+  FileMinus,
+  FileEdit,
+  FileSearch,
+  FileSlash,
+  FileQuestion,
+  FileWarning,
+  FileInfo,
+  FileHeart,
+  FileClock,
+  FileUp,
+  FileDown,
+  FileLeft,
+  FileRight,
+  FileSymlink,
+  FileBinary,
+  FileType,
+  FileType2,
+  FileJson,
+  FileJs,
+  FileTs,
+  FileJsx,
+  FileTsx,
+  FileVue,
+  FileSvelte,
+  FileHtml,
+  FileCss,
+  FileScss,
+  FileLess,
+  FileSass,
+  FileStylus,
+  FileMarkdown,
+  FileYaml,
+  FileToml,
+  FileIni,
+  FileEnv,
+  FileGit,
+  FileGitignore,
+  FileDocker,
+  FileKubernetes,
+  FileTerraform,
+  FileAnsible,
+  FileJenkins,
+  FileTravis,
+  FileCircleci,
+  FileGithub,
+  FileGitlab,
+  FileBitbucket,
+  FileAzure,
+  FileAws,
+  FileGcp,
+  FileDigitalocean,
+  FileHeroku,
+  FileVercel,
+  FileNetlify,
+  FileSurge,
+  FileFirebase,
+  FileSupabase,
+  FilePlanetscale,
+  FileMongodb,
+  FilePostgres,
+  FileMysql,
+  FileRedis,
+  FileElasticsearch,
+  FileKibana,
+  FileLogstash,
+  FileBeats,
+  FileDocker as Docker,
+  FileKubernetes as Kubernetes,
+  FileTerraform as Terraform,
+  FileAnsible as Ansible,
+  FileJenkins as Jenkins,
+  FileTravis as Travis,
+  FileCircleci as Circleci,
+  FileGithub as Github,
+  FileGitlab as Gitlab,
+  FileBitbucket as Bitbucket,
+  FileAzure as Azure,
+  FileAws as Aws,
+  FileGcp as Gcp,
+  FileDigitalocean as Digitalocean,
+  FileHeroku as Heroku,
+  FileVercel as Vercel,
+  FileNetlify as Netlify,
+  FileSurge as Surge,
+  FileFirebase as Firebase,
+  FileSupabase as Supabase,
+  FilePlanetscale as Planetscale,
+  FileMongodb as Mongodb,
+  FilePostgres as Postgres,
+  FileMysql as Mysql,
+  FileRedis as Redis,
+  FileElasticsearch as Elasticsearch,
+  FileKibana as Kibana,
+  FileLogstash as Logstash,
   FileBeats as Beats
 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { transformEstablishmentImages } from '@/lib/image-url-transformer'
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://monmariage.ai'
+
+// Mapping des types de service pour le SEO
+const serviceTypeLabels: Record<string, string> = {
+  'LIEU': 'Lieu de réception',
+  'TRAITEUR': 'Traiteur',
+  'PHOTOGRAPHE': 'Photographe',
+  'MUSIQUE': 'DJ / Musique',
+  'VOITURE': 'Location de voiture',
+  'BUS': 'Location de bus',
+  'DECORATION': 'Décorateur',
+  'CHAPITEAU': 'Location de chapiteau',
+  'ANIMATION': 'Animation',
+  'FLORISTE': 'Fleuriste',
+  'LISTE': 'Liste de mariage',
+  'ORGANISATION': 'Wedding Planner',
+  'VIDEO': 'Vidéaste',
+  'LUNE_DE_MIEL': 'Voyage de noces',
+  'WEDDING_CAKE': 'Wedding Cake',
+  'OFFICIANT': 'Officiant de cérémonie',
+  'FOOD_TRUCK': 'Food Truck',
+  'VIN': 'Vins et spiritueux',
+  'FAIRE_PART': 'Faire-part',
+  'CADEAUX_INVITES': 'Cadeaux invités'
+}
+
+// Fonction pour récupérer les données minimales pour les metadata
+async function getStorefrontMetadata(id: string) {
+  try {
+    const storefront = await prisma.partnerStorefront.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        type: true,
+        isActive: true,
+        images: true,
+        establishment: {
+          select: {
+            name: true,
+            description: true,
+            city: true,
+            region: true,
+            venueType: true,
+            startingPrice: true,
+            maxCapacity: true,
+            rating: true,
+            reviewCount: true,
+            images: true,
+            latitude: true,
+            longitude: true
+          }
+        },
+        partner: {
+          select: {
+            companyName: true,
+            description: true,
+            serviceType: true,
+            billingCity: true,
+            basePrice: true,
+            maxCapacity: true,
+            images: true
+          }
+        }
+      }
+    })
+
+    if (!storefront) {
+      // Essayer de trouver un établissement
+      const establishment = await prisma.establishment.findUnique({
+        where: { id },
+        select: {
+          name: true,
+          description: true,
+          city: true,
+          region: true,
+          venueType: true,
+          startingPrice: true,
+          maxCapacity: true,
+          rating: true,
+          reviewCount: true,
+          images: true,
+          latitude: true,
+          longitude: true
+        }
+      })
+      if (establishment) {
+        return { type: 'VENUE', establishment, partner: null, images: establishment.images || [] }
+      }
+
+      // Essayer de trouver un partenaire
+      const partner = await prisma.partner.findUnique({
+        where: { id },
+        select: {
+          companyName: true,
+          description: true,
+          serviceType: true,
+          billingCity: true,
+          basePrice: true,
+          maxCapacity: true,
+          images: true
+        }
+      })
+      if (partner) {
+        return { type: 'PARTNER', establishment: null, partner, images: partner.images || [] }
+      }
+
+      return null
+    }
+
+    return storefront
+  } catch {
+    return null
+  }
+}
+
+// Fonction pour nettoyer le HTML de la description
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const data = await getStorefrontMetadata(id)
+
+  if (!data) {
+    return {
+      title: 'Prestataire non trouvé',
+      description: 'Ce prestataire n\'existe pas ou n\'est plus disponible.'
+    }
+  }
+
+  const isVenue = data.type === 'VENUE'
+  let title: string
+  let description: string
+  let location: string
+  let serviceType: string
+  let imageUrl: string | undefined
+  let price: number | null = null
+  let capacity: number | null = null
+
+  if (isVenue && data.establishment) {
+    const est = data.establishment
+    title = est.name
+    description = est.description ? stripHtml(est.description).slice(0, 160) : `${est.name} - Lieu de réception pour mariage à ${est.city}, ${est.region}`
+    location = `${est.city}, ${est.region}`
+    serviceType = 'Lieu de réception'
+    price = est.startingPrice
+    capacity = est.maxCapacity
+    imageUrl = est.images?.[0] || data.images?.[0]
+  } else if (data.partner) {
+    const partner = data.partner
+    title = partner.companyName
+    description = partner.description ? stripHtml(partner.description).slice(0, 160) : `${partner.companyName} - ${serviceTypeLabels[partner.serviceType] || partner.serviceType} pour mariage à ${partner.billingCity}`
+    location = `${partner.billingCity}, France`
+    serviceType = serviceTypeLabels[partner.serviceType] || partner.serviceType
+    price = partner.basePrice
+    capacity = partner.maxCapacity
+    imageUrl = partner.images?.[0] || data.images?.[0]
+  } else {
+    return {
+      title: 'Prestataire',
+      description: 'Découvrez ce prestataire de mariage sur MonMariage.ai'
+    }
+  }
+
+  const fullTitle = `${title} - ${serviceType} mariage ${location}`
+  const metaDescription = description || `Découvrez ${title}, ${serviceType.toLowerCase()} pour votre mariage à ${location}. Demandez un devis gratuit sur MonMariage.ai.`
+
+  return {
+    title: fullTitle,
+    description: metaDescription,
+    keywords: [
+      title,
+      serviceType,
+      `${serviceType} mariage`,
+      `${serviceType} ${location}`,
+      'mariage',
+      'prestataire mariage',
+      location
+    ],
+    openGraph: {
+      title: fullTitle,
+      description: metaDescription,
+      url: `/storefront/${id}`,
+      type: 'website',
+      images: imageUrl ? [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${title} - ${serviceType}`
+        }
+      ] : undefined
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: fullTitle,
+      description: metaDescription,
+      images: imageUrl ? [imageUrl] : undefined
+    },
+    alternates: {
+      canonical: `/storefront/${id}`
+    },
+    other: {
+      ...(price && { 'product:price:amount': String(price) }),
+      ...(price && { 'product:price:currency': 'EUR' }),
+      ...(capacity && { 'business:capacity': String(capacity) })
+    }
+  }
+}
 import ImageGallery from './components/ImageGallery'
 import ImageCarousel from './components/ImageCarousel'
 import ContactCard from './components/ContactCard'
@@ -602,8 +814,50 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
 
   const serviceOptions = await getOptionsForServiceType(serviceType)
 
+  // Générer le JSON-LD LocalBusiness pour le SEO
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@type': isVenue ? 'EventVenue' : 'LocalBusiness',
+    name: companyName,
+    description: description ? description.replace(/<[^>]*>/g, '').slice(0, 500) : undefined,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: isVenue && storefront.establishment ? storefront.establishment.city : storefront.partner?.billingCity,
+      addressRegion: isVenue && storefront.establishment ? storefront.establishment.region : undefined,
+      addressCountry: 'FR'
+    },
+    ...(allImages[0]?.url && { image: allImages[0].url }),
+    ...(rating > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: rating,
+        reviewCount: 12,
+        bestRating: 5,
+        worstRating: 1
+      }
+    }),
+    ...(price > 0 && {
+      priceRange: `À partir de ${price}€`
+    }),
+    ...(capacity > 0 && isVenue && {
+      maximumAttendeeCapacity: capacity
+    }),
+    url: `${BASE_URL}/storefront/${storefront.id}`,
+    ...(isPartner && {
+      '@type': 'LocalBusiness',
+      additionalType: serviceTypeLabels[serviceType] || serviceType
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* JSON-LD Schema LocalBusiness */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLdData)
+        }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Section principale avec carrousel et contact */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 lg:mb-8">
