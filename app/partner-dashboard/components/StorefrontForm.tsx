@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation'
 // Schéma de validation Zod
 const storefrontFormSchema = z.object({
   companyName: z.string().min(1, "Le nom de l'entreprise est requis").max(100, "Le nom de l'entreprise ne peut pas dépasser 100 caractères"),
-  description: z.string().min(10, "La description doit contenir au moins 10 caractères").max(2000, "La description ne peut pas dépasser 2000 caractères"),
+  description: z.string().min(10, "La description doit contenir au moins 10 caractères").max(5000, "La description ne peut pas dépasser 5000 caractères"),
   serviceType: z.nativeEnum(ServiceType, {
     errorMap: () => ({ message: "Veuillez sélectionner un type de service valide" })
   }),

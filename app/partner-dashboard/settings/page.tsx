@@ -24,7 +24,6 @@ import {
 export default function Settings() {
   const { data: session, update } = useSession()
   const { toast } = useToast()
-  const [isEditing, setIsEditing] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState("https://github.com/shadcn.png")
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -434,100 +433,6 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* Informations de l'entreprise */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Informations de l&apos;entreprise</CardTitle>
-        </CardHeader>
-        <CardContent>
-                      <form className="space-y-6">
-              <div>
-                <Label htmlFor="company-name">
-                  Nom de l&apos;entreprise
-                </Label>
-                <Input
-                  id="company-name"
-                  type="text"
-                  defaultValue="Château de Vaux-le-Vicomte"
-                  disabled={!isEditing}
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  defaultValue="Le Château de Vaux-le-Vicomte, joyau architectural du XVIIe siècle, vous ouvre ses portes pour faire de votre mariage un événement véritablement royal."
-                  disabled={!isEditing}
-                  className="min-h-[100px]"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="address">
-                    Adresse
-                  </Label>
-                  <Input
-                    id="address"
-                    type="text"
-                    defaultValue="77950 Maincy, France"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">
-                    Téléphone
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    defaultValue="+33 1 64 14 41 90"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="website">
-                    Site web
-                  </Label>
-                  <Input
-                    id="website"
-                    type="url"
-                    defaultValue="www.vaux-le-vicomte.com"
-                    disabled={!isEditing}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end">
-                {isEditing ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() => setIsEditing(false)}
-                      className="mr-3"
-                    >
-                      Annuler
-                    </Button>
-                    <Button
-                      type="submit"
-                    >
-                      Enregistrer
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Modifier
-                  </Button>
-                )}
-              </div>
-            </form>
-        </CardContent>
-      </Card>
-
       {/* Comptes connectés */}
       <Card className="mb-8">
         <CardHeader>
@@ -545,7 +450,7 @@ export default function Settings() {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Google</p>
-                  <p className="text-sm text-gray-500">events@vaux-le-vicomte.com</p>
+                  <p className="text-sm text-gray-500">{session?.user?.email || 'Non connecté'}</p>
                 </div>
               </div>
               <Button variant="outline" size="sm">Déconnecter</Button>

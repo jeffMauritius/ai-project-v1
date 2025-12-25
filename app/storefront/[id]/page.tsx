@@ -534,7 +534,9 @@ async function getStorefrontData(id: string) {
             hasAccommodation: true,
             images: true, // Inclure le tableau images qui contient les URLs Vercel Blob
             latitude: true,
-            longitude: true
+            longitude: true,
+            receptionSpaces: true,
+            receptionOptions: true
           }
         },
         partner: {
@@ -548,7 +550,9 @@ async function getStorefrontData(id: string) {
             maxCapacity: true,
             options: true,
             searchableOptions: true,
-            images: true // Inclure les images de la collection partners
+            images: true,
+            latitude: true,
+            longitude: true
           }
         }
       }
@@ -656,8 +660,11 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
   }
 
   // Déterminer le type de prestataire et ses informations
-  const isVenue = storefront.type === 'VENUE'
-  const isPartner = storefront.type === 'PARTNER'
+  // Un storefront peut être de type VENUE mais lié à un Partner (lieu de réception géré par un partenaire)
+  const hasEstablishment = storefront.establishment !== null
+  const hasPartner = storefront.partner !== null
+  const isVenue = storefront.type === 'VENUE' && hasEstablishment
+  const isPartner = storefront.type === 'PARTNER' || (storefront.type === 'VENUE' && hasPartner && !hasEstablishment)
   
   // Récupérer les images selon le type de storefront
   let allImages = storefront.media
@@ -708,26 +715,31 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
   let price = 0
   let capacity = 0
 
-  if (isVenue && storefront.establishment) {
+  // Caster les options du partner pour un accès typé
+  const partnerOptions = storefront.partner?.options as Record<string, Record<string, any>> | null
+
+  // Priorité: utiliser les données du partner si disponibles (car c'est là que les données sont saisies via le dashboard)
+  // sinon utiliser les données de l'establishment
+  if (storefront.partner && storefront.partner.companyName) {
+    const partner = storefront.partner
+    serviceType = partner.serviceType || 'LIEU'
+    companyName = partner.companyName
+    description = partner.description || ''
+    venueAddress = `${partner.billingCity || ''}, France`
+    venueType = partner.serviceType || ''
+    rating = 4.5
+    price = partner.basePrice || 0
+    capacity = partner.maxCapacity || 0
+  } else if (storefront.establishment && storefront.establishment.name) {
     const establishment = storefront.establishment
     serviceType = 'LIEU'
     companyName = establishment.name
     description = establishment.description || ''
-    venueAddress = `${establishment.city}, ${establishment.region}`
+    venueAddress = `${establishment.city || ''}, ${establishment.region || ''}`
     venueType = establishment.venueType || ''
     rating = establishment.rating || 0
     price = establishment.startingPrice || 0
     capacity = establishment.maxCapacity || 0
-  } else if (isPartner && storefront.partner) {
-    const partner = storefront.partner
-    serviceType = partner.serviceType
-    companyName = partner.companyName
-    description = partner.description || ''
-    venueAddress = `${partner.billingCity}, France`
-    venueType = partner.serviceType
-    rating = 4.5 // Note par défaut pour les partenaires
-    price = partner.basePrice || 0
-    capacity = partner.maxCapacity || 0
   }
 
   // Helper function pour charger les options de manière sécurisée
@@ -942,8 +954,8 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                 serviceType={serviceType}
                 interventionType={venueType}
                 interventionRadius={50}
-                latitude={isVenue && storefront.establishment ? storefront.establishment.latitude : null}
-                longitude={isVenue && storefront.establishment ? storefront.establishment.longitude : null}
+                latitude={storefront.establishment?.latitude ?? storefront.partner?.latitude ?? null}
+                longitude={storefront.establishment?.longitude ?? storefront.partner?.longitude ?? null}
               />
             </div>
           </div>
@@ -971,125 +983,288 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
 
         {/* Options de réception - Utilise toute la largeur */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Les options {companyName}</h2>
-          <div className="bg-white rounded-lg p-6 border">
-            {serviceOptions.length > 0 ? (
-              serviceOptions.map((section: any, sectionIndex: number) => (
-                <div key={sectionIndex} className="mb-8 last:mb-0">
-                  <div className="flex items-center gap-3 mb-4">
-                    {(() => {
-                      const SectionIconComponent = getSectionIcon(section.title)
-                      return <SectionIconComponent className="w-6 h-6 text-pink-600" />
-                    })()}
-                    <h3 className="text-lg font-semibold text-gray-800">{section.title}</h3>
+          <h2 className="text-2xl font-bold mb-6">Les options {companyName}</h2>
+          <div className="space-y-6">
+            {(() => {
+              // Cas spécial: Lieu de réception avec establishment
+              // Les données sont dans receptionSpaces et receptionOptions
+              const receptionSpaces = storefront.establishment?.receptionSpaces as any[] | undefined
+              const receptionOptions = storefront.establishment?.receptionOptions as any | undefined
+
+              if (storefront.establishment && (receptionSpaces?.length || receptionOptions)) {
+                const sections = []
+
+                // Section: Espaces de réception
+                if (receptionSpaces && receptionSpaces.length > 0) {
+                  sections.push(
+                    <div key="spaces" className="bg-white rounded-xl p-6 border shadow-sm">
+                      <div className="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                        <Home className="w-5 h-5 text-pink-600" />
+                        <h3 className="text-base font-semibold text-gray-800">Espaces de réception</h3>
+                      </div>
+                      <div className="space-y-4">
+                        {receptionSpaces.map((space: any, idx: number) => (
+                          <div key={idx} className="p-4 bg-gray-50 rounded-lg border">
+                            <h4 className="font-medium text-gray-900 mb-2">{space.name}</h4>
+                            {space.description && (
+                              <p className="text-sm text-gray-600 mb-3">{space.description}</p>
+                            )}
+                            <div className="flex flex-wrap gap-2">
+                              {space.surface > 0 && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full border text-sm">
+                                  <Square className="w-3 h-3" /> {space.surface} m²
+                                </span>
+                              )}
+                              {space.seatedCapacity > 0 && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full border text-sm">
+                                  <Users className="w-3 h-3" /> {space.seatedCapacity} assis
+                                </span>
+                              )}
+                              {space.standingCapacity > 0 && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full border text-sm">
+                                  <Users className="w-3 h-3" /> {space.standingCapacity} debout
+                                </span>
+                              )}
+                              {space.hasDanceFloor && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-700 rounded-full border border-pink-200 text-sm">
+                                  <Music className="w-3 h-3" /> Piste de danse
+                                </span>
+                              )}
+                              {space.hasPmrAccess && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-700 rounded-full border border-pink-200 text-sm">
+                                  <Accessibility className="w-3 h-3" /> Accès PMR
+                                </span>
+                              )}
+                              {space.hasPrivateOutdoor && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-700 rounded-full border border-pink-200 text-sm">
+                                  <TreePine className="w-3 h-3" /> Extérieur privatif
+                                </span>
+                              )}
+                              {space.rentalDuration > 0 && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full border text-sm">
+                                  <Clock className="w-3 h-3" /> {space.rentalDuration}h
+                                </span>
+                              )}
+                              {space.price > 0 && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full border text-sm font-medium text-pink-600">
+                                  <Euro className="w-3 h-3" /> {space.price.toLocaleString('fr-FR')} €
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                }
+
+                // Section: Hébergement
+                if (receptionOptions?.accommodationType && receptionOptions.accommodationType !== 'Aucun') {
+                  const accommodationItems = []
+                  accommodationItems.push({ label: 'Type', value: receptionOptions.accommodationType })
+                  if (receptionOptions.numberOfRooms > 0) accommodationItems.push({ label: 'Chambres', value: receptionOptions.numberOfRooms })
+                  if (receptionOptions.numberOfBeds > 0) accommodationItems.push({ label: 'Lits', value: receptionOptions.numberOfBeds })
+
+                  if (accommodationItems.length > 0) {
+                    sections.push(
+                      <div key="accommodation" className="bg-white rounded-xl p-6 border shadow-sm">
+                        <div className="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                          <Bed className="w-5 h-5 text-pink-600" />
+                          <h3 className="text-base font-semibold text-gray-800">Hébergement</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          {accommodationItems.map((item, idx) => (
+                            <div key={idx} className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-200">
+                              <span className="text-sm text-gray-600">{item.label}</span>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-sm font-medium text-pink-600">{item.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  }
+                }
+
+                // Section: Restauration
+                if (receptionOptions) {
+                  const restaurationItems = []
+                  if (receptionOptions.hasMandatoryCaterer) restaurationItems.push({ label: 'Traiteur imposé', isBoolean: true })
+                  if (receptionOptions.providesCatering) restaurationItems.push({ label: 'Restauration proposée', isBoolean: true })
+                  if (receptionOptions.allowsOwnDrinks) restaurationItems.push({ label: 'Boissons personnelles autorisées', isBoolean: true })
+                  if (receptionOptions.hasCorkageFee && receptionOptions.corkageFee > 0) {
+                    restaurationItems.push({ label: 'Droit de bouchon', value: `${receptionOptions.corkageFee} €` })
+                  }
+                  if (receptionOptions.hasTimeLimit && receptionOptions.timeLimit) {
+                    restaurationItems.push({ label: 'Limite horaire', value: receptionOptions.timeLimit })
+                  }
+
+                  if (restaurationItems.length > 0) {
+                    sections.push(
+                      <div key="restauration" className="bg-white rounded-xl p-6 border shadow-sm">
+                        <div className="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                          <Utensils className="w-5 h-5 text-pink-600" />
+                          <h3 className="text-base font-semibold text-gray-800">Restauration</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          {restaurationItems.map((item: any, idx) => (
+                            <div key={idx} className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-200">
+                              <span className="text-sm text-gray-600">{item.label}</span>
+                              {!item.isBoolean && item.value && (
+                                <>
+                                  <span className="text-gray-300">•</span>
+                                  <span className="text-sm font-medium text-pink-600">{item.value}</span>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  }
+                }
+
+                // Section: Services
+                if (receptionOptions) {
+                  const serviceItems = []
+                  if (receptionOptions.hasMandatoryPhotographer) serviceItems.push({ label: 'Photographe imposé', isBoolean: true })
+                  if (receptionOptions.hasMusicExclusivity) serviceItems.push({ label: 'Exclusivité musique', isBoolean: true })
+                  if (receptionOptions.includesCleaning) serviceItems.push({ label: 'Ménage inclus', isBoolean: true })
+                  if (receptionOptions.allowsPets) serviceItems.push({ label: 'Animaux acceptés', isBoolean: true })
+                  if (receptionOptions.allowsMultipleEvents) serviceItems.push({ label: 'Plusieurs événements possibles', isBoolean: true })
+                  if (receptionOptions.hasSecurityGuard) serviceItems.push({ label: 'Agent de sécurité', isBoolean: true })
+                  if (receptionOptions.additionalServices) {
+                    serviceItems.push({ label: 'Services additionnels', value: receptionOptions.additionalServices })
+                  }
+
+                  if (serviceItems.length > 0) {
+                    sections.push(
+                      <div key="services" className="bg-white rounded-xl p-6 border shadow-sm">
+                        <div className="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                          <Settings className="w-5 h-5 text-pink-600" />
+                          <h3 className="text-base font-semibold text-gray-800">Services</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          {serviceItems.map((item: any, idx) => (
+                            <div key={idx} className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-200">
+                              <span className="text-sm text-gray-600">{item.label}</span>
+                              {!item.isBoolean && item.value && (
+                                <>
+                                  <span className="text-gray-300">•</span>
+                                  <span className="text-sm font-medium text-pink-600">{item.value}</span>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  }
+                }
+
+                if (sections.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-gray-500 bg-white rounded-xl border">
+                      Aucune option configurée pour ce lieu.
+                    </div>
+                  )
+                }
+
+                return sections
+              }
+
+              // Cas standard: Autres prestataires (utilise partner.options)
+              let providerType = '';
+              switch (serviceType) {
+                case 'LIEU': providerType = 'reception-venue'; break;
+                case 'PHOTOGRAPHE': providerType = 'photographer'; break;
+                case 'TRAITEUR': providerType = 'caterer'; break;
+                case 'MUSIQUE': providerType = 'music-dj'; break;
+                case 'VOITURE': case 'BUS': providerType = 'vehicle'; break;
+                case 'DECORATION': providerType = 'decoration'; break;
+                case 'CHAPITEAU': providerType = 'tent'; break;
+                case 'ANIMATION': providerType = 'animation'; break;
+                case 'FLORISTE': providerType = 'florist'; break;
+                case 'LISTE': providerType = 'wedding-registry'; break;
+                case 'ORGANISATION': providerType = 'wedding-planner'; break;
+                case 'VIDEO': providerType = 'video'; break;
+                case 'LUNE_DE_MIEL': providerType = 'honeymoon-travel'; break;
+                case 'WEDDING_CAKE': providerType = 'wedding-cake'; break;
+                case 'OFFICIANT': providerType = 'officiant'; break;
+                case 'FOOD_TRUCK': providerType = 'food-truck'; break;
+                case 'VIN': providerType = 'wine'; break;
+                case 'FAIRE_PART': providerType = 'invitation'; break;
+                case 'CADEAUX_INVITES': providerType = 'guest-gifts'; break;
+                default: providerType = '';
+              }
+
+              // Récupérer les options sauvegardées pour ce type de prestataire
+              const savedProviderOptions = partnerOptions?.[providerType] || {};
+
+              if (serviceOptions.length === 0 || Object.keys(savedProviderOptions).length === 0) {
+                return (
+                  <div className="text-center py-8 text-gray-500 bg-white rounded-xl border">
+                    Aucune option configurée pour ce type de service.
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {(section.fields || section.options)?.map((field: any, fieldIndex: number) => {
-                      // Récupérer la valeur sauvegardée pour ce champ
-                      let savedValue = null;
-                      
-                      if (storefront.partner?.options) {
-                        // Déterminer le type de prestataire selon le serviceType
-                        let providerType = '';
-                        switch (serviceType) {
-                          case 'LIEU':
-                            providerType = 'reception-venue';
-                            break;
-                          case 'PHOTOGRAPHE':
-                            providerType = 'photographer';
-                            break;
-                          case 'TRAITEUR':
-                            providerType = 'caterer';
-                            break;
-                          case 'MUSIQUE':
-                            providerType = 'music-dj';
-                            break;
-                          case 'VOITURE':
-                          case 'BUS':
-                            providerType = 'vehicle';
-                            break;
-                          case 'DECORATION':
-                            providerType = 'decoration';
-                            break;
-                          case 'CHAPITEAU':
-                            providerType = 'tent';
-                            break;
-                          case 'ANIMATION':
-                            providerType = 'animation';
-                            break;
-                          case 'FLORISTE':
-                            providerType = 'florist';
-                            break;
-                          case 'LISTE':
-                            providerType = 'wedding-registry';
-                            break;
-                          case 'ORGANISATION':
-                            providerType = 'wedding-planner';
-                            break;
-                          case 'VIDEO':
-                            providerType = 'video';
-                            break;
-                          case 'LUNE_DE_MIEL':
-                            providerType = 'honeymoon-travel';
-                            break;
-                          case 'WEDDING_CAKE':
-                            providerType = 'wedding-cake';
-                            break;
-                          case 'OFFICIANT':
-                            providerType = 'officiant';
-                            break;
-                          case 'FOOD_TRUCK':
-                            providerType = 'food-truck';
-                            break;
-                          case 'VIN':
-                            providerType = 'wine';
-                            break;
-                          case 'FAIRE_PART':
-                            providerType = 'invitation';
-                            break;
-                          case 'CADEAUX_INVITES':
-                            providerType = 'guest-gifts';
-                            break;
-                          default:
-                            providerType = '';
-                        }
-                        
-                        // Récupérer les options pour ce type de prestataire
-                        const providerOptions = storefront.partner.options[providerType];
-                        if (providerOptions && providerOptions[field.id]) {
-                          savedValue = providerOptions[field.id];
-                        }
-                      }
-                      
-                      // Formater la valeur pour l'affichage
-                      let displayValue = 'Non renseigné';
-                      if (savedValue !== null && savedValue !== undefined && savedValue !== '') {
+                );
+              }
+
+              return serviceOptions.map((section: any, sectionIndex: number) => {
+                // Récupérer les champs avec des valeurs pour cette section
+                const fieldsWithValues = (section.fields || section.options)?.filter((field: any) => {
+                  const savedValue = savedProviderOptions[field.id];
+                  return savedValue !== null && savedValue !== undefined && savedValue !== '' && savedValue !== false;
+                }) || [];
+
+                // Ne pas afficher la section si aucun champ n'a de valeur
+                if (fieldsWithValues.length === 0) return null;
+
+                return (
+                  <div key={sectionIndex} className="bg-white rounded-xl p-6 border shadow-sm">
+                    <div className="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                      {(() => {
+                        const SectionIconComponent = getSectionIcon(section.title)
+                        return <SectionIconComponent className="w-5 h-5 text-pink-600" />
+                      })()}
+                      <h3 className="text-base font-semibold text-gray-800">{section.title}</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {fieldsWithValues.map((field: any, fieldIndex: number) => {
+                        const savedValue = savedProviderOptions[field.id];
+
+                        // Formater la valeur pour l'affichage
+                        let displayValue = '';
                         if (typeof savedValue === 'boolean') {
-                          displayValue = savedValue ? 'Oui' : 'Non';
+                          displayValue = savedValue ? 'Oui' : '';
                         } else if (Array.isArray(savedValue)) {
                           displayValue = savedValue.join(', ');
                         } else {
                           displayValue = String(savedValue);
                         }
-                      }
-                      
-                      return (
-                        <div key={fieldIndex} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                          <span className="text-sm text-gray-600">{field.question} :</span>
-                          <span className="font-semibold text-sm text-gray-800">
-                            {displayValue}
-                          </span>
-                        </div>
-                      );
-                    })}
+
+                        // Pour les booléens "Oui", afficher juste le label
+                        const isBoolean = typeof savedValue === 'boolean';
+
+                        return (
+                          <div
+                            key={fieldIndex}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-200"
+                          >
+                            <span className="text-sm text-gray-600">{field.question}</span>
+                            {!isBoolean && (
+                              <>
+                                <span className="text-gray-300">•</span>
+                                <span className="text-sm font-medium text-pink-600">{displayValue}</span>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                Aucune option configurée pour ce type de service.
-              </div>
-            )}
+                );
+              });
+            })()}
           </div>
         </section>
       </div>

@@ -253,7 +253,9 @@ model ReceptionSpace {
   hasDanceFloor   Boolean  @default(false)
   hasPmrAccess    Boolean  @default(false)
   hasPrivateOutdoor Boolean @default(false)
-  
+  rentalDuration  Float    @default(0)
+  price           Float    @default(0)
+
   // Relations
   establishmentId String @db.ObjectId
   establishment   Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)

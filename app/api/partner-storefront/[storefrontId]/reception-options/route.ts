@@ -123,7 +123,9 @@ export async function PUT(
           standingCapacity: space.standingCapacity || 0,
           hasDanceFloor: space.hasDanceFloor || false,
           hasPmrAccess: space.hasPmrAccess || false,
-          hasPrivateOutdoor: space.hasPrivateOutdoor || false
+          hasPrivateOutdoor: space.hasPrivateOutdoor || false,
+          rentalDuration: space.rentalDuration || 0,
+          price: space.price || 0
         }
 
         // Vérifier si l'ID existe vraiment dans la base de données (ObjectId MongoDB valide)

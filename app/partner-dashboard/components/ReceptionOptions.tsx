@@ -22,6 +22,8 @@ interface ReceptionSpace {
   hasDanceFloor: boolean
   hasPmrAccess: boolean
   hasPrivateOutdoor: boolean
+  rentalDuration: number
+  price: number
 }
 
 interface ReceptionOptions {
@@ -103,6 +105,8 @@ export function ReceptionOptions({ storefrontId, initialData, onUpdate }: Recept
         hasDanceFloor: false,
         hasPmrAccess: false,
         hasPrivateOutdoor: false,
+        rentalDuration: 0,
+        price: 0,
       },
     ])
   }
@@ -249,39 +253,31 @@ export function ReceptionOptions({ storefrontId, initialData, onUpdate }: Recept
                   <Label htmlFor={`privateOutdoor-${index}`}>Extérieur privatif</Label>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor={`rentalDuration-${index}`}>Durée de location (heures)</Label>
+                  <Input
+                    id={`rentalDuration-${index}`}
+                    type="number"
+                    value={space.rentalDuration || ''}
+                    onChange={(e) => handleSpaceChange(index, 'rentalDuration', e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`price-${index}`}>Tarif (€)</Label>
+                  <Input
+                    id={`price-${index}`}
+                    type="number"
+                    value={space.price || ''}
+                    onChange={(e) => handleSpaceChange(index, 'price', e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                  />
+                </div>
+              </div>
             </div>
           ))}
           <Button type="button" onClick={addSpace}>
             Ajouter un espace
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Durée de location et tarif */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Durée de location et tarif</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="rentalDuration">Durée de location</Label>
-              <Input
-                id="rentalDuration"
-                value={options.rentalDuration}
-                onChange={(e) => setOptions({ ...options, rentalDuration: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Tarif</Label>
-              <Input
-                id="price"
-                type="number"
-                value={options.price}
-                onChange={(e) => setOptions({ ...options, price: parseFloat(e.target.value) })}
-              />
-            </div>
-          </div>
         </CardContent>
       </Card>
 
