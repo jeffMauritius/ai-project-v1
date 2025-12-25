@@ -16,13 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from 'next/navigation'
+import { useSidebar } from '../contexts/SidebarContext'
 
-interface NavbarProps {
-  onMenuClick?: () => void
-  showMenuButton?: boolean
-}
-
-export default function Navbar({ onMenuClick, showMenuButton = false }: NavbarProps) {
+export default function Navbar() {
+  const { showMenuButton, setIsOpen } = useSidebar()
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -60,8 +57,12 @@ export default function Navbar({ onMenuClick, showMenuButton = false }: NavbarPr
     }
   };
 
-  if (!mounted) {
-    return null
+  const handleHamburgerClick = () => {
+    if (showMenuButton) {
+      setIsOpen(true)
+    } else {
+      setIsMobileMenuOpen(current => !current)
+    }
   }
 
   return (
@@ -69,16 +70,15 @@ export default function Navbar({ onMenuClick, showMenuButton = false }: NavbarPr
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
           <div className="flex items-center space-x-4 md:space-x-8">
-            {/* Bouton hamburger pour sidebar dashboard */}
-            {showMenuButton && (
-              <button
-                onClick={onMenuClick}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden"
-                aria-label="Ouvrir le menu"
-              >
-                <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-              </button>
-            )}
+            {/* Bouton hamburger - toujours visible sur mobile */}
+            <button
+              type="button"
+              onClick={handleHamburgerClick}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden"
+              aria-label="Ouvrir le menu"
+            >
+              <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+            </button>
 
             <Link href="/" className="flex flex-shrink-0 items-center">
               <Image src="/monmariage-logo.png" alt="MonMariage.ai logo" height={40} width={180} className="h-8 sm:h-10 w-auto" priority />
@@ -102,7 +102,7 @@ export default function Navbar({ onMenuClick, showMenuButton = false }: NavbarPr
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {session?.user?.role === "PARTNER" && storefrontId && (
+            {mounted && session?.user?.role === "PARTNER" && storefrontId && (
               <Link
                 href={`/storefront/${storefrontId}`}
                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -113,7 +113,7 @@ export default function Navbar({ onMenuClick, showMenuButton = false }: NavbarPr
               </Link>
             )}
 
-            {status === "loading" ? (
+            {!mounted || status === "loading" ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (
               <DropdownMenu>
@@ -167,6 +167,28 @@ export default function Navbar({ onMenuClick, showMenuButton = false }: NavbarPr
           </div>
         </div>
       </div>
+
+      {/* Menu mobile pour pages publiques uniquement (pas sur les dashboards) */}
+      {isMobileMenuOpen && !showMenuButton && (
+        <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-3 space-y-2">
+            <Link
+              href="/establishments"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-gray-700 dark:text-gray-300 hover:text-pink-600 hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-md text-base font-medium transition-colors"
+            >
+              Lieux de mariages
+            </Link>
+            <Link
+              href="/prestataires"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-gray-700 dark:text-gray-300 hover:text-pink-600 hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-md text-base font-medium transition-colors"
+            >
+              Prestataires
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

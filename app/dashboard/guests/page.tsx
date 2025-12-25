@@ -380,21 +380,21 @@ export default function Guests() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex-1">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Invités</h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             {confirmedGuests} confirmés sur {totalGuests} invités au total
           </p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <button
             onClick={() => {
               resetGroupForm()
               setEditingGuest(null)
               setIsAddingGuest(true)
             }}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500"
+            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500"
             disabled={saving}
           >
             <PlusIcon className="h-5 w-5 mr-2" />
@@ -407,7 +407,7 @@ export default function Guests() {
                 setEditingIndividualGuest(null)
                 setIsAddingIndividualGuest(true)
               }}
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm ${
+              className={`inline-flex items-center justify-center w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm ${
                 guestGroups.length === 0
                   ? 'bg-gray-400 cursor-not-allowed opacity-50 text-white'
                   : 'bg-pink-600 hover:bg-pink-500 text-white'

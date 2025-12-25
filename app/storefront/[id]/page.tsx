@@ -610,26 +610,26 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
           {/* Carrousel - 2/3 de la largeur */}
           <div className="lg:col-span-2">
             <div className="mb-4">
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">{companyName}</h1>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="w-4 h-4" />
+                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">{companyName}</h1>
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
                     <span>{venueAddress}</span>
                   </div>
                 </div>
                 {/* Avis clients à droite du titre */}
-                <div className="text-right">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="flex items-center gap-1">
+                <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 sm:text-right">
+                  <div className="flex items-center gap-1 sm:gap-2 sm:mb-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-4 h-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                        <Star key={i} className={`w-3 h-3 sm:w-4 sm:h-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">{rating}/5</span>
+                    <span className="text-xs sm:text-sm text-gray-600 font-medium">{rating}/5</span>
                   </div>
                   <p className="text-xs text-gray-500">(12 avis)</p>
-                  <button className="text-pink-600 text-xs hover:underline">
+                  <button className="text-pink-600 text-xs hover:underline hidden sm:block">
                     Voir tous les avis
                   </button>
                 </div>
@@ -639,7 +639,7 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
               <ImageCarousel images={allImages} title={companyName} />
             </div>
             {/* Boutons sous le carrousel */}
-            <div className="mt-4 flex items-center gap-4">
+            <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
               <FavoriteButton
                 storefrontId={storefront.id}
                 name={companyName}
@@ -662,12 +662,12 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
           </div>
 
           {/* Carte de contact - 1/3 de la largeur */}
-          <div className="lg:col-span-1">
-            <div className="mb-4 invisible">
+          <div className="lg:col-span-1 mt-6 lg:mt-0">
+            <div className="mb-4 invisible hidden lg:block">
               {/* Espace invisible pour aligner avec le titre */}
               <div style={{ height: '5.25rem' }}></div>
             </div>
-            <div className="h-80 md:h-96 flex flex-col justify-end">
+            <div className="lg:h-80 lg:flex lg:flex-col lg:justify-end">
               <ContactCard
                 storefrontId={storefront.id}
                 companyName={companyName}

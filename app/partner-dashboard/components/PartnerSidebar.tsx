@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { BarChart3, CreditCard, MessageSquare, Star, Settings, Store, Users2, Inbox, LineChart, X } from 'lucide-react'
+import { useSidebar } from '../../contexts/SidebarContext'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/partner-dashboard', icon: BarChart3 },
@@ -18,19 +19,19 @@ const navigation = [
   { name: 'Paramètres', href: '/partner-dashboard/settings', icon: Settings },
 ]
 
-interface PartnerSidebarProps {
-  isOpen?: boolean
-  onClose?: () => void
-}
-
-export default function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps) {
+export default function PartnerSidebar() {
   const pathname = usePathname()
+  const { isOpen, setIsOpen, setShowMenuButton } = useSidebar()
+
+  // Activer le bouton menu quand le composant est monté
+  useEffect(() => {
+    setShowMenuButton(true)
+    return () => setShowMenuButton(false)
+  }, [setShowMenuButton])
 
   // Fermer le sidebar quand on change de page sur mobile
   useEffect(() => {
-    if (onClose) {
-      onClose()
-    }
+    setIsOpen(false)
   }, [pathname])
 
   return (
@@ -39,7 +40,7 @@ export default function PartnerSidebar({ isOpen = false, onClose }: PartnerSideb
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={onClose}
+          onClick={() => setIsOpen(false)}
         />
       )}
 
@@ -55,7 +56,7 @@ export default function PartnerSidebar({ isOpen = false, onClose }: PartnerSideb
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 md:hidden">
           <span className="font-semibold text-gray-900 dark:text-white">Menu Partenaire</span>
           <button
-            onClick={onClose}
+            onClick={() => setIsOpen(false)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="h-5 w-5 text-gray-500" />

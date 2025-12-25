@@ -7,6 +7,7 @@ import Footer from './components/Footer'
 import { GalleryProvider } from '@/components/ui/GlobalImageGallery'
 import { ConfirmationProvider } from '@/components/ui/confirmation-dialog'
 import { FavoritesProvider } from '@/hooks/useFavorites'
+import { SidebarProvider } from './contexts/SidebarContext'
 import { headers } from 'next/headers'
 
 const inter = Inter({ subsets: ['latin'] });
@@ -38,9 +39,11 @@ export default async function RootLayout({
           <ConfirmationProvider>
             <GalleryProvider>
               <FavoritesProvider>
-                {!isAuthPage && <Navbar />}
-                {children}
-                {!isAuthPage && <Footer />}
+                <SidebarProvider>
+                  {!isAuthPage && <Navbar />}
+                  {children}
+                  {!isAuthPage && <Footer />}
+                </SidebarProvider>
               </FavoritesProvider>
             </GalleryProvider>
           </ConfirmationProvider>

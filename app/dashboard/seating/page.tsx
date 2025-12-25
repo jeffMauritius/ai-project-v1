@@ -320,9 +320,9 @@ export default function Seating() {
       onDragEnd={handleDragEnd}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="flex h-[calc(100vh-9rem)]">
+      <div className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-9rem)]">
         {/* Liste des invités */}
-        <div className="w-80 bg-white dark:bg-gray-800 shadow-lg overflow-hidden border-r border-gray-200 dark:border-gray-700">
+        <div className="w-full md:w-80 bg-white dark:bg-gray-800 shadow-lg overflow-hidden border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 max-h-[40vh] md:max-h-none">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-medium text-gray-900 dark:text-white">
                 Invités non placés
@@ -374,13 +374,13 @@ export default function Seating() {
           </div>
 
           {/* Plan de table */}
-          <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex-1 p-4 md:p-8 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Plan de table</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Plan de table</h1>
               {!guestsLoading && !tablesLoading && (
-                <div className="flex gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  <span>Total invités: {guests.length}</span>
+                <div className="flex flex-wrap gap-2 md:gap-4 mt-2 text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                  <span>Total: {guests.length}</span>
                   <span>Placés: {guests.filter(g => g.status === 'assigned').length}</span>
                   <span>Non placés: {guests.filter(g => g.status === 'unassigned').length}</span>
                   <span>Tables: {tables.length}</span>
@@ -396,7 +396,7 @@ export default function Seating() {
             )}
             <button
               onClick={() => setIsAddingTable(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+              className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
               Ajouter une table
@@ -405,7 +405,7 @@ export default function Seating() {
 
           {/* Modal d'ajout de table */}
           {isAddingTable && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
               <div
                 ref={dialogRef}
                 className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-sm"
@@ -466,7 +466,7 @@ export default function Seating() {
                     )}
                   </div>
                 </div>
-                <div className="flex justify-end space-x-3">
+                <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end mt-4">
                   <button
                     onClick={() => {
                       setIsAddingTable(false)
@@ -474,14 +474,14 @@ export default function Seating() {
                       setNewTableSeats(8)
                       setNewTableName('')
                     }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md border border-gray-300 dark:border-gray-600"
                     disabled={saving}
                   >
                     Annuler
                   </button>
                   <button
                     onClick={handleAddTable}
-                    className="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md disabled:opacity-50"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-500 rounded-md disabled:opacity-50"
                     disabled={saving}
                   >
                     {saving ? 'Ajout...' : 'Ajouter'}

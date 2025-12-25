@@ -14,6 +14,7 @@ import {
   HeartIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
+import { useSidebar } from '../contexts/SidebarContext'
 
 const navigation = [
   { name: 'Paramètres', href: '/dashboard/settings', icon: UserCircleIcon },
@@ -26,19 +27,19 @@ const navigation = [
   { name: 'Photos', href: '/dashboard/photos', icon: PhotoIcon },
 ]
 
-interface SidebarProps {
-  isOpen?: boolean
-  onClose?: () => void
-}
-
-export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname()
+  const { isOpen, setIsOpen, setShowMenuButton } = useSidebar()
+
+  // Activer le bouton menu quand le composant est monté
+  useEffect(() => {
+    setShowMenuButton(true)
+    return () => setShowMenuButton(false)
+  }, [setShowMenuButton])
 
   // Fermer le sidebar quand on change de page sur mobile
   useEffect(() => {
-    if (onClose) {
-      onClose()
-    }
+    setIsOpen(false)
   }, [pathname])
 
   return (
@@ -47,7 +48,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={onClose}
+          onClick={() => setIsOpen(false)}
         />
       )}
 
@@ -63,7 +64,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 md:hidden">
           <span className="font-semibold text-gray-900 dark:text-white">Menu</span>
           <button
-            onClick={onClose}
+            onClick={() => setIsOpen(false)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <XMarkIcon className="h-5 w-5 text-gray-500" />
