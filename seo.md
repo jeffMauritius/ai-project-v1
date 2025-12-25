@@ -18,6 +18,8 @@
 | generateMetadata Storefront | /app/storefront/[id]/page.tsx | Fait |
 | JSON-LD LocalBusiness | /app/storefront/[id]/page.tsx | Fait |
 | manifest.json PWA | /public/manifest.json | Fait |
+| Google Search Console | Configuration | Fait |
+| Soumission Sitemap | Google Search Console | Fait |
 
 ---
 
@@ -54,6 +56,10 @@
 - Icône logo existant
 - Shortcuts vers lieux et prestataires
 
+### Google Search Console
+- Propriété vérifiée
+- Sitemap soumis : https://monmariage.ai/sitemap.xml
+
 ---
 
 ## URLs
@@ -68,9 +74,8 @@
 ## Prochaines étapes optionnelles
 
 1. Créer image OG dédiée (1200x630px) - /public/og-image.jpg
-2. Configurer Google Search Console
-3. Soumettre sitemap à Google
-4. Tester avec Rich Results Test
+2. Suivre l'indexation dans Google Search Console
+3. Tester avec Rich Results Test
 
 ---
 

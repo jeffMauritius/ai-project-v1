@@ -494,7 +494,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 import ImageGallery from './components/ImageGallery'
 import ImageCarousel from './components/ImageCarousel'
 import ContactCard from './components/ContactCard'
-import ChatCard from './components/ChatCard'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { FavoriteButton } from '@/components/ui/FavoriteButton'
 import { AddToOrganizationButton } from '@/components/ui/AddToOrganizationButton'
@@ -533,7 +532,9 @@ async function getStorefrontData(id: string) {
             hasTerrace: true,
             hasKitchen: true,
             hasAccommodation: true,
-            images: true // Inclure le tableau images qui contient les URLs Vercel Blob
+            images: true, // Inclure le tableau images qui contient les URLs Vercel Blob
+            latitude: true,
+            longitude: true
           }
         },
         partner: {
@@ -574,7 +575,9 @@ async function getStorefrontData(id: string) {
           hasTerrace: true,
           hasKitchen: true,
           hasAccommodation: true,
-          images: true
+          images: true,
+          latitude: true,
+          longitude: true
         }
       })
       
@@ -860,7 +863,7 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Section principale avec carrousel et contact */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 lg:mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-4 lg:mb-6">
           {/* Carrousel - 2/3 de la largeur */}
           <div className="lg:col-span-2">
             <div className="mb-4">
@@ -913,6 +916,15 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                 className="border border-gray-300 hover:bg-gray-50"
               />
             </div>
+
+            {/* Description - À propos */}
+            <section className="mt-6">
+              <h2 className="text-2xl font-bold mb-4">À propos de {companyName}</h2>
+              <div
+                className="text-gray-700 leading-relaxed [&>p]:mb-2 [&>br]:leading-tight prose-p:my-1"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            </section>
           </div>
 
           {/* Carte de contact - 1/3 de la largeur */}
@@ -921,7 +933,7 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
               {/* Espace invisible pour aligner avec le titre */}
               <div style={{ height: '5.25rem' }}></div>
             </div>
-            <div className="lg:h-80 lg:flex lg:flex-col lg:justify-end">
+            <div>
               <ContactCard
                 storefrontId={storefront.id}
                 companyName={companyName}
@@ -930,6 +942,8 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                 serviceType={serviceType}
                 interventionType={venueType}
                 interventionRadius={50}
+                latitude={isVenue && storefront.establishment ? storefront.establishment.latitude : null}
+                longitude={isVenue && storefront.establishment ? storefront.establishment.longitude : null}
               />
             </div>
           </div>
@@ -938,17 +952,6 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
         {/* Contenu principal */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <div className="lg:col-span-2">
-            {/* Description */}
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">À propos de {companyName}</h2>
-              <div className="prose max-w-none">
-                <div 
-                  className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: description }}
-                />
-              </div>
-            </section>
-
             {/* Galerie d'images */}
             {galleryImages.length > 0 && (
               <ImageLightbox 
@@ -963,13 +966,6 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                 gridCols={4}
               />
             )}
-          </div>
-
-          {/* Chat en temps réel */}
-          <div className="lg:col-span-1">
-            <div className="h-96">
-              <ChatCard companyName={companyName} storefrontId={id} />
-            </div>
           </div>
         </div>
 

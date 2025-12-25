@@ -3,6 +3,18 @@
 import { MapPin, Phone, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { QuoteRequestForm } from '@/components/ui/QuoteRequestForm'
+import dynamic from 'next/dynamic'
+import ChatCard from './ChatCard'
+
+// Import dynamique pour éviter les erreurs SSR avec Leaflet
+const VenueMap = dynamic(() => import('./VenueMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[200px] rounded-lg bg-gray-100 animate-pulse flex items-center justify-center">
+      <span className="text-gray-400 text-sm">Chargement de la carte...</span>
+    </div>
+  ),
+})
 
 interface ContactCardProps {
   storefrontId: string
@@ -12,6 +24,8 @@ interface ContactCardProps {
   serviceType: string
   interventionType: string
   interventionRadius: number
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export default function ContactCard({
@@ -21,8 +35,11 @@ export default function ContactCard({
   venueType,
   serviceType,
   interventionType,
-  interventionRadius
+  interventionRadius,
+  latitude,
+  longitude
 }: ContactCardProps) {
+  const hasCoordinates = latitude != null && longitude != null
   const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false);
   return (
     <div className="w-full flex flex-col space-y-4">
@@ -78,6 +95,23 @@ export default function ContactCard({
             </span>
           </div>
         </div>
+
+        {/* Carte de localisation */}
+        {hasCoordinates && (
+          <div className="mt-4 pt-4 border-t">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Localisation</h4>
+            <VenueMap
+              latitude={latitude!}
+              longitude={longitude!}
+              venueName={companyName}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Chat en temps réel */}
+      <div className="h-96">
+        <ChatCard companyName={companyName} storefrontId={storefrontId} />
       </div>
     </div>
   )
