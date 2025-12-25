@@ -154,8 +154,8 @@ export default function PrestatairesPage() {
   const totalPages = data?.totalPages || 0;
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="mb-8 text-3xl font-bold">Nos Prestataires</h1>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="mb-6 text-2xl sm:text-3xl font-bold">Nos Prestataires</h1>
       
       <TypeFilter
         types={serviceTypes}

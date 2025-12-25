@@ -241,3 +241,17 @@
   - Utilisation du composant `ImageWithFallback` pour les cartes de prestataires
 
 **Résultat :** Les cartes affichent maintenant un placeholder élégant avec une icône et un message quand l'image n'est pas disponible ou échoue au chargement
+
+---
+
+### 15. Fix padding page Prestataires mobile
+
+**Problème :** La page Prestataires n'avait pas les mêmes paddings responsifs que la page Établissements, causant un débordement sur mobile.
+
+**Solution :**
+- Modification de `/app/prestataires/page.tsx` :
+  - Ajout de padding horizontal responsive `px-4 sm:px-6 lg:px-8`
+  - Taille de titre responsive `text-2xl sm:text-3xl`
+  - Réduction du margin-bottom du titre à `mb-6` (cohérent avec établissements)
+
+**Résultat :** La page Prestataires a maintenant les mêmes marges et paddings que la page Établissements
