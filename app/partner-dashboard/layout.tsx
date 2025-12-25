@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import PartnerSidebar from './components/PartnerSidebar'
+import PartnerDashboardLayoutClient from './PartnerDashboardLayoutClient'
 
 export const metadata: Metadata = {
   title: 'Espace Partenaire - MonMariage.ai',
@@ -11,14 +11,5 @@ export default function PartnerDashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="flex">
-        <PartnerSidebar />
-        <main className="flex-1 p-8">
-          {children}
-        </main>
-      </div>
-    </div>
-  )
+  return <PartnerDashboardLayoutClient>{children}</PartnerDashboardLayoutClient>
 }

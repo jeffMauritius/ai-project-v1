@@ -51,9 +51,9 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-between">
         {/* Hero Section */}
         <div className="relative isolate">
-          <div className="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8 dark:bg-gray-900">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-16 lg:py-20 lg:px-8 dark:bg-gray-900">
             <div className="mx-auto max-w-2xl text-center">
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Planifiez le mariage de vos rêves avec l&apos;IA
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">

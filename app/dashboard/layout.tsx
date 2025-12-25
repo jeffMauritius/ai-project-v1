@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
-import Sidebar from '../components/Sidebar'
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import DashboardLayoutClient from './DashboardLayoutClient'
 
 export const metadata: Metadata = {
   title: 'Tableau de bord - MonMariage.ai',
@@ -20,16 +20,5 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  return (
-    <>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 p-8">
-            {children}
-          </main>
-        </div>
-      </div>
-    </>
-  )
+  return <DashboardLayoutClient>{children}</DashboardLayoutClient>
 }

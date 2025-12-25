@@ -73,7 +73,7 @@ export default function Analytics() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Tableau de bord
@@ -83,7 +83,7 @@ export default function Analytics() {
           </p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Sélectionner une période" />
           </SelectTrigger>
           <SelectContent>

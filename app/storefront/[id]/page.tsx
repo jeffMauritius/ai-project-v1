@@ -604,15 +604,15 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-0 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Section principale avec carrousel et contact */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 lg:mb-8">
           {/* Carrousel - 2/3 de la largeur */}
           <div className="lg:col-span-2">
             <div className="mb-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{companyName}</h1>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">{companyName}</h1>
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="w-4 h-4" />
                     <span>{venueAddress}</span>
@@ -682,7 +682,7 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
         </div>
 
         {/* Contenu principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <div className="lg:col-span-2">
             {/* Description */}
             <section className="mb-8">

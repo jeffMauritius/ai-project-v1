@@ -208,8 +208,8 @@ export default function AISearchBar() {
             <p className="text-gray-600 dark:text-gray-300 mb-6">
               Pour utiliser cette fonctionnalité, vous devez créer un compte gratuit.
             </p>
-            <Button 
-              onClick={() => router.push('/auth/login')}
+            <Button
+              onClick={() => router.push('/auth/register')}
               className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium mx-auto"
             >
               Créer un compte gratuitement

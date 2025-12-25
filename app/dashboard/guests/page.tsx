@@ -481,7 +481,7 @@ export default function Guests() {
       </div>
 
       {/* Liste des groupes */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
@@ -562,9 +562,10 @@ export default function Guests() {
 
       {/* Liste des invités individuels */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden mt-8">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white">Liste des invités</h2>
         </div>
+        <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
@@ -637,6 +638,7 @@ export default function Guests() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Modal Ajout/Édition Groupe */}

@@ -262,19 +262,19 @@ export default function Messages() {
 
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-9rem)]">
-    <div className="flex items-center justify-between mb-8">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
+    <div className="flex items-center justify-between mb-4 sm:mb-8">
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
       <div className="flex items-center space-x-2">
         <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-        <span className="text-sm text-gray-600 dark:text-gray-400">
+        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           {isConnected ? 'Connecté' : 'Déconnecté'}
         </span>
       </div>
     </div>
-      
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow h-full flex overflow-hidden">
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow h-full flex flex-col md:flex-row overflow-hidden">
         {/* Liste des conversations */}
-        <div className="w-1/3 border-r border-gray-200 dark:border-gray-700">
+        <div className={`${selectedConversation ? 'hidden md:block' : 'block'} w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700`}>
           <div className="h-full flex flex-col">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <input
@@ -343,27 +343,38 @@ export default function Messages() {
 
         {/* Zone de conversation */}
         {selectedConversation ? (
-          <div className="flex-1 flex flex-col">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className={`${selectedConversation ? 'block' : 'hidden md:block'} flex-1 flex flex-col w-full md:w-2/3`}>
+            <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center">
+                {/* Bouton retour sur mobile */}
+                <button
+                  onClick={() => setSelectedConversation(null)}
+                  className="md:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  aria-label="Retour aux conversations"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                   <ChatBubbleLeftRightIcon className="w-5 h-5 text-pink-600" />
                 </div>
-                <div>
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white truncate">
                     {conversations.find(c => c.id === selectedConversation)?.partner.name}
                   </h2>
-                  <p className="text-sm text-pink-600 dark:text-pink-400">
+                  <p className="text-xs sm:text-sm text-pink-600 dark:text-pink-400">
                     {conversations.find(c => c.id === selectedConversation)?.partner.type}
                   </p>
                 </div>
-                <div className="ml-auto">
+                <div className="flex-shrink-0">
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                    isConnected 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
+                    isConnected
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
                       : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
                   }`}>
-                    {isConnected ? 'En ligne' : 'Hors ligne'}
+                    <span className="hidden sm:inline">{isConnected ? 'En ligne' : 'Hors ligne'}</span>
+                    <span className="sm:hidden">{isConnected ? '●' : '○'}</span>
                   </span>
                 </div>
               </div>
