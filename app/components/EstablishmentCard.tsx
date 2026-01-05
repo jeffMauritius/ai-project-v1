@@ -158,11 +158,12 @@ export default function EstablishmentCard({ establishment }: EstablishmentCardPr
       <CardContent className="p-4">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <span className="text-lg font-semibold">⭐ {rating}</span>
+            {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+            {/* <span className="text-lg font-semibold">⭐ {rating}</span>
             <span className="text-sm text-gray-600">
               ({numberOfReviews})
-            </span>
-            <span className="ml-2 text-sm text-gray-600">{location}</span>
+            </span> */}
+            <span className="text-sm text-gray-600">{location}</span>
           </div>
         </div>
         <h3 className="mb-2 text-xl font-semibold group-hover:text-pink-600 transition-colors">{name}</h3>

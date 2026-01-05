@@ -345,12 +345,13 @@ export default function Results() {
                       {getServiceTypeLabel(result.serviceType)}
                     </span>
                   </div>
-                  {result.rating && (
+                  {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+                  {/* {result.rating && (
                     <div className="absolute bottom-4 left-4 flex items-center bg-white/90 dark:bg-gray-800/90 px-2 py-1 rounded-full">
                       <StarIcon className="h-4 w-4 text-yellow-400" />
                       <span className="ml-1 text-sm font-medium">{result.rating}</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
                 
                 <div className="p-6">

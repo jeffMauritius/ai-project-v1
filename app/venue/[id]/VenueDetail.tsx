@@ -285,10 +285,11 @@ export default function VenueDetail({ id }: { id: string }) {
                     <MapPinIcon className="h-4 w-4 mr-1" />
                     {venue.location}
                   </div>
-                  <div className="flex items-center">
+                  {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+                  {/* <div className="flex items-center">
                     <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
                     {venue.rating}
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className="text-right">
@@ -344,10 +345,11 @@ export default function VenueDetail({ id }: { id: string }) {
                         <h3 className="font-semibold text-gray-900 dark:text-white">{partner.name}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{partner.type}</p>
                       </div>
-                      <div className="flex items-center">
+                      {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+                      {/* <div className="flex items-center">
                         <StarIcon className="h-4 w-4 text-yellow-400" />
                         <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">{partner.rating}</span>
-                      </div>
+                      </div> */}
                     </div>
                     <a 
                       href={`/partner/${partner.id}`}

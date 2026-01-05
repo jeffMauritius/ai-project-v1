@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/pagination";
 import { useQuery } from "@tanstack/react-query";
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback'
-import { StarIcon } from '@heroicons/react/24/solid'
+// import { StarIcon } from '@heroicons/react/24/solid' // MASQUÉ TEMPORAIREMENT - plus utilisé
 import { MapPinIcon, BanknotesIcon, UsersIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 
@@ -180,12 +180,13 @@ export default function PrestatairesPage() {
                   {getServiceTypeLabel(prestataire.serviceType)}
                 </span>
               </div>
-              {prestataire.rating && (
+              {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+              {/* {prestataire.rating && (
                 <div className="absolute bottom-4 left-4 flex items-center bg-white/90 px-2 py-1 rounded-full">
                   <StarIcon className="h-4 w-4 text-yellow-400" />
                   <span className="ml-1 text-sm font-medium">{prestataire.rating}</span>
                 </div>
-              )}
+              )} */}
             </div>
             
             <div className="p-6">

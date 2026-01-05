@@ -289,10 +289,11 @@ export default function PartnerDetail({ id }: { id: string }) {
                     <MapPinIcon className="h-4 w-4 mr-1" />
                     {partner.location}
                   </div>
-                  <div className="flex items-center">
+                  {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+                  {/* <div className="flex items-center">
                     <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
                     {partner.rating}
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className="text-right">

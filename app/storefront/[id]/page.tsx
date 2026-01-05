@@ -842,15 +842,16 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
       addressCountry: 'FR'
     },
     ...(allImages[0]?.url && { image: allImages[0].url }),
-    ...(rating > 0 && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: rating,
-        reviewCount: 12,
-        bestRating: 5,
-        worstRating: 1
-      }
-    }),
+    // MASQUÉ TEMPORAIREMENT - Avis dans JSON-LD
+    // ...(rating > 0 && {
+    //   aggregateRating: {
+    //     '@type': 'AggregateRating',
+    //     ratingValue: rating,
+    //     reviewCount: 12,
+    //     bestRating: 5,
+    //     worstRating: 1
+    //   }
+    // }),
     ...(price > 0 && {
       priceRange: `À partir de ${price}€`
     }),
@@ -887,8 +888,8 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                     <span>{venueAddress}</span>
                   </div>
                 </div>
-                {/* Avis clients à droite du titre */}
-                <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 sm:text-right">
+                {/* Avis clients à droite du titre - MASQUÉ TEMPORAIREMENT */}
+                {/* <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 sm:text-right">
                   <div className="flex items-center gap-1 sm:gap-2 sm:mb-1">
                     <div className="flex items-center gap-0.5 sm:gap-1">
                       {[...Array(5)].map((_, i) => (
@@ -901,20 +902,19 @@ export default async function StorefrontPublicPage({ params }: { params: Promise
                   <button className="text-pink-600 text-xs hover:underline hidden sm:block">
                     Voir tous les avis
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="h-80 md:h-96">
               <ImageCarousel images={allImages} title={companyName} />
             </div>
             {/* Boutons sous le carrousel */}
+            {/* rating et numberOfReviews masqués temporairement - ne pas passer ces props */}
             <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
               <FavoriteButton
                 storefrontId={storefront.id}
                 name={companyName}
                 location={venueAddress}
-                rating={rating}
-                numberOfReviews={12}
                 description={description}
                 imageUrl={allImages[0]?.url || '/placeholder-venue.jpg'}
                 showText={true}

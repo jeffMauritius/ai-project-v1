@@ -24,13 +24,10 @@ export default function Terms() {
             <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-4 bg-white dark:bg-gray-800">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Éditeur du site</h3>
               <div className="prose dark:prose-invert">
-                <p><strong>SARL Monolythe</strong></p>
-                <p>Siège social : 1180 route des Hauts Fourneaux – 01150 Villebois – France</p>
-                <p>SIRET : 810 607 440 00015</p>
-                <p>Forme juridique : SARL</p>
-                <p>Responsable de publication : Le gérant de la SARL Monolythe</p>
+                <p><strong>Fox Office</strong></p>
+                <p>Adresse : Beau Bassin Mauritius</p>
+                <p>BRN C07061769</p>
                 <p>Email : <a href="mailto:contact@monmariage.ai" className="text-blue-600 dark:text-blue-400 hover:underline">contact@monmariage.ai</a></p>
-                <p>Téléphone : <a href="tel:0621778117" className="text-blue-600 dark:text-blue-400 hover:underline">06 21 77 81 17</a></p>
               </div>
             </div>
 
@@ -76,7 +73,7 @@ export default function Terms() {
                 <li>gratuit pour les prestataires.</li>
               </ul>
               <p>
-                La société Monolythe se réserve le droit d&apos;introduire ultérieurement des offres payantes, notamment pour les prestataires, sans obligation de maintenir la gratuité.
+                Fox Office se réserve le droit d&apos;introduire ultérieurement des offres payantes, notamment pour les prestataires, sans obligation de maintenir la gratuité.
               </p>
             </div>
           </div>
@@ -150,7 +147,7 @@ export default function Terms() {
           <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-4 bg-white dark:bg-gray-800">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Article 8 – Évolution du service</h3>
             <div className="prose dark:prose-invert">
-              <p>La société Monolythe se réserve le droit de :</p>
+              <p>Fox Office se réserve le droit de :</p>
               <ul>
                 <li>modifier les fonctionnalités,</li>
                 <li>suspendre temporairement ou définitivement le site,</li>

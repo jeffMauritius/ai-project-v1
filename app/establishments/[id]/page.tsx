@@ -90,12 +90,13 @@ export default function EstablishmentPage() {
                   <MapPin className="h-5 w-5 text-gray-500" />
                   <span className="text-gray-600">{establishment.location}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+                {/* <div className="flex items-center gap-1">
                   <Star className="h-5 w-5 text-yellow-400" />
                   <span className="text-gray-600">
                     {establishment.rating} ({establishment.numberOfReviews} avis)
                   </span>
-                </div>
+                </div> */}
                 <div className="flex items-center gap-1">
                   <Users className="h-5 w-5 text-gray-500" />
                   <span className="text-gray-600">{establishment.capacity}</span>

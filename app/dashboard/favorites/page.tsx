@@ -121,9 +121,10 @@ export default function Favorites() {
               <CardContent className="p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <StarIcon className="h-4 w-4 text-yellow-400 fill-current" />
+                    {/* MASQUÉ TEMPORAIREMENT - Avis et étoiles */}
+                    {/* <StarIcon className="h-4 w-4 text-yellow-400 fill-current" />
                     <span className="text-sm font-medium">{favorite.rating}</span>
-                    <span className="text-xs text-gray-500">({favorite.numberOfReviews})</span>
+                    <span className="text-xs text-gray-500">({favorite.numberOfReviews})</span> */}
                   </div>
                 </div>
                 
