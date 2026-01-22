@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/monmariage-logo.png',
+    icon: '/mmai.png',
     shortcut: '/monmariage-logo.png',
     apple: '/monmariage-logo.png',
   },
