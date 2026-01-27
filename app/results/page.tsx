@@ -8,6 +8,42 @@ import { MapPinIcon, BanknotesIcon, CalendarDaysIcon, UsersIcon } from '@heroico
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
+// Composant Image avec fallback en cas d'erreur
+function ImageWithFallback({
+  src,
+  fallbackSrc,
+  alt,
+  ...props
+}: {
+  src: string
+  fallbackSrc: string
+  alt: string
+  fill?: boolean
+  className?: string
+}) {
+  const [imgSrc, setImgSrc] = useState(src)
+  const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    setImgSrc(src)
+    setHasError(false)
+  }, [src])
+
+  return (
+    <Image
+      {...props}
+      src={hasError ? fallbackSrc : imgSrc}
+      alt={alt}
+      onError={() => {
+        if (!hasError) {
+          setHasError(true)
+          setImgSrc(fallbackSrc)
+        }
+      }}
+    />
+  )
+}
+
 interface SearchResult {
   id: string
   type: 'VENUE' | 'PARTNER'
@@ -195,6 +231,7 @@ export default function Results() {
       'TRAITEUR': 'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&h=600&fit=crop',
       'PHOTOGRAPHE': 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=800&h=600&fit=crop',
       'VOITURE': 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&h=600&fit=crop',
+      'BUS': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&h=600&fit=crop',
       'MUSIQUE': 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&h=600&fit=crop',
       'DECORATION': 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop',
       'FLORISTE': 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&h=600&fit=crop',
@@ -202,6 +239,13 @@ export default function Results() {
       'ANIMATION': 'https://images.unsplash.com/photo-1464047736614-af63643285bf?w=800&h=600&fit=crop',
       'WEDDING_CAKE': 'https://images.unsplash.com/photo-1535254973040-607b474cb50d?w=800&h=600&fit=crop',
       'OFFICIANT': 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800&h=600&fit=crop',
+      'FAIRE_PART': 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&h=600&fit=crop',
+      'CADEAUX_INVITES': 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&h=600&fit=crop',
+      'CHAPITEAU': 'https://images.unsplash.com/photo-1478147427282-58a87a120781?w=800&h=600&fit=crop',
+      'FOOD_TRUCK': 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=800&h=600&fit=crop',
+      'ROBE_MARIEE': 'https://images.unsplash.com/photo-1594552072238-b8a33785b261?w=800&h=600&fit=crop',
+      'COSTUME': 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800&h=600&fit=crop',
+      'COIFFURE': 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&h=600&fit=crop',
     }
 
     return fallbackImages[serviceType] || 'https://images.unsplash.com/photo-1519167758481-83f29da8ae39?w=800&h=600&fit=crop'
@@ -216,9 +260,18 @@ export default function Results() {
       'FLORISTE': 'Fleuriste',
       'DECORATION': 'Décoration',
       'VOITURE': 'Transport',
+      'BUS': 'Bus',
       'VIDEO': 'Vidéaste',
+      'ANIMATION': 'Animation',
       'WEDDING_CAKE': 'Pâtisserie',
-      'OFFICIANT': 'Officiant'
+      'OFFICIANT': 'Officiant',
+      'FAIRE_PART': 'Faire-part',
+      'CADEAUX_INVITES': 'Cadeaux invités',
+      'CHAPITEAU': 'Chapiteau',
+      'FOOD_TRUCK': 'Food truck',
+      'ROBE_MARIEE': 'Robe de mariée',
+      'COSTUME': 'Costume',
+      'COIFFURE': 'Coiffure',
     }
     return labels[serviceType] || serviceType
   }
@@ -324,18 +377,15 @@ export default function Results() {
               // Utiliser un ID unique pour éviter les erreurs de clés dupliquées
               const uniqueKey = `${result.id}-${index}`
               
-              const imageUrl = result.imageUrl || result.images?.[0] || getFallbackImage(result.serviceType)
-
-              // Debug: log l'image utilisée
-              if (!result.imageUrl && !result.images?.[0]) {
-                console.log(`🖼️ Utilisation fallback pour ${result.name || result.companyName} (${result.serviceType}): ${imageUrl}`)
-              }
+              const imageUrl = result.imageUrl || result.images?.[0]
+              const fallbackUrl = getFallbackImage(result.serviceType)
 
               return (
                 <div key={uniqueKey} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-48">
-                  <Image
-                    src={imageUrl}
+                  <ImageWithFallback
+                    src={imageUrl || fallbackUrl}
+                    fallbackSrc={fallbackUrl}
                     alt={result.name || result.companyName || "Image du prestataire"}
                     fill
                     className="object-cover"

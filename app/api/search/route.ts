@@ -313,7 +313,8 @@ TYPES DE SERVICES disponibles (peut en avoir plusieurs si demandés) :
 - LIEU : château, domaine, auberge, hôtel, restaurant, salle, bateau, manoir, propriété, mas, ferme, grange
 - TRAITEUR : cuisine, repas, buffet, cocktail, menu, gastronomie
 - PHOTOGRAPHE : photo, reportage, shooting, photographie
-- VOITURE : transport, limousine, bus, automobile, véhicule, voiture ancienne
+- VOITURE : transport, limousine, automobile, véhicule, voiture ancienne
+- BUS : bus, navette, transport collectif
 - MUSIQUE : dj, orchestre, groupe, musicien, band, jazz, classique
 - DECORATION : déco, décorateur, décoration florale, aménagement
 - FLORISTE : fleurs, bouquet, composition florale, fleuriste
@@ -321,6 +322,13 @@ TYPES DE SERVICES disponibles (peut en avoir plusieurs si demandés) :
 - ANIMATION : magicien, spectacle, entertaineur, divertissement
 - WEDDING_CAKE : gâteau, pâtisserie, wedding cake, pièce montée
 - OFFICIANT : cérémonie laïque, célébrant
+- FAIRE_PART : faire-part, invitation, papeterie, carton d'invitation
+- CADEAUX_INVITES : cadeaux invités, dragées, souvenirs, cadeau mariage
+- CHAPITEAU : chapiteau, tente, barnums, structure
+- FOOD_TRUCK : food truck, camion restaurant, street food
+- ROBE_MARIEE : robe de mariée, robe mariage, robe sur mesure, robe de mariée sur mesure, couturière, robes mariée
+- COSTUME : costume marié, costume mariage, costume sur mesure, tailleur homme
+- COIFFURE : coiffure, coiffeur, coiffeuse, chignon, mise en beauté cheveux
 
 IMPORTANT POUR REQUÊTES MULTI-SERVICES :
 - Si l'utilisateur demande plusieurs types de services (ex: "château, fleuriste et traiteur"), retourne TOUS les types dans le tableau serviceType
@@ -566,7 +574,8 @@ Maintenant analyse cette requête :`
     console.error('❌ Erreur analyse IA:', error)
     
     // Fallback : analyse simple par mots-clés
-    const words = query.toLowerCase().split(' ')
+    const queryLower = query.toLowerCase()
+    const words = queryLower.split(' ')
     const serviceType: string[] = []
     const features: string[] = []
     let location = ''
@@ -590,8 +599,11 @@ Maintenant analyse cette requête :`
     if (words.some(w => ['traiteur', 'cuisine'].includes(w))) {
       serviceType.push('TRAITEUR')
     }
-    if (words.some(w => ['voiture', 'limousine', 'bus'].includes(w))) {
+    if (words.some(w => ['voiture', 'limousine', 'automobile'].includes(w))) {
       serviceType.push('VOITURE')
+    }
+    if (words.some(w => ['bus', 'navette'].includes(w))) {
+      serviceType.push('BUS')
     }
     if (words.some(w => ['musique', 'dj', 'orchestre'].includes(w))) {
       serviceType.push('MUSIQUE')
@@ -601,6 +613,28 @@ Maintenant analyse cette requête :`
     }
     if (words.some(w => ['fleuriste', 'fleurs'].includes(w))) {
       serviceType.push('FLORISTE')
+    }
+    if (words.some(w => ['robe', 'mariée', 'mariee', 'couturière', 'couturiere'].includes(w)) ||
+        queryLower.includes('robe de mariée') || queryLower.includes('robe mariée') || queryLower.includes('robe mariage')) {
+      serviceType.push('ROBE_MARIEE')
+    }
+    if (words.some(w => ['costume', 'tailleur'].includes(w)) && words.some(w => ['marié', 'marie', 'homme', 'mariage'].includes(w))) {
+      serviceType.push('COSTUME')
+    }
+    if (words.some(w => ['coiffure', 'coiffeur', 'coiffeuse', 'chignon'].includes(w))) {
+      serviceType.push('COIFFURE')
+    }
+    if (words.some(w => ['faire-part', 'fairepart', 'invitation', 'papeterie'].includes(w)) || queryLower.includes('faire part')) {
+      serviceType.push('FAIRE_PART')
+    }
+    if (words.some(w => ['dragées', 'dragees', 'cadeaux'].includes(w)) && words.some(w => ['invités', 'invites'].includes(w))) {
+      serviceType.push('CADEAUX_INVITES')
+    }
+    if (words.some(w => ['chapiteau', 'tente', 'barnum'].includes(w))) {
+      serviceType.push('CHAPITEAU')
+    }
+    if (words.some(w => ['food', 'truck'].includes(w)) || queryLower.includes('food truck') || queryLower.includes('foodtruck')) {
+      serviceType.push('FOOD_TRUCK')
     }
     
     // Détection de la localisation
@@ -782,14 +816,15 @@ export async function POST(request: NextRequest) {
         const bestStorefront = partner.storefronts[0]
         let imageUrl = undefined
 
-        if (bestStorefront?.images && bestStorefront.images.length > 0) {
-          imageUrl = bestStorefront.images[0]
+        // Priorité: 1. Images du partner, 2. Media du storefront, 3. Images du storefront
+        // Les images partner sont plus fiables (format image-1-xxx.webp)
+        if (partner.images && partner.images.length > 0) {
+          imageUrl = partner.images[0]
         } else if (bestStorefront?.media && bestStorefront.media.length > 0) {
           const firstImage = bestStorefront.media.find(media => media.type === 'IMAGE')
           if (firstImage) imageUrl = firstImage.url
-        }
-        if (!imageUrl && partner.images && partner.images.length > 0) {
-          imageUrl = partner.images[0]
+        } else if (bestStorefront?.images && bestStorefront.images.length > 0) {
+          imageUrl = bestStorefront.images[0]
         }
 
         results.push({
@@ -1122,18 +1157,17 @@ export async function POST(request: NextRequest) {
         const bestStorefront = partner.storefronts[0]
         let imageUrl = undefined
 
-        if (bestStorefront?.images && bestStorefront.images.length > 0) {
-          imageUrl = bestStorefront.images[0]
+        // Priorité: 1. Images du partner, 2. Media du storefront, 3. Images du storefront
+        // Les images partner sont plus fiables (format image-1-xxx.webp)
+        if (partner.images && partner.images.length > 0) {
+          imageUrl = partner.images[0]
         } else if (bestStorefront?.media && bestStorefront.media.length > 0) {
           const firstImage = bestStorefront.media.find(media => media.type === 'IMAGE')
           if (firstImage) {
             imageUrl = firstImage.url
           }
-        }
-
-        // Utiliser les images du partenaire si pas d'images storefront
-        if (!imageUrl && partner.images && partner.images.length > 0) {
-          imageUrl = partner.images[0]
+        } else if (bestStorefront?.images && bestStorefront.images.length > 0) {
+          imageUrl = bestStorefront.images[0]
         }
 
         const result: SearchResult = {
