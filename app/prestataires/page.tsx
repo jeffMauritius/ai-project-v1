@@ -82,8 +82,8 @@ export default function PrestatairesPage() {
     { type: 'CHAPITEAU', label: 'Chapiteau', count: 357 },
     { type: 'BUS', label: 'Bus', count: 108 },
     { type: 'FOOD_TRUCK', label: 'Food truck', count: 14 },
-    { type: 'COSTUME', label: 'Costume', count: 0 },
-    { type: 'COIFFURE', label: 'Coiffure', count: 0 },
+    { type: 'COIFFURE', label: 'Coiffure', count: 69 },
+    { type: 'COSTUME', label: 'Costume', count: 30 },
     { type: 'VIDEO', label: 'Video', count: 1 },
     { type: 'OFFICIANT', label: 'Officiant', count: 1 }
   ];
