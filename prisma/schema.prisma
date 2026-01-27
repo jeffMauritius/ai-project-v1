@@ -31,6 +31,9 @@ enum ServiceType {
   OFFICIANT
   FOOD_TRUCK
   VIN
+  ROBE_MARIEE
+  COSTUME
+  COIFFURE
 }
 
 enum VenueType {

@@ -21,7 +21,10 @@ export const SERVICE_TYPE_TO_JSON_FILE: Record<ServiceType, string> = {
   WEDDING_CAKE: 'wedding-cake-options.json',
   OFFICIANT: 'officiant-options.json',
   FOOD_TRUCK: 'food-truck-options.json',
-  VIN: 'wine-options.json'
+  VIN: 'wine-options.json',
+  ROBE_MARIEE: 'wedding-dress-options.json',
+  COSTUME: 'groom-suit-options.json',
+  COIFFURE: 'beauty-hair-options.json'
 };
 
 // Mapping des types de prestataires vers les fichiers JSON
@@ -99,7 +102,10 @@ export const SERVICE_TYPE_TO_JSON_KEY: Record<ServiceType, string> = {
   WEDDING_CAKE: 'wedding_cake',
   OFFICIANT: 'officiants',
   FOOD_TRUCK: 'food_truck',
-  VIN: 'vin'
+  VIN: 'vin',
+  ROBE_MARIEE: 'wedding_dress',
+  COSTUME: 'groom_suit',
+  COIFFURE: 'beauty_hair'
 };
 
 // Types pour les options

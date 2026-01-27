@@ -79,6 +79,9 @@ export default function PrestatairesPage() {
     { type: 'ANIMATION', label: 'Animation', count: 1009 },
     { type: 'MUSIQUE', label: 'Musique', count: 847 },
     { type: 'CHAPITEAU', label: 'Chapiteau', count: 358 },
+    { type: 'ROBE_MARIEE', label: 'Robe de mariée', count: 0 },
+    { type: 'COSTUME', label: 'Costume', count: 0 },
+    { type: 'COIFFURE', label: 'Coiffure', count: 0 },
     { type: 'FOOD_TRUCK', label: 'Food truck', count: 19 },
     { type: 'OFFICIANT', label: 'Officiant', count: 2 },
     { type: 'VIDEO', label: 'Video', count: 1 }
@@ -95,7 +98,10 @@ export default function PrestatairesPage() {
       'VOITURE': 'Transport',
       'VIDEO': 'Vidéaste',
       'WEDDING_CAKE': 'Pâtisserie',
-      'OFFICIANT': 'Officiant'
+      'OFFICIANT': 'Officiant',
+      'ROBE_MARIEE': 'Robe de mariée',
+      'COSTUME': 'Costume',
+      'COIFFURE': 'Coiffure'
     }
     return labels[serviceType] || serviceType
   }
