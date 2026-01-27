@@ -38,6 +38,7 @@ interface SearchCriteria {
   userCoordinates?: { lat: number; lng: number } // Nouveau: coordonnées utilisateur
   maxDistance?: number // Nouveau: distance maximale en km
   searchByName?: string // Nouveau: recherche par nom exact d'un lieu/prestataire
+  descriptionKeywords?: string[] // Nouveau: mots-clés à rechercher dans les descriptions
 }
 
 // Mapping statique pour requêtes simples (rapidité)
@@ -247,6 +248,18 @@ function calculateRelevanceScore(
     }
   }
 
+  // 9. Mots-clés dans la description (+25 points par mot-clé trouvé)
+  if (criteria.descriptionKeywords && criteria.descriptionKeywords.length > 0 && result.description) {
+    const descLower = result.description.toLowerCase()
+    const matchedKeywords = criteria.descriptionKeywords.filter(keyword =>
+      descLower.includes(keyword.toLowerCase())
+    )
+    if (matchedKeywords.length > 0) {
+      score += matchedKeywords.length * 25
+      matchedCriteria.push(`description_${matchedKeywords.length}_keywords`)
+    }
+  }
+
   return { score, matchedCriteria }
 }
 
@@ -329,6 +342,16 @@ LOCALISATIONS :
 STYLES possibles :
 champêtre, moderne, vintage, bohème, classique, romantique, industriel, rustique, élégant, chic
 
+MOTS-CLÉS POUR DESCRIPTION (descriptionKeywords) :
+Extrais les mots-clés importants de la requête qui devraient être recherchés dans les descriptions des lieux/prestataires.
+Exemples de mots-clés à extraire :
+- Ambiance/atmosphère : "intimiste", "convivial", "luxueux", "authentique", "pittoresque"
+- Caractéristiques : "vue mer", "vue montagne", "piscine", "cave", "vignoble", "forêt"
+- Style de cuisine : "gastronomique", "bistronomique", "végétarien", "local", "terroir"
+- Spécialités : "fruits de mer", "gibier", "bio", "fait maison"
+- Activités : "cérémonie laïque", "vin d'honneur", "brunch"
+- Autres : tout mot spécifique qui ne rentre pas dans les autres catégories
+
 CAPACITÉS :
 - Ajoute une tolérance de ±10% autour du nombre mentionné
 - Si "100 personnes" → {"min": 90, "max": 120}
@@ -352,6 +375,7 @@ INSTRUCTIONS D'EXTRACTION :
 6. Identifie le STYLE si mentionné
 7. Extrait la CAPACITÉ avec tolérance ±10% si mentionnée (50 invités → min: 45, max: 60)
 8. Détecte le BUDGET si mentionné
+9. Extrait les MOTS-CLÉS pour recherche dans les descriptions (descriptionKeywords)
 
 Réponds UNIQUEMENT avec ce JSON (pas de texte avant/après) :
 {
@@ -363,7 +387,8 @@ Réponds UNIQUEMENT avec ce JSON (pas de texte avant/après) :
   "style": ["champêtre"],
   "capacity": {"min": 90, "max": 120},
   "budget": {"min": 5000, "max": 15000},
-  "searchByName": null
+  "searchByName": null,
+  "descriptionKeywords": ["vue", "romantique", "intimiste"]
 }
 
 EXEMPLE RECHERCHE PAR NOM :
@@ -388,7 +413,8 @@ Requête : "Château avec jardin près de Paris pour 100 personnes"
   "venueType": "château",
   "maxDistance": 50,
   "features": ["jardin"],
-  "capacity": {"min": 90, "max": 120}
+  "capacity": {"min": 90, "max": 120},
+  "descriptionKeywords": []
 }
 
 Requête : "Château à moins de 50 km de Lyon"
@@ -403,7 +429,26 @@ Requête : "Photographe style reportage sud de la France"
 → {
   "serviceType": ["PHOTOGRAPHE"],
   "location": "sud de la france",
-  "style": ["reportage"]
+  "style": ["reportage"],
+  "descriptionKeywords": ["reportage", "naturel", "spontané"]
+}
+
+Requête : "Domaine avec vue sur la mer et ambiance romantique en Bretagne"
+→ {
+  "serviceType": ["LIEU"],
+  "location": "bretagne",
+  "venueType": "domaine",
+  "features": [],
+  "style": ["romantique"],
+  "descriptionKeywords": ["vue mer", "romantique", "océan", "bord de mer"]
+}
+
+Requête : "Traiteur cuisine gastronomique et bio près de Lyon"
+→ {
+  "serviceType": ["TRAITEUR"],
+  "location": "lyon",
+  "maxDistance": 50,
+  "descriptionKeywords": ["gastronomique", "bio", "local", "terroir", "fait maison"]
 }
 
 Requête : "Domaine champêtre Bordeaux 150 invités avec hébergement dans un rayon de 30km"
@@ -509,7 +554,8 @@ Maintenant analyse cette requête :`
       style: parsed.style || [],
       userCoordinates: userCoordinates ?? undefined,
       maxDistance: parsed.maxDistance || undefined,
-      searchByName: parsed.searchByName || undefined
+      searchByName: parsed.searchByName || undefined,
+      descriptionKeywords: parsed.descriptionKeywords || []
     }
 
     queryCache.set(cacheKey, result)
@@ -578,14 +624,30 @@ Maintenant analyse cette requête :`
       features.push('domaine')
     }
     
+    // Extraction des mots-clés pour la description (fallback)
+    const descriptionKeywords: string[] = []
+    const keywordPatterns = [
+      'vue', 'mer', 'montagne', 'lac', 'forêt', 'vignoble', 'campagne',
+      'romantique', 'intimiste', 'luxueux', 'authentique', 'pittoresque', 'convivial',
+      'gastronomique', 'bistronomique', 'bio', 'local', 'terroir', 'fait maison',
+      'piscine', 'spa', 'cave', 'bibliothèque', 'cheminée',
+      'cérémonie', 'cocktail', 'brunch', 'réception'
+    ]
+    for (const pattern of keywordPatterns) {
+      if (query.toLowerCase().includes(pattern)) {
+        descriptionKeywords.push(pattern)
+      }
+    }
+
     const result: SearchCriteria = {
       serviceType: serviceType.length > 0 ? serviceType : ['LIEU'],
       location,
       features,
       date: '',
-      style: []
+      style: [],
+      descriptionKeywords
     }
-    
+
     queryCache.set(cacheKey, result)
     console.log('🔍 Analyse fallback pour:', query, '→', result)
     return result
@@ -841,7 +903,14 @@ export async function POST(request: NextRequest) {
         console.log(`👥 Filtre capacité: peut accueillir au moins ${analysis.capacity.min} personnes`)
       }
 
-      // 4. Filtrage par localisation - toujours filtrer par région pour réduire les résultats
+      // 4. Mots-clés dans la description : pas de filtrage strict, uniquement scoring
+      // Les mots-clés sont utilisés pour booster le score des résultats pertinents
+      // mais ne filtrent pas (trop restrictif sinon)
+      if (analysis.descriptionKeywords && analysis.descriptionKeywords.length > 0) {
+        console.log(`📝 Mots-clés description à scorer: [${analysis.descriptionKeywords.join(', ')}]`)
+      }
+
+      // 5. Filtrage par localisation - toujours filtrer par région pour réduire les résultats
       // Même avec des coordonnées, on filtre par région pour avoir des résultats pertinents
       if (analysis.location) {
         const locationTerms = analysis.location.toLowerCase().split(' ')
@@ -1004,6 +1073,11 @@ export async function POST(request: NextRequest) {
           })),
           { interventionType: 'all_france' } // Inclure ceux qui interviennent partout
         ]
+      }
+
+      // Mots-clés description : pas de filtrage, uniquement scoring (voir calculateRelevanceScore)
+      if (analysis.descriptionKeywords && analysis.descriptionKeywords.length > 0) {
+        console.log(`📝 Mots-clés description partenaires à scorer: [${analysis.descriptionKeywords.join(', ')}]`)
       }
 
       console.log('🔍 Filtres partenaires:', JSON.stringify(partnerWhereConditions, null, 2))
