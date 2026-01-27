@@ -69,22 +69,23 @@ export default function PrestatairesPage() {
 
   // Types de services avec leurs compteurs réels (LIEU supprimé car doublon avec établissements)
   const serviceTypes = [
-    { type: 'DECORATION', label: 'Décoration', count: 3117 },
-    { type: 'VOITURE', label: 'Transport', count: 3149 },
-    { type: 'TRAITEUR', label: 'Traiteur', count: 2783 },
-    { type: 'FLORISTE', label: 'Fleuriste', count: 2170 },
-    { type: 'CADEAUX_INVITES', label: 'Cadeaux invités', count: 2095 },
-    { type: 'PHOTOGRAPHE', label: 'Photographe', count: 1739 },
-    { type: 'FAIRE_PART', label: 'Faire-part', count: 1293 },
-    { type: 'ANIMATION', label: 'Animation', count: 1009 },
-    { type: 'MUSIQUE', label: 'Musique', count: 847 },
-    { type: 'CHAPITEAU', label: 'Chapiteau', count: 358 },
-    { type: 'ROBE_MARIEE', label: 'Robe de mariée', count: 0 },
+    { type: 'TRAITEUR', label: 'Traiteur', count: 2759 },
+    { type: 'VOITURE', label: 'Transport', count: 2275 },
+    { type: 'DECORATION', label: 'Décoration', count: 1977 },
+    { type: 'FLORISTE', label: 'Fleuriste', count: 1890 },
+    { type: 'PHOTOGRAPHE', label: 'Photographe', count: 1713 },
+    { type: 'CADEAUX_INVITES', label: 'Cadeaux invités', count: 1535 },
+    { type: 'FAIRE_PART', label: 'Faire-part', count: 948 },
+    { type: 'ANIMATION', label: 'Animation', count: 934 },
+    { type: 'MUSIQUE', label: 'Musique', count: 838 },
+    { type: 'ROBE_MARIEE', label: 'Robe de mariée', count: 538 },
+    { type: 'CHAPITEAU', label: 'Chapiteau', count: 357 },
+    { type: 'BUS', label: 'Bus', count: 108 },
+    { type: 'FOOD_TRUCK', label: 'Food truck', count: 14 },
     { type: 'COSTUME', label: 'Costume', count: 0 },
     { type: 'COIFFURE', label: 'Coiffure', count: 0 },
-    { type: 'FOOD_TRUCK', label: 'Food truck', count: 19 },
-    { type: 'OFFICIANT', label: 'Officiant', count: 2 },
-    { type: 'VIDEO', label: 'Video', count: 1 }
+    { type: 'VIDEO', label: 'Video', count: 1 },
+    { type: 'OFFICIANT', label: 'Officiant', count: 1 }
   ];
 
   const getServiceTypeLabel = (serviceType: string) => {
