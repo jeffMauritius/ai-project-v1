@@ -105,6 +105,18 @@ export default function PrestatairesPage() {
     return `À partir de ${price.toLocaleString('fr-FR')}€`
   }
 
+  // Fonction pour extraire le texte pur du HTML
+  const stripHtml = (html: string | undefined | null): string => {
+    if (!html) return ''
+    // Créer un élément temporaire pour parser le HTML
+    if (typeof window !== 'undefined') {
+      const doc = new DOMParser().parseFromString(html, 'text/html')
+      return doc.body.textContent || ''
+    }
+    // Fallback pour SSR: supprimer les balises avec regex
+    return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+  }
+
   const handleViewDetails = async (prestataire: Prestataire) => {
     // Marquer la vitrine comme consultée
     try {
@@ -194,11 +206,9 @@ export default function PrestatairesPage() {
                 {prestataire.name || prestataire.companyName}
               </h3>
               
-              <div 
-                className="text-gray-600 text-sm mb-4 line-clamp-2"
-              >
-                {prestataire.description}
-              </div>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                {stripHtml(prestataire.description)}
+              </p>
               
               <div className="space-y-2 mb-4">
                 {prestataire.location && (
