@@ -40,6 +40,19 @@ export function ImageWithFallback({
     )
   }
 
+  // Utiliser img standard pour les URLs Vercel Blob (évite les problèmes de CSP)
+  if (src.includes('blob.vercel-storage.com')) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        className={`${className} ${fill ? 'absolute inset-0 w-full h-full' : ''}`}
+        style={fill ? { objectFit: 'cover' } : undefined}
+        onError={handleError}
+      />
+    )
+  }
+
   return (
     <Image
       src={src}
