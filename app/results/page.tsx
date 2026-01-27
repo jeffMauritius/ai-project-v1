@@ -359,10 +359,10 @@ export default function Results() {
                     {result.name || result.companyName}
                   </h3>
                   
-                  <div 
-                    className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: result.description }}
-                  />
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                    {/* Strip HTML tags for security - display plain text only */}
+                    {result.description?.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() || ''}
+                  </p>
                   
                   <div className="space-y-2 mb-4">
                     {result.location && (

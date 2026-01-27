@@ -63,6 +63,13 @@ export async function GET(request: Request) {
       if (!storefront) {
         return new NextResponse('Storefront non trouvé', { status: 404 })
       }
+
+      // Vérifier si la vitrine est active pour l'accès public
+      // Les vitrines inactives ne sont pas accessibles publiquement
+      if (!storefront.isActive) {
+        return new NextResponse('Storefront non trouvé', { status: 404 })
+      }
+
       return NextResponse.json(storefront)
     }
 

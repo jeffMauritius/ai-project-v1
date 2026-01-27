@@ -21,8 +21,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Valider le format de l'email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    // Valider le format de l'email (regex améliorée)
+    // Requiert au minimum: local@domain.tld (tld >= 2 caractères)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: 'Format d\'email invalide' },
@@ -30,10 +31,13 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Normaliser l'email
+    const normalizedEmail = email.toLowerCase().trim()
+
     // Vérifier si l'email est déjà utilisé par un autre utilisateur
     const existingUser = await prisma.user.findFirst({
       where: {
-        email: email,
+        email: normalizedEmail,
         id: { not: session.user.id }
       }
     })
@@ -45,11 +49,14 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Log pour audit de sécurité
+    console.log('[SECURITY] Email update:', { userId: session.user.id, newEmail: normalizedEmail })
+
     // Mettre à jour l'email de l'utilisateur
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        email: email,
+        email: normalizedEmail,
         updatedAt: new Date()
       },
       select: {

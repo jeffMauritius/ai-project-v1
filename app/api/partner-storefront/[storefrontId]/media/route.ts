@@ -91,18 +91,44 @@ export async function POST(
 
     // Vérifier la taille du fichier (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: 'Fichier trop volumineux' }, { status: 400 })
+      return NextResponse.json({ error: 'Fichier trop volumineux (max 10MB)' }, { status: 400 })
     }
 
-    // Vérifier le type de fichier
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-      return NextResponse.json({ error: 'Type de fichier non supporté' }, { status: 400 })
+    // Liste blanche des types MIME autorisés (sécurité renforcée)
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/quicktime']
+    const allowedTypes = [...allowedImageTypes, ...allowedVideoTypes]
+
+    if (!allowedTypes.includes(file.type)) {
+      console.warn('[SECURITY] Rejected file upload - invalid type:', { type: file.type, storefrontId })
+      return NextResponse.json({ error: 'Type de fichier non supporté. Formats acceptés: JPG, PNG, GIF, WebP, MP4, WebM' }, { status: 400 })
     }
 
-    // Générer un nom de fichier unique
+    // Valider l'extension du fichier (double vérification)
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mov']
+    const fileExtension = file.name.split('.').pop()?.toLowerCase()
+
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      console.warn('[SECURITY] Rejected file upload - invalid extension:', { extension: fileExtension, storefrontId })
+      return NextResponse.json({ error: 'Extension de fichier non supportée' }, { status: 400 })
+    }
+
+    // Vérifier la cohérence entre MIME type et extension
+    const isImage = allowedImageTypes.includes(file.type)
+    const isImageExtension = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)
+    const isVideo = allowedVideoTypes.includes(file.type)
+    const isVideoExtension = ['mp4', 'webm', 'mov'].includes(fileExtension)
+
+    if ((isImage && !isImageExtension) || (isVideo && !isVideoExtension)) {
+      console.warn('[SECURITY] Rejected file upload - MIME/extension mismatch:', { type: file.type, extension: fileExtension, storefrontId })
+      return NextResponse.json({ error: 'Type de fichier incohérent' }, { status: 400 })
+    }
+
+    // Générer un nom de fichier unique et sécurisé (sans utiliser le nom original)
     const timestamp = Date.now()
-    const fileExtension = file.name.split('.').pop()
-    const fileName = `${storefrontId}/${timestamp}.${fileExtension}`
+    const randomSuffix = Math.random().toString(36).substring(2, 8)
+    const safeExtension = fileExtension.replace(/[^a-z0-9]/g, '')
+    const fileName = `${storefrontId}/${timestamp}-${randomSuffix}.${safeExtension}`
 
     // Upload vers Vercel Blob Storage
     const blob = await put(fileName, file, {

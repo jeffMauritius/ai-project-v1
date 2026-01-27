@@ -84,15 +84,23 @@ export function ShareButton({
       animation: slideIn 0.3s ease-out;
       border-left: 4px solid #ec4899;
     `;
-    successDiv.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 16px;">📤</span>
-        <span>Lien partagé !</span>
-      </div>
-      <div style="font-size: 12px; margin-top: 4px; opacity: 0.9;">
-        URL copiée dans le presse-papiers
-      </div>
-    `;
+    // Create elements safely to prevent XSS
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+    const iconSpan = document.createElement('span');
+    iconSpan.style.fontSize = '16px';
+    iconSpan.textContent = '📤';
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = 'Lien partagé !';
+    headerDiv.appendChild(iconSpan);
+    headerDiv.appendChild(titleSpan);
+
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = 'font-size: 12px; margin-top: 4px; opacity: 0.9;';
+    messageDiv.textContent = 'URL copiée dans le presse-papiers';
+
+    successDiv.appendChild(headerDiv);
+    successDiv.appendChild(messageDiv);
     
     // Add animation styles if not already present
     if (!document.querySelector('#share-animation-styles')) {

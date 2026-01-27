@@ -146,12 +146,17 @@ export function FavoriteButton({
       animation: slideIn 0.3s ease-out;
       border-left: 4px solid ${isSuccess ? '#ec4899' : '#dc2626'};
     `;
-    successDiv.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 16px;">${isSuccess ? '💖' : '💔'}</span>
-        <span>${message}</span>
-      </div>
-    `;
+    // Create elements safely to prevent XSS
+    const contentDiv = document.createElement('div');
+    contentDiv.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+    const iconSpan = document.createElement('span');
+    iconSpan.style.fontSize = '16px';
+    iconSpan.textContent = isSuccess ? '💖' : '💔';
+    const messageSpan = document.createElement('span');
+    messageSpan.textContent = message; // Safe: uses textContent instead of innerHTML
+    contentDiv.appendChild(iconSpan);
+    contentDiv.appendChild(messageSpan);
+    successDiv.appendChild(contentDiv);
     
     // Add animation styles
     const style = document.createElement('style');

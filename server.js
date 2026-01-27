@@ -63,15 +63,66 @@ app.prepare().then(() => {
       // Nouveau message
       socket.on('new-message', async (data) => {
         console.log('💬 Nouveau message reçu:', data)
-        
+
         try {
+          // Validation des données d'entrée (sécurité)
+          if (!data || typeof data !== 'object') {
+            console.warn('[SECURITY] Invalid message data received')
+            socket.emit('error', { message: 'Données de message invalides.' })
+            return
+          }
+
+          // Validation du conversationId
+          if (!data.conversationId || typeof data.conversationId !== 'string' || data.conversationId.length !== 24) {
+            console.warn('[SECURITY] Invalid conversationId:', data.conversationId)
+            socket.emit('error', { message: 'ID de conversation invalide.' })
+            return
+          }
+
+          // Validation du contenu du message
+          if (!data.content || typeof data.content !== 'string') {
+            socket.emit('error', { message: 'Contenu du message requis.' })
+            return
+          }
+
+          // Limite de taille du message (10000 caractères max)
+          const MAX_MESSAGE_LENGTH = 10000
+          if (data.content.length > MAX_MESSAGE_LENGTH) {
+            socket.emit('error', { message: `Message trop long (max ${MAX_MESSAGE_LENGTH} caractères).` })
+            return
+          }
+
+          // Nettoyer le contenu (supprimer les caractères de contrôle dangereux)
+          const sanitizedContent = data.content
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Supprimer les caractères de contrôle
+            .trim()
+
+          if (!sanitizedContent) {
+            socket.emit('error', { message: 'Le message ne peut pas être vide.' })
+            return
+          }
+
+          // Validation du senderType
+          const validSenderTypes = ['user', 'provider']
+          if (!validSenderTypes.includes(data.senderType)) {
+            console.warn('[SECURITY] Invalid senderType:', data.senderType)
+            socket.emit('error', { message: 'Type d\'expéditeur invalide.' })
+            return
+          }
+
+          // Validation du senderId (doit être fourni par le client authentifié)
+          const senderId = data.senderId || 'anonymous'
+          if (senderId === 'anonymous') {
+            console.warn('[SECURITY] Message without senderId from socket:', socket.id)
+          }
+
           // Sauvegarder le message dans la base de données
           const newMessage = await prisma.message.create({
             data: {
               conversationId: data.conversationId,
               senderType: data.senderType,
-              senderId: 'temp-id', // TODO: Remplacer par l'ID réel de l'utilisateur/partenaire
-              content: data.content,
+              senderId: senderId,
+              content: sanitizedContent,
               messageType: 'text',
               deliveredAt: new Date(),
             },

@@ -21,15 +21,24 @@ export async function DELETE(
       return NextResponse.json({ error: 'ID de conversation requis' }, { status: 400 })
     }
 
-    // Vérifier que la conversation appartient à l'utilisateur
+    // Vérifier que la conversation appartient à l'utilisateur OU au partenaire
+    // Cela permet un accès bi-directionnel aux conversations
     const conversation = await prisma.conversation.findFirst({
       where: {
         id: id,
-        userId: session.user.id
+        OR: [
+          { userId: session.user.id },
+          { partnerId: session.user.id }
+        ]
       }
     })
 
     if (!conversation) {
+      // Log pour monitoring de sécurité
+      console.warn('[SECURITY] Unauthorized conversation access attempt:', {
+        userId: session.user.id,
+        conversationId: id
+      })
       return NextResponse.json({ error: 'Conversation non trouvée' }, { status: 404 })
     }
 
