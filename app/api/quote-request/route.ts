@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Email du partenaire qui recevra la demande
     // Si l'email du prestataire n'est pas disponible, utiliser les emails de fallback
-    const FALLBACK_EMAILS = ['jfroussel75@gmail.com', 'arnaud@monmariage.ai'];
+    const FALLBACK_EMAILS = ['jfroussel75@gmail.com', 'arnaud@monmariage.ai', 'jahangeer@monmariage.ai'];
     const partnerEmail = storefrontEmail || storefront.partner?.user?.email;
     const isUsingFallback = !partnerEmail;
 
@@ -153,7 +153,58 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      console.log('[QUOTE-REQUEST] ✅ Demande enregistrée pour:', partnerEmail);
+      // Le partenaire a un email, lui envoyer directement
+      const partnerEmailHtml = `
+        <h2>Nouvelle demande de devis</h2>
+        <p>Vous avez reçu une nouvelle demande de devis pour <strong>${partnerName}</strong>.</p>
+
+        <h3>Client</h3>
+        <ul>
+          <li><strong>Nom:</strong> ${session.user.name || 'Non renseigné'}</li>
+          <li><strong>Email:</strong> ${session.user.email || 'Non renseigné'}</li>
+        </ul>
+
+        <h3>Détails de la demande</h3>
+        <ul>
+          <li><strong>Date de l'événement:</strong> ${new Date(eventDate).toLocaleDateString('fr-FR')}</li>
+          <li><strong>Nombre d'invités:</strong> ${guestCount}</li>
+          <li><strong>Type d'événement:</strong> ${eventType}</li>
+          <li><strong>Lieu:</strong> ${venueLocation}</li>
+          <li><strong>Budget:</strong> ${budget}</li>
+        </ul>
+
+        ${message ? `<h3>Message du client</h3><p>${message}</p>` : ''}
+
+        <hr>
+        <p><em>Vous pouvez répondre directement à cet email pour contacter le client.</em></p>
+      `;
+
+      try {
+        await sendMail({
+          to: partnerEmail,
+          subject: `[MonMariage.ai] Nouvelle demande de devis - ${partnerName}`,
+          html: partnerEmailHtml
+        });
+        console.log('[QUOTE-REQUEST] 📧 Email envoyé au partenaire:', partnerEmail);
+      } catch (emailError) {
+        console.error('[QUOTE-REQUEST] ❌ Erreur envoi email au partenaire:', emailError);
+      }
+
+      // Toujours envoyer une copie à jahangeer@monmariage.ai
+      try {
+        await sendMail({
+          to: 'jahangeer@monmariage.ai',
+          subject: `[MonMariage.ai] Copie - Nouvelle demande de devis - ${partnerName}`,
+          html: `
+            <h2>Copie - Nouvelle demande de devis</h2>
+            <p><strong>Email envoyé au partenaire:</strong> ${partnerEmail}</p>
+            ${partnerEmailHtml}
+          `
+        });
+        console.log('[QUOTE-REQUEST] 📧 Copie envoyée à jahangeer@monmariage.ai');
+      } catch (emailError) {
+        console.error('[QUOTE-REQUEST] ❌ Erreur envoi copie à jahangeer@monmariage.ai:', emailError);
+      }
     }
 
     return NextResponse.json({
