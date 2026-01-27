@@ -1,1 +1,211 @@
-{"placeholder": "structure"}
+{
+  "wedding_dress": {
+    "title": "Robe de mariée",
+    "sections": [
+      {
+        "title": "Types de robes et styles",
+        "fields": [
+          {
+            "id": "styles_robes",
+            "question": "Quels styles de robes proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Princesse",
+              "Sirène",
+              "A-line (trapèze)",
+              "Empire",
+              "Fourreau",
+              "Bohème",
+              "Vintage",
+              "Minimaliste",
+              "Romantique",
+              "Glamour",
+              "Champêtre",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "types_robes",
+            "question": "Quels types de robes avez-vous en boutique ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Robes longues",
+              "Robes courtes",
+              "Robes avec traîne",
+              "Robes de couleur (ivoire, champagne, blush, etc.)",
+              "Robes grande taille",
+              "Robes petite taille",
+              "Robes de mariage civil",
+              "Robes de seconde cérémonie",
+              "Combinaisons",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "createurs",
+            "question": "Travaillez-vous avec des créateurs spécifiques ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "placeholder": "Listez les créateurs et marques disponibles",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Services proposés",
+        "fields": [
+          {
+            "id": "services",
+            "question": "Quels services proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Vente de robes neuves",
+              "Location de robes",
+              "Création sur-mesure",
+              "Retouches incluses",
+              "Retouches en supplément",
+              "Essayages sur rendez-vous",
+              "Essayages libres",
+              "Conseils personnalisés",
+              "Service à domicile",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "nombre_essayages",
+            "question": "Combien d'essayages sont inclus ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: 3 essayages inclus",
+            "required": false
+          },
+          {
+            "id": "delai_commande",
+            "question": "Quel est le délai moyen de commande/livraison ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: 4 à 6 mois",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Accessoires et compléments",
+        "fields": [
+          {
+            "id": "accessoires",
+            "question": "Quels accessoires proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Voiles",
+              "Diadèmes et couronnes",
+              "Bijoux (boucles d'oreilles, colliers, bracelets)",
+              "Chaussures de mariée",
+              "Boléros et étoles",
+              "Ceintures et rubans",
+              "Gants",
+              "Jarretières",
+              "Sacs et pochettes",
+              "Lingerie de mariée",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "robes_demoiselles",
+            "question": "Proposez-vous des robes pour les demoiselles d'honneur ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "tenues_meres",
+            "question": "Proposez-vous des tenues pour les mères des mariés ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "gamme_prix",
+            "question": "Quelle est votre gamme de prix ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Moins de 500€",
+              "500€ - 1000€",
+              "1000€ - 2000€",
+              "2000€ - 3000€",
+              "3000€ - 5000€",
+              "Plus de 5000€"
+            ],
+            "required": false
+          },
+          {
+            "id": "prix_minimum",
+            "question": "À partir de quel prix puis-je trouver une robe ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Prix minimum en euros",
+            "required": false
+          },
+          {
+            "id": "acompte",
+            "question": "Quel acompte demandez-vous à la commande ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: 30% à la commande",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "horaires_rdv",
+            "question": "Quels sont vos horaires pour les essayages ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "placeholder": "Ex: Du mardi au samedi de 10h à 19h, sur rendez-vous",
+            "required": false
+          },
+          {
+            "id": "accompagnants",
+            "question": "Combien d'accompagnants sont autorisés lors des essayages ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: Maximum 3 personnes",
+            "required": false
+          },
+          {
+            "id": "annulation",
+            "question": "Quelle est votre politique d'annulation ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}

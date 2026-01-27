@@ -1,1 +1,285 @@
-{"placeholder": "structure"}
+{
+  "beauty_hair": {
+    "title": "Coiffure et Maquillage",
+    "sections": [
+      {
+        "title": "Services proposés",
+        "fields": [
+          {
+            "id": "services_principaux",
+            "question": "Quels services proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Coiffure mariée",
+              "Coiffure invitées",
+              "Maquillage mariée",
+              "Maquillage invitées",
+              "Manucure / Pose de vernis",
+              "Pose de faux ongles",
+              "Extensions de cils",
+              "Soins du visage",
+              "Épilation",
+              "Massage / Relaxation",
+              "Bronzage / Autobronzant",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "essai_inclus",
+            "question": "Un essai coiffure/maquillage est-il inclus ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, essai inclus",
+              "Essai en supplément",
+              "Pas d'essai proposé"
+            ],
+            "required": false
+          },
+          {
+            "id": "deplacement",
+            "question": "Vous déplacez-vous sur le lieu de préparation ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "frais_deplacement",
+            "question": "Facturez-vous les déplacements ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Non, déplacement inclus",
+              "Oui, selon la distance",
+              "Forfait fixe"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Styles de coiffure",
+        "fields": [
+          {
+            "id": "styles_coiffure",
+            "question": "Quels styles de coiffure proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Chignon classique",
+              "Chignon flou / bohème",
+              "Chignon bas",
+              "Chignon haut",
+              "Tresse(s)",
+              "Cheveux détachés / Brushing",
+              "Ondulations / Boucles",
+              "Cheveux lisses",
+              "Demi-queue",
+              "Coiffure avec accessoires (fleurs, bijoux)",
+              "Coiffure avec voile",
+              "Coiffure courte",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "accessoires_cheveux",
+            "question": "Fournissez-vous des accessoires de coiffure ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Peignes et barrettes",
+              "Diadèmes et couronnes",
+              "Fleurs naturelles",
+              "Fleurs artificielles",
+              "Bijoux de tête",
+              "Épingles décoratives",
+              "Non, je n'en fournis pas"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Styles de maquillage",
+        "fields": [
+          {
+            "id": "styles_maquillage",
+            "question": "Quels styles de maquillage proposez-vous ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Naturel / No-makeup look",
+              "Sophistiqué / Glamour",
+              "Romantique",
+              "Vintage / Rétro",
+              "Bohème",
+              "Smoky eyes",
+              "Nude",
+              "Maquillage avec faux-cils",
+              "Maquillage longue tenue",
+              "Maquillage waterproof",
+              "Autres"
+            ],
+            "required": false
+          },
+          {
+            "id": "marques_maquillage",
+            "question": "Quelles marques de maquillage utilisez-vous ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "placeholder": "Ex: MAC, NARS, Charlotte Tilbury, Make Up For Ever...",
+            "required": false
+          },
+          {
+            "id": "types_peaux",
+            "question": "Avez-vous de l'expérience avec tous les types de peaux ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Peaux claires",
+              "Peaux mates",
+              "Peaux foncées",
+              "Peaux sensibles",
+              "Peaux à problèmes (acné, rosacée)",
+              "Tous types de peaux"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Tarification",
+        "fields": [
+          {
+            "id": "forfait_mariee",
+            "question": "Quel est le tarif pour la mariée (coiffure + maquillage) ?",
+            "component_type": "select",
+            "field_type": "select",
+            "options": [
+              "Moins de 150€",
+              "150€ - 250€",
+              "250€ - 400€",
+              "400€ - 600€",
+              "Plus de 600€"
+            ],
+            "required": false
+          },
+          {
+            "id": "tarif_coiffure",
+            "question": "Quel est le tarif pour la coiffure seule (mariée) ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Prix en euros",
+            "required": false
+          },
+          {
+            "id": "tarif_maquillage",
+            "question": "Quel est le tarif pour le maquillage seul (mariée) ?",
+            "component_type": "input",
+            "field_type": "number",
+            "placeholder": "Prix en euros",
+            "required": false
+          },
+          {
+            "id": "tarif_invitees",
+            "question": "Quel est le tarif pour les invitées (coiffure ou maquillage) ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: À partir de 50€ par personne",
+            "required": false
+          },
+          {
+            "id": "tarif_essai",
+            "question": "Quel est le tarif de l'essai ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: 80€ (déduit du forfait mariage)",
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Organisation le jour J",
+        "fields": [
+          {
+            "id": "nombre_personnes",
+            "question": "Combien de personnes pouvez-vous coiffer/maquiller le jour J ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: Jusqu'à 8 personnes (avec une assistante)",
+            "required": false
+          },
+          {
+            "id": "equipe",
+            "question": "Travaillez-vous en équipe ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, avec une ou plusieurs assistantes",
+              "Non, je travaille seul(e)"
+            ],
+            "required": false
+          },
+          {
+            "id": "retouches",
+            "question": "Proposez-vous des retouches pendant la journée ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui, inclus dans le forfait",
+              "Oui, en supplément",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "kit_retouche",
+            "question": "Fournissez-vous un kit de retouche pour la mariée ?",
+            "component_type": "radio",
+            "field_type": "radio",
+            "options": [
+              "Oui",
+              "Non"
+            ],
+            "required": false
+          }
+        ]
+      },
+      {
+        "title": "Conditions",
+        "fields": [
+          {
+            "id": "rayon_intervention",
+            "question": "Dans quel rayon vous déplacez-vous ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: 50 km autour de Paris",
+            "required": false
+          },
+          {
+            "id": "acompte",
+            "question": "Quel acompte demandez-vous à la réservation ?",
+            "component_type": "input",
+            "field_type": "text",
+            "placeholder": "Ex: 30% à la réservation",
+            "required": false
+          },
+          {
+            "id": "annulation",
+            "question": "Quelle est votre politique d'annulation ?",
+            "component_type": "textarea",
+            "field_type": "text",
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}
